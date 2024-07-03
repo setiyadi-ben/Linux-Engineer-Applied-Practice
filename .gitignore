@@ -1,0 +1,3 @@
+cat .gitignore
+#ignore files inside .gitignore-files
+.gitignore-files/
