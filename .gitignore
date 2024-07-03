@@ -1,3 +1,5 @@
 cat .gitignore
+# https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
+# https://git-scm.com/book/en/v2/Git-Basics-Recording-Changes-to-the-Repository#_ignoring
 #ignore files inside .gitignore-files
 .gitignore-files/
