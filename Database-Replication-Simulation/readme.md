@@ -35,11 +35,13 @@ Real-time analytics: Database replication enables data to be transmitted and ana
 
 ## Simulation steps
 
-[**Commands are putting up here**](../Database-Replication-Simulation/terminal-command)
+[**Commands are putting up here**](../Database-Replication-Simulation/terminal-command.md)
 
+<br>
 <justify>
 I have make freedom from selecting those tools and materials I have provided above. So, I'm will straight to the things that are important below and I'm assuming you have understand the basics setup like installation process.
 </justify>
+</br>
 
 <left>
 1. Make sure you have installed the Linux OS with database inside the virtualization software.
@@ -55,7 +57,7 @@ I have make freedom from selecting those tools and materials I have provided abo
 2. Create new user and also grant the permissions.
 </left>
 
-([**Commands are putting up here**](../Database-Replication-Simulation/terminal-command))
+([**Commands are putting up here**](../Database-Replication-Simulation/terminal-command.md))
 <center>
 
 ![Image when mysql installation is successful](/image-files/creating-auth-user-pass.png)
@@ -65,7 +67,7 @@ I have make freedom from selecting those tools and materials I have provided abo
 3. Install phpMyAdmin to get easy access creating a database table for a use of master database that you can use phpmyadmin for GUI based or you just write syntax below inside myql terminal.
 </left>
 
-([**Commands are putting up here**](../Database-Replication-Simulation/terminal-command))
+([**Commands are putting up here**](../Database-Replication-Simulation/terminal-command.md))
 <center>
 
 ![Image when phpMyAdmin installation is successful](/image-files/installation-phpmyadmin-done.png)
