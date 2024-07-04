@@ -45,20 +45,20 @@ I have make freedom from selecting those tools and materials I have provided abo
 
 <center>
 
-![Image when installation is successful](/.gitignore-files/installation-done.png)
+![Image when installation is successful](/image-files/installation-done.png)
 
-![Image when mysql installation is successful](/.gitignore-files/installation-mysql-done.png)
+![Image when mysql installation is successful](/image-files/installation-mysql-done.png)
 </center>
 
 2. Create new user and also grant the permissions ([**Commands are putting up here**](../Database-Replication-Simulation/terminal-command)).
 <center>
 
-![Image when mysql installation is successful](/.gitignore-files/creating-auth-user-pass.png)
+![Image when mysql installation is successful](/image-files/creating-auth-user-pass.png)
 </center>
 
 3. Install phpMyAdmin to get easy access creating a database table for a use of master database that you can use phpmyadmin for GUI based or you just write syntax below ([**Commands are putting up here**](../Database-Replication-Simulation/terminal-command)) inside myql terminal.
-![Image when phpMyAdmin installation is successful](/.gitignore-files/installation-phpmyadmin-done.png)
+![Image when phpMyAdmin installation is successful](/image-files/installation-phpmyadmin-done.png)
 
-![image creating new mysqldb](/.gitignore-files/creating-mysqldb-phpmyadmin-1.png)
+![image creating new mysqldb](/image-files/creating-mysqldb-phpmyadmin-1.png)
 
 4. trytrytrtyryt
