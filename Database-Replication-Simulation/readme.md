@@ -30,13 +30,16 @@ Real-time analytics: Database replication enables data to be transmitted and ana
 
 - VMware for virtualization or other software that matches your preferences.
 - 2 or more Linux OS that have been installed database in it
-- Any syntax/script or software to initialize HTTP POST requests for sending the dummy data
+- Any syntax/script or software to initialize **MySQL query** for sending the dummy data
 - Linux commands for configuring master slave simulations
 
 ## Simulation steps
 
 [**Commands are putting up here**](../Database-Replication-Simulation/terminal-command.md)
 
+
+<br>
+<b>A. Installation and database setup </b></br>
 <br>
 <justify>
 I have make freedom from selecting those tools and materials I have provided above. So, I'm will straight to the things that are important below and I'm assuming you have understand the basics setup like installation process.
@@ -108,3 +111,21 @@ In preview button on the bottom left, you can use that syntax output if you want
 ![Image When Creating mysql table is done](/image-files/creating-mysqltable-phpmyadmin-3.png)
 
 </center>
+
+<left>
+7. Some of you might be wanted to try creating database using MySQL query language. So, here it is I'm also provided below the second database inside terminal commands.
+
+<b>(TO BE WORKING ON SOON)</b>
+
+</left>
+
+<br>
+
+<b>B. Simulate sending data MySQL query using Python </b></br>
+
+<left>
+8. In this particular simulation, I'm going to make scenario like this:
+<br>- The database and the table we setup earlier is the server</br>
+<br>- We will access the database from outside the server using the remote ip
+that I have used already in ssh tunnel</br>
+</left>
