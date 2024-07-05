@@ -1,5 +1,7 @@
 # Database Replication - Tools and materials that need to be prepared
 
+## [**back to Linux-Engineer-Applied-Practice**](../README.md)
+
 ## Use cases knowledge
 
 <justify>
@@ -121,11 +123,37 @@ In preview button on the bottom left, you can use that syntax output if you want
 
 <br>
 
-<b>B. Simulate sending data MySQL query using Python </b></br>
+<b>B. Simulate sending MySQL query data using Python </b></br>
 
 <left>
 8. In this particular simulation, I'm going to make scenario like this:
-<br>- The database and the table we setup earlier is the server</br>
+<br>- The database and the table we setup earlier is the server.
 <br>- We will access the database from outside the server using the remote ip
-that I have used already in ssh tunnel</br>
+that I have used already in ssh tunnel
+<br>- Perform sending a random dummy data in every 5 minutes inside MySQL
+database.</br>
+
 </left>
+<br>
+<left>
+9. To be able to perform the simulation, you need to have python installed in PATH, install mysql-connector, allowing the firewall inside the database server and having the syntax to be able to perform MySQL query. Below here you can pay attention to make sure you will not mess up with a bunch of errors.
+</br></left>
+
+([**Commands are putting up here**](../Database-Replication-Simulation/terminal-command.md))
+<center>
+
+![Image When installing Python](/image-files/installation-python.png)
+
+
+![Image When MySQL Connector](/image-files/installation-python-2.png)
+
+![Image When MySQL Connector](/image-files/mysql-setup-firewall-3.png)
+
+![Image When Configure MySQL Firewall](/image-files/mysql-setup-firewall.png)
+
+![Image When Configure MySQL Firewall](/image-files/mysql-setup-firewall-2.png)
+
+![Image of MySQL Connection Test](/image-files/mysql-test-connections-py.png)
+
+![Image of MySQL Connection Test](/image-files/mysql-test-connections-py-2.png)
+</center>
