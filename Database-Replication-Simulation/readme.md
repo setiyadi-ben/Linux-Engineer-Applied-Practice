@@ -144,7 +144,6 @@ database.</br>
 
 ![Image When installing Python](/image-files/installation-python.png)
 
-
 ![Image When MySQL Connector](/image-files/installation-python-2.png)
 
 ![Image When MySQL Connector](/image-files/mysql-setup-firewall-3.png)
@@ -156,4 +155,11 @@ database.</br>
 ![Image of MySQL Connection Test](/image-files/mysql-test-connections-py.png)
 
 ![Image of MySQL Connection Test](/image-files/mysql-test-connections-py-2.png)
+
 </center>
+
+
+<left>
+10. Once you have passed the connection check by outputting similar to the image above. Now, I'm going to send the dummy data into MySQL Database using the modified python code to make it as if simulating the consecutive data flow through the database.
+</left>
+
