@@ -40,9 +40,8 @@ Real-time analytics: Database replication enables data to be transmitted and ana
 [**Commands are putting up here**](../Database-Replication-Simulation/terminal-command.md)
 
 
-<br>
-<b>A. Installation and database setup </b></br>
-<br>
+<b>A. Installation and database setup </b>
+
 <justify>
 I have make freedom from selecting those tools and materials I have provided above. So, I'm will straight to the things that are important below and I'm assuming you have understand the basics setup like installation process.
 </justify>
@@ -121,9 +120,7 @@ In preview button on the bottom left, you can use that syntax output if you want
 
 </left>
 
-<br>
-
-<b>B. Simulate sending MySQL query data using Python </b></br>
+<b>B. Simulate sending MySQL query data using Python </b>
 
 <left>
 8. In this particular simulation, I'm going to make scenario like this:
@@ -158,8 +155,57 @@ database.</br>
 
 </center>
 
-
 <left>
-10. Once you have passed the connection check by outputting similar to the image above. Now, I'm going to send the dummy data into MySQL Database using the modified python code to make it as if simulating the consecutive data flow through the database.
+10. Once you have passed the connection check by outputting similar to the image above. Now, I'm going to send the dummy data into MySQL Database using the modified python code to make it <b>as if simulating the consecutive data flow through the database id-lcm-prd1 from another network.</b>
 </left>
 
+([**Commands are putting up here**](../Database-Replication-Simulation/terminal-command.md))
+
+<center>
+
+![Image of Python Code for MySQL Inser Query](/image-files/mysql-insert-py-0.png)
+
+![Image of Python compile prompt](/image-files/mysql-insert-py-1.png)
+
+![Image of MySQL Insert Query success inserting data](/image-files/mysql-insert-py-2.png)
+</center>
+
+<br>
+
+<b>C. Setup Database Replication - For the use case of Scaling-up the current databases infrastructure </b></br>
+
+<left>
+11. Before get in into replication tasks, when the condition of the current databases has the data in it what you should do is to <b>dump the current data in your databases outside (export the data)</b> with supportable format such as: SQL, CSV, JSON, XML & etc.
+</left><br></br>
+
+<left>
+12. To simulate SQL dump or you can say export database, I have provided 2 methods using phpMyAdmin via web GUI and using SQL query syntax using bash.
+</left>
+
+<center>
+
+<b>Using phpMyAdmin</b>
+![Image of database dump using phpMyAdmin-1](/image-files/mysql-dump-data-1.png)
+
+![Image of database dump using phpMyAdmin-1](/image-files/mysql-dump-data-2.png)
+</center>
+
+mysql -u [username] -p -e "SELECT * FROM penjualan_ikan" id-lcm-prd1 --json > sql_dump-penjualan_ikan.json
+
+mysql -u staff1-engineer -p password -e "SELECT * FROM penjualan_ikan" id-lcm-prd1 --json > sql_dump-penjualan_ikan.json
+
+mysql -u staff1-engineer -p password -e "SELECT JSON_ARRAYAGG(JSON_OBJECT(
+    'id', id,
+    'name', list_ikan,
+    'timestamp', formatted_date,
+    'price', price_changes,
+    'stock', stock_changes
+)) AS json_output FROM penjualan_ikan;" id-lcm-prd1 > sql_dump-penjualan_ikan.json
+
+mysql -u staff1-engineer -p password -e "SELECT JSON_ARRAYAGG(JSON_OBJECT(
+    'id', id,
+    'list_ikan', name,
+    'timestamp', timestamp,
+    'formatted_date', price_changes,
+    'stock_changes', stock_changes
+)) AS json_output FROM penjualan_ikan;" id-lcm-prd1 > sql_dump-penjualan_ikan.json
