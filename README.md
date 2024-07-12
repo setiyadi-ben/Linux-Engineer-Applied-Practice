@@ -7,4 +7,4 @@ If you are thinking about the ideas of "What should I learn?" You can watch this
 
 ## Linux Engineer
 
-### [**Database Replication Simulation**](../tree/main/Database-Replication-Simulation/readme.md)
+### [**Database Replication Simulation**](../main/Database-Replication-Simulation/readme.md)
