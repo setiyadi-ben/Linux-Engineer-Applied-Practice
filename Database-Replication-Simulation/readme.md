@@ -194,18 +194,48 @@ mysql -u [username] -p -e "SELECT * FROM penjualan_ikan" id-lcm-prd1 --json > sq
 
 mysql -u staff1-engineer -p password -e "SELECT * FROM penjualan_ikan" id-lcm-prd1 --json > sql_dump-penjualan_ikan.json
 
-mysql -u staff1-engineer -p password -e "SELECT JSON_ARRAYAGG(JSON_OBJECT(
-    'id', id,
-    'name', list_ikan,
-    'timestamp', formatted_date,
-    'price', price_changes,
-    'stock', stock_changes
-)) AS json_output FROM penjualan_ikan;" id-lcm-prd1 > sql_dump-penjualan_ikan.json
+sudo mysqldump -u staff1-engineer -p id-lcm-prd1 > sql_dump-db_id-lcm-prd1.sql
 
-mysql -u staff1-engineer -p password -e "SELECT JSON_ARRAYAGG(JSON_OBJECT(
+mysql -u staff1-engineer -p -D id-lcm-prd1 -e "SELECT JSON_ARRAYAGG(JSON_OBJECT(
     'id', id,
     'list_ikan', name,
     'timestamp', timestamp,
-    'formatted_date', price_changes,
-    'stock_changes', stock_changes
+    'price_changes', price,
+    'stock_changes', stock
 )) AS json_output FROM penjualan_ikan;" id-lcm-prd1 > sql_dump-penjualan_ikan.json
+
+~~mysql -u staff1-engineer -p -D id-lcm-prd1 -e "
+SELECT CONCAT(
+    '<rows>',
+    GROUP_CONCAT(
+        CONCAT(
+            '<row>',
+            '<id>', id, '</id>',
+            '<list_ikan>', name, '</list_ikan>',
+            '<timestamp>', timestamp, '</timestamp>',
+            '<price_changes>', price, '</price_changes>',
+            '<stock_changes>', stock, '</stock_changes>',
+            '</row>'
+        ) SEPARATOR ''
+    ),
+    '</rows>'
+) AS xml_output
+FROM penjualan_ikan;" > sql_dump-db_id-lcm-prd1.xml~~
+
+SELECT * FROM penjualan_ikan
+INTO OUTFILE '~/home/admintelecom'
+FIELDS TERMINATED BY ','
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n';
+
+
+mysql -u staff1-engineer -p -D id-lcm-prd1 -e "
+SELECT * FROM penjualan_ikan
+INTO OUTFILE '/home/admintelecom/penjualan_ikan.csv'
+FIELDS TERMINATED BY ','
+ENCLOSED BY '\"'
+LINES TERMINATED BY '\n';
+"
+mysql -u staff1-engineer -p -D id-lcm-prd1 -B -e "SELECT * FROM penjualan_ikan" > sql_dump-penjualan_ikan.csv
+
+mysql -u staff1-engineer -p id-lcm-prd1 < sql_dump-db_id-lcm-prd1.sql
