@@ -190,11 +190,15 @@ database.</br>
 ![Image of database dump using phpMyAdmin-1](/image-files/mysql-dump-data-2.png)
 </center>
 
-mysql -u [username] -p -e "SELECT * FROM penjualan_ikan" id-lcm-prd1 --json > sql_dump-penjualan_ikan.json
+<center>
 
-mysql -u staff1-engineer -p password -e "SELECT * FROM penjualan_ikan" id-lcm-prd1 --json > sql_dump-penjualan_ikan.json
+<b>Using linux Bash on Ubuntu Server</b>
+
+
+</center>
 
 sudo mysqldump -u staff1-engineer -p id-lcm-prd1 > sql_dump-db_id-lcm-prd1.sql
+mysql -u staff1-engineer -p id-lcm-prd1 < sql_dump-db_id-lcm-prd1.sql
 
 mysql -u staff1-engineer -p -D id-lcm-prd1 -e "SELECT JSON_ARRAYAGG(JSON_OBJECT(
     'id', id,
@@ -204,23 +208,8 @@ mysql -u staff1-engineer -p -D id-lcm-prd1 -e "SELECT JSON_ARRAYAGG(JSON_OBJECT(
     'stock_changes', stock
 )) AS json_output FROM penjualan_ikan;" id-lcm-prd1 > sql_dump-penjualan_ikan.json
 
-~~mysql -u staff1-engineer -p -D id-lcm-prd1 -e "
-SELECT CONCAT(
-    '<rows>',
-    GROUP_CONCAT(
-        CONCAT(
-            '<row>',
-            '<id>', id, '</id>',
-            '<list_ikan>', name, '</list_ikan>',
-            '<timestamp>', timestamp, '</timestamp>',
-            '<price_changes>', price, '</price_changes>',
-            '<stock_changes>', stock, '</stock_changes>',
-            '</row>'
-        ) SEPARATOR ''
-    ),
-    '</rows>'
-) AS xml_output
-FROM penjualan_ikan;" > sql_dump-db_id-lcm-prd1.xml~~
+
+
 
 SELECT * FROM penjualan_ikan
 INTO OUTFILE '~/home/admintelecom'
@@ -238,4 +227,3 @@ LINES TERMINATED BY '\n';
 "
 mysql -u staff1-engineer -p -D id-lcm-prd1 -B -e "SELECT * FROM penjualan_ikan" > sql_dump-penjualan_ikan.csv
 
-mysql -u staff1-engineer -p id-lcm-prd1 < sql_dump-db_id-lcm-prd1.sql
