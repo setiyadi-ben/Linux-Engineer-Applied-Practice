@@ -103,3 +103,24 @@ python mysql-insert_data.py
 
 [**back to Database Replication - Tools and materials that need to be prepared**](/Database-Replication-Simulation/readme.md)
 
+**Database dump using SQL query syntax**
+
+~~~bash
+sudo mysqldump -u staff1-engineer -p id-lcm-prd1 > sql_dump-db_id-lcm-prd1.sql
+~~~
+~~~bash
+ls
+pwd
+~~~
+
+**DROP Database table using SQL query syntax**
+
+~~~bash
+sudo mysql -u staff1-engineer -p
+~~~
+~~~sql
+show databases;
+use id-lcm-prd1;
+drop table `penjualan_ikan`;
+~~~
+

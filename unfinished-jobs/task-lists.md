@@ -2,7 +2,7 @@
 # In Mind:
 
 <left>
-<li><s>Simulating MySQL dump for export & import database data.</s>
+<li> Set-Up database Replica for Master and Salave configuration
 <li> 
 </left>
 
@@ -28,6 +28,6 @@
 
 # Done:
 <left>
-<li><s> 
+<li><s>
 <li><s>Simulating MySQL dump for export & import database data in ".sql" extension.</s>
 </li></left>

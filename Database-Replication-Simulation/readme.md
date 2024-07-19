@@ -179,51 +179,58 @@ database.</br>
 </left><br></br>
 
 <left>
-12. To simulate SQL dump or you can say export database, I have provided 2 methods using phpMyAdmin via web GUI and using SQL query syntax using bash.
+12. To simulate SQL dump or you can say export database, I have provided 2 methods using phpMyAdmin via web GUI and using SQL query syntax using in bash shell.
 </left>
 
 <center>
 
 <b>Using phpMyAdmin</b>
-![Image of database dump using phpMyAdmin-1](/image-files/mysql-dump-data-1.png)
+![Image of database dump using phpMyAdmin-1](/image-files/mysql-dump-data-1_phpmyadmin.png)
 
-![Image of database dump using phpMyAdmin-1](/image-files/mysql-dump-data-2.png)
+![Image of database dump using phpMyAdmin-1](/image-files/mysql-dump-data-2_phpmyadmin.png)
 </center>
+
 
 <center>
 
-<b>Using linux Bash on Ubuntu Server</b>
+<b>Using Linux bash on Ubuntu Server</b>
+([**Commands are putting up here**](../Database-Replication-Simulation/terminal-command.md))
 
+![Image of database dump using SQL query syntax](/image-files/mysql-dump-data-3.png)
 
 </center>
 
-sudo mysqldump -u staff1-engineer -p id-lcm-prd1 > sql_dump-db_id-lcm-prd1.sql
-mysql -u staff1-engineer -p id-lcm-prd1 < sql_dump-db_id-lcm-prd1.sql
+<left>
+From 2 example methods that I have provided above, <b>method 1 the sql dump file is stored in your personal computer and method 2 the sql file is stored inside the linux server you have configured into.</b>
+</left>
 
-mysql -u staff1-engineer -p -D id-lcm-prd1 -e "SELECT JSON_ARRAYAGG(JSON_OBJECT(
-    'id', id,
-    'list_ikan', name,
-    'timestamp', timestamp,
-    'price_changes', price,
-    'stock_changes', stock
-)) AS json_output FROM penjualan_ikan;" id-lcm-prd1 > sql_dump-penjualan_ikan.json
+<br><left>
+13. Next, perform database data cleansing by clearing the table inside the database using 2 methods phpMyAdmin via web GUI and using SQL query syntax in bash shell.
+</left></br>
 
+<center>
 
+<b>Using phpMyAdmin</b>
 
+![Image of Drop Database via phpmyadmin](/image-files/mysql-dump-data-4.png)
 
-SELECT * FROM penjualan_ikan
-INTO OUTFILE '~/home/admintelecom'
-FIELDS TERMINATED BY ','
-ENCLOSED BY '"'
-LINES TERMINATED BY '\n';
+![Image of Drop Database via phpmyadminn Success](/image-files/mysql-dump-data-5.png)
 
+<b>Using Linux bash on Ubuntu Server</b>
 
-mysql -u staff1-engineer -p -D id-lcm-prd1 -e "
-SELECT * FROM penjualan_ikan
-INTO OUTFILE '/home/admintelecom/penjualan_ikan.csv'
-FIELDS TERMINATED BY ','
-ENCLOSED BY '\"'
-LINES TERMINATED BY '\n';
-"
-mysql -u staff1-engineer -p -D id-lcm-prd1 -B -e "SELECT * FROM penjualan_ikan" > sql_dump-penjualan_ikan.csv
+![Image of Drop Database Table via SQL query](/image-files/mysql-dump-data-6.png)
+</center>
+<left>
+Avoid dropping the database because the mysql dump that just backed-up only work when the database are still availabe in the server. I'm also providing the error first in order to you understand the situation.
+</left>
 
+<center>
+
+![Image of False Drop Database via phpmyadmin](/image-files/mysql-dump-data-8.png)
+
+![Image of False Drop Database via SQL query](/image-files/mysql-dump-data-9.png)
+</center>
+
+<left>
+14. For restoring the database table data in-pactice it is used when we have set the database replica for the master and slave configuation. So, in order to achieve that. First we need to set-up the replicas first.
+</left>
