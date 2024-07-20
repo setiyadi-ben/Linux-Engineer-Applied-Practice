@@ -2,14 +2,12 @@
 
 ## Formatting
 
-### What app --> What it is used --> Commands
-
-## Bash
+### What it is used --> Commands
 
 ### Installing ifconfig
 
 ~~~bash
-sudo apt-install net-tools
+sudo apt-get install net-tools
 ~~~
 
 ### Installing and configure and configuring MySQL Server
@@ -49,9 +47,20 @@ CREATE USER 'staff1-engineer'@'%' IDENTIFIED BY 'password';
 GRANT ALL PRIVILEGES ON*.*TO 'staff1-engineer'@'%' WITH GRANT OPTION;
 ~~~
 
+**Creating database using MySQL Query**
+~~~sql
+CREATE DATABASE `id-lcm-prd1`;
+~~~
+
 **Creating database table using MySQL Query**
 ~~~sql
-CREATE TABLE `id-lcm-prd2`.`penjualan_ikan` (`id` INT NOT NULL AUTO_INCREMENT , `name` VARCHAR(45) NOT NULL , `timestamp` TIMESTAMP NOT NULL , `price` FLOAT NOT NULL , `stock` INT NOT NULL , PRIMARY KEY (`id`)) ENGINE = CSV;
+CREATE TABLE `id-lcm-prd1`.`penjualan_ikan`
+ (`id` INT NOT NULL AUTO_INCREMENT ,
+  `name` VARCHAR(45) NOT NULL ,
+   `timestamp` TIMESTAMP NOT NULL ,
+    `price` FLOAT NOT NULL ,
+     `stock` INT NOT NULL ,
+      PRIMARY KEY (`id`)) ENGINE = InnoDB;
 ~~~
 
 **Installing phpMyAdmin**
@@ -124,3 +133,61 @@ use id-lcm-prd1;
 drop table `penjualan_ikan`;
 ~~~
 
+**Access mysqld.cnf to enable multiple parameters on master server**
+~~~
+sudo nano /etc/mysql/mysql.conf.d/mysqld.cnf
+~~~
+Scroll to the bottom and un-tick the following:
+~~~nano
+server-id   = 1
+log-bin     = /var/log/mysql/mysql-bin.log
+~~~
+Restart the MySQL service
+~~~
+sudo systemctl restart mysql
+~~~
+
+**Create user and password for replica also with enabling permission**
+
+~~~
+CREATE USER 'replica-bot'@'%' IDENTIFIED BY 'password';
+~~~
+~~~
+GRANT REPLICATION SLAVE ON *.* TO 'replica-bot'@'%' WITH GRANT OPTION;
+~~~
+
+**Try to connect replica-bot user from slave server**
+~~~
+sudo mysql -h 192.168.129.129 -u replica-bot -p
+~~~
+
+**Access mysqld.cnf to enable multiple parameters on slave server**
+~~~
+sudo nano /etc/mysql/mysql.conf.d/mysqld.cnf
+~~~
+Scroll to the bottom and un-tick the following:
+~~~nano
+server-id   = 2
+log-bin     = /var/log/mysql/mysql-bin.log
+~~~
+Restart the MySQL service
+~~~
+sudo systemctl restart mysql
+~~~
+
+Slave Server configuration in order to connect to Master Server
+~~~sql
+STOP SLAVE;
+~~~
+~~~sql
+CHANGE MASTER TO
+MASTER_HOST='192.168.129.129',
+MASTER_USER='replica-bot',
+MASTER_PASSWORD='password',
+MASTER_LOG_FILE='mysql-bin.000001',
+MASTER_LOG_POS=157;
+~~~
+~~~sql
+START SLAVE;
+SHOW SLAVE STATUS\G;
+~~~

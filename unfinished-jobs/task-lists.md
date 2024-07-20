@@ -2,7 +2,7 @@
 # In Mind:
 
 <left>
-<li> Set-Up database Replica for Master and Salave configuration
+<li> Creating documentation for database Replica for Master and Slave configuration
 <li> 
 </left>
 
@@ -28,6 +28,7 @@
 
 # Done:
 <left>
-<li><s>
+<li><s>Documenting previous database setup using bash
+<li><s>Set-Up database Replica for Master and Slave configuration
 <li><s>Simulating MySQL dump for export & import database data in ".sql" extension.</s>
 </li></left>

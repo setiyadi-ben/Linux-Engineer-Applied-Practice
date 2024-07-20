@@ -114,16 +114,21 @@ In preview button on the bottom left, you can use that syntax output if you want
 </center>
 
 <left>
-7. Some of you might be wanted to try creating database using MySQL query language. So, here it is I'm also provided below the second database inside terminal commands.
+7. Some of you might be wanted to try creating database and database table using MySQL query language. So, here it is I'm also provided below the second database inside terminal commands. 
 
-<b>(TO BE WORKING ON SOON)</b>
+([**Commands are putting up here**](../Database-Replication-Simulation/terminal-command.md))
+<br><center>
 
+![Image of creating database table using MySQL query](/image-files/creating-mysqldb-and_table-1.png)
+</br></center>
 </left>
+
+<b><u>***IT IS IMPORTANT TO DUPLICATE THE STEPS ABOVE FOR THE SECOND SERVER SET-UP UNTIL REACHING CREATE DATABASE STATEMENT.***</u></b>
 
 <b>B. Simulate sending MySQL query data using Python </b>
 
 <left>
-8. In this particular simulation, I'm going to make scenario like this:
+1. In this particular simulation, I'm going to make scenario like this:
 <br>- The database and the table we setup earlier is the server.
 <br>- We will access the database from outside the server using the remote ip
 that I have used already in ssh tunnel
@@ -232,5 +237,7 @@ Avoid dropping the database because the mysql dump that just backed-up only work
 </center>
 
 <left>
-14. For restoring the database table data in-pactice it is used when we have set the database replica for the master and slave configuation. So, in order to achieve that. First we need to set-up the replicas first.
+14. For restoring the database table data in-practice it is used when we have set the database replica for the master and slave configuation. So, in order to achieve that. First we need to set-up the replicas first.
 </left>
+
+[**MySQL :How to Configure Mysql master slave replication in MYSQL database**](https://www.youtube.com/watch?v=6VfE3XKXpTs)
