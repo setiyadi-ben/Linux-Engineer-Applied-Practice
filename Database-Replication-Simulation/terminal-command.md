@@ -180,14 +180,14 @@ Slave Server configuration in order to connect to Master Server
 STOP SLAVE;
 ~~~
 ~~~sql
-CHANGE MASTER TO
-MASTER_HOST='192.168.129.129',
-MASTER_USER='replica-bot',
-MASTER_PASSWORD='password',
-MASTER_LOG_FILE='mysql-bin.000001',
-MASTER_LOG_POS=157;
+CHANGE REPLICATION SOURCE TO
+SOURCE_HOST='192.168.129.129',
+SOURCE_USER='replica-bot',
+SOURCE_PASSWORD='password',
+SOURCE_LOG_FILE='mysql-bin.000002',
+SOURCE_LOG_POS=5140;
 ~~~
 ~~~sql
 START SLAVE;
-SHOW SLAVE STATUS\G;
+SHOW SLAVE STATUS\G
 ~~~

@@ -151,6 +151,7 @@ database.</br>
 ![Image When MySQL Connector](/image-files/mysql-setup-firewall-3.png)
 
 ![Image When Configure MySQL Firewall](/image-files/mysql-setup-firewall.png)
+<br>Don't forget to type <b>ctrl + x then y and enter to save</b></br>
 
 ![Image When Configure MySQL Firewall](/image-files/mysql-setup-firewall-2.png)
 
@@ -237,7 +238,75 @@ Avoid dropping the database because the mysql dump that just backed-up only work
 </center>
 
 <left>
-14. For restoring the database table data in-practice it is used when we have set the database replica for the master and slave configuation. So, in order to achieve that. First we need to set-up the replicas first.
+14. From here I'm going to set-up the replicas first. After that, continue to push the database data back into the master server and then checking the slave server to verify the database data is already inside.
 </left>
 
 [**MySQL :How to Configure Mysql master slave replication in MYSQL database**](https://www.youtube.com/watch?v=6VfE3XKXpTs)
+
+
+<b>D. Setup Database Replication for a Master Server </b>
+
+<left>
+15.  I'm going to start with typing ifconfig to print the master server host ip and changing some parameters in mysqld.cnf. In this step I'm keeping the bind-address to 0.0.0.0 because this is a simulation, when you are in real work you might be binding the address to a private ip in order to limit networks that has access into database.
+<center>
+
+![Image of ifconfig & mysqld.cnf](/image-files/mysql-replica_set-up-1.png)
+![Image of mysqld.cnf config](/image-files/mysqld.cnf_master-1.png)
+<br>Don't forget to type <b>ctrl + x then y and enter to save</b></br>
+</center>
+</left>
+
+<left>
+16. The next step is to create replica user for a way slave server gain access to the master server to able to perform the replica. You can also check if the user you have created is exist or not. Also check that users in slave server is it can be connected or not.
+<center>
+
+![image of creating user for slave server replica's](/image-files/mysql-replica_set-up-3.png)
+![Image of granting access to slave server replica's](/image-files/mysql-replica_set-up-4.png)
+![image of checking slave server connection](/image-files/mysql-replica_set-up-5.png)
+</center>
+</left>
+
+<left>
+17. After the replica user has been successfully created, the next step is pinpoint the value of mysql master status to be used later.
+<center>
+
+![Image of mysql master status](/image-files/mysql-replica_set-up-2.png)
+</center>
+</left>
+
+<b>E. Setup Database Replication for a Slave Server </b>
+
+<left>
+18. This step is similar to number 15, only change the server-id from 1 to 2.
+<center>
+
+![Image of ifconfig & mysqld.cnf](/image-files/mysql-replica_set-up-6.png)
+![Image of mysqld.cnf config](/image-files/mysqld.cnf_slave-2.png)
+<br>Don't forget to type <b>ctrl + x then y and enter to save</b></br>
+</center>
+</left>
+
+<left>
+19. From step number 18, after succesfully login as root user I'm going to configure the slave server for listening to master server in order to replicate every database data from there. Those value below are from previous steps that I have done already.
+<center>
+
+![Image of ](/image-files/mysql-replica_set-up-7.png)
+</center>
+</left>
+
+<left>
+20. To check if your configuration is rightly applied, type this prompt below to verify your configuration by checking the mysql slave status.
+<center>
+
+![Image of check slave status](/image-files/mysql-replica_set-up-8.png)
+</center>
+</left>
+
+<b>F. Restore Master Server Database Data to Test Replication on Slave Server</b>
+
+<left>
+
+<center>
+
+</center>
+</left>
