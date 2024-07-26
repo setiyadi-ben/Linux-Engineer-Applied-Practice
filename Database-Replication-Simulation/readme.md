@@ -305,8 +305,34 @@ Avoid dropping the database because the mysql dump that just backed-up only work
 <b>F. Restore Master Server Database Data to Test Replication on Slave Server</b>
 
 <left>
-
+21. In step 12, I have stored the database data inside /home/admintelecom. Now I'm gonna restore the database data back by importing this file using SQL syntax below.
 <center>
 
+![Image of restoring database data](/image-files/mysql-replica_restore-data-1.png)
+</center>
+</left>
+
+<left>
+22. To check if the data was inserted or not, simply navigate to check the database table data on master server.
+<center>
+
+![Image of Checking database table data](/image-files/mysql-replica_restore-data-2.png)
+</center>
+</left>
+
+<left>
+23. Technically, the database replication would sync the data asynchronously from the master source. To verify if the replication process is running correctly, you need to check the status on both master and slave server like this below. You can see that a match connection between master and slave server by just seeing Source_log_File and Read_Source_Log_Pos values.
+<center>
+
+![Image of replication check on master server](/image-files/mysql-replica_restore-data-3.png)
+![Image of replication check on slave server](/image-files/mysql-replica_restore-data-4.png)
+</center>
+</left>
+
+<left>
+24. If those value are the same, you now has mastered database replication and the data rom the master server can be transferred to slave server.
+<center>
+
+![Image of restoring data](/image-files/mysql-replica_restore-data-5.png)
 </center>
 </left>
