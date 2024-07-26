@@ -9,7 +9,7 @@
 ~~~bash
 sudo apt-get install net-tools
 ~~~
-
+<a id="drs-no-1"></a>
 ### Installing and configure and configuring MySQL Server
 
 [**back to Database Replication - Tools and materials that need to be prepared**](/Database-Replication-Simulation/readme.md)
@@ -31,6 +31,7 @@ sudo service mysql status
 [**back to Database Replication - Tools and materials that need to be prepared**](/Database-Replication-Simulation/readme.md)
 
 [**click here for details**](https://www.digitalocean.com/community/tutorials/how-to-create-a-new-user-and-grant-permissions-in-mysql)
+<a id="drs-no-2"></a>
 
 **Login using user root, password are the same with your linux login password**
 ~~~bash
@@ -149,10 +150,10 @@ sudo systemctl restart mysql
 
 **Create user and password for replica also with enabling permission**
 
+~~~sql
+CREATE USER 'replica-bot'@'%' IDENTIFIED WITH mysql_native_password BY 'password';
 ~~~
-CREATE USER 'replica-bot'@'%' IDENTIFIED BY 'password';
-~~~
-~~~
+~~~sql
 GRANT REPLICATION SLAVE ON *.* TO 'replica-bot'@'%' WITH GRANT OPTION;
 ~~~
 

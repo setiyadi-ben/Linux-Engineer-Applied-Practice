@@ -1,5 +1,4 @@
-# Database Replication - Tools and materials that need to be prepared
-
+# Database Replication Simulation
 ## [**back to Linux-Engineer-Applied-Practice**](../README.md)
 
 ## Use cases knowledge
@@ -7,53 +6,50 @@
 <justify>
 Database replication is a crucial technique in the IT world that enables data duplication from one database (master) to another (slave). This brings many benefits to various applications and businesses, especially in improving data performance and availability. Here are some common use cases for database replication:
 
-1. Scalability and High Performance:
+**1. Scalability and High Performance:**
 
 High-traffic e-commerce websites: Database replication can distribute product, price, and inventory data to multiple servers, allowing the website to serve many users simultaneously without experiencing bottlenecks on a single central server.
-Mobile apps with a global user base: Database replication allows data to be stored on servers in different regions, so users worldwide can access data with low latency.
+Mobile apps with a global user base: **Database replication allows data to be stored on servers in different regions, so users worldwide can access data with low latency.**
 
-2. Disaster Recovery and Data Availability:
+**2. Disaster Recovery and Data Availability:**
 
-Financial and banking applications: Database replication ensures transaction data and customer balances remain available even if the central server fails. Replicated data on other servers can be used to continue operations without downtime.
-News websites or social media platforms: Database replication ensures the website remains online and accessible to users even in the event of natural disasters or infrastructure disruptions in one location.
+Financial and banking applications: Database replication ensures transaction data and customer balances remain available even if the central server fails. Replicated data on other servers can be used to continue operations without downtime. News websites or social media platforms: **Database replication ensures the website remains online and accessible to users even in the event of natural disasters or infrastructure disruptions in one location.**
 
-3. Disaster Recovery and Backup Solutions:
+**3. Disaster Recovery and Backup Solutions:**
 
 Point-in-Time (PIT) Replication: Allows restoring the database to a specific point in time in the past, useful for recovering data after cyberattacks or human errors.
-Disaster recovery solutions: Database replication in different locations enables rapid system recovery after natural disasters or infrastructure failures in one location.
+Disaster recovery solutions: **Database replication in different locations enables rapid system recovery after natural disasters or infrastructure failures in one location.**
 
-4. Data Analytics and Reporting:
+**4. Data Analytics and Reporting:**
 
 Distributed data warehouses: Database replication allows data from various sources to be centralized in one location for easier analysis and reporting.
-Real-time analytics: Database replication enables data to be transmitted and analyzed in real-time across multiple locations for faster decision-making.
+Real-time analytics: **Database replication enables data to be transmitted and analyzed in real-time across multiple locations for faster decision-making.**
 </justify>
 
 ## Tools & materials
 
 - VMware for virtualization or other software that matches your preferences.
-- 2 or more Linux OS that have been installed database in it
-- Any syntax/script or software to initialize **MySQL query** for sending the dummy data
-- Linux commands for configuring master slave simulations
+- 2 or more Linux OS that have been installed database in it.
+- Any syntax/script or software to initialize **MySQL query** for sending the dummy data.
+- Linux commands for configuring master slave simulations.
+- SSH Client for simulating a remote connection from outside local network.
 
 ## Simulation steps
 
-[**Commands are putting up here**](../Database-Replication-Simulation/terminal-command.md)
-
-
 <b>A. Installation and database setup </b>
 
-<justify>
+<left>
 I have make freedom from selecting those tools and materials I have provided above. So, I'm will straight to the things that are important below and I'm assuming you have understand the basics setup like installation process.
-</justify>
-</br>
+</left>
 
 <left>
 1. Make sure you have installed the Linux OS with database inside the virtualization software.
+
+([**Commands are putting up here**](../Database-Replication-Simulation/terminal-command.md/#drs-no-1))
 </left>
 <center>
 
 ![Image when installation is successful](/image-files/installation-done.png)
-
 ![Image when mysql installation is successful](/image-files/installation-mysql-done.png)
 </center>
 
@@ -61,7 +57,7 @@ I have make freedom from selecting those tools and materials I have provided abo
 2. Create new user and also grant the permissions.
 </left>
 
-([**Commands are putting up here**](../Database-Replication-Simulation/terminal-command.md))
+([**Commands are putting up here**](../Database-Replication-Simulation/terminal-command.md/#drs-no-2))
 <center>
 
 ![Image when mysql installation is successful](/image-files/creating-auth-user-pass.png)
@@ -75,11 +71,8 @@ I have make freedom from selecting those tools and materials I have provided abo
 <center>
 
 ![Image when phpMyAdmin installation is successful](/image-files/installation-phpmyadmin-done.png)
-
 ![image creating new mysqldb](/image-files/creating-mysqldb-phpmyadmin-1.png)
-
 ![Image creating mysqltable](/image-files/creating-mysqltable-phpmyadmin-1.png)
-
 </center>
 
 <left>
@@ -99,10 +92,11 @@ I have make freedom from selecting those tools and materials I have provided abo
 <center>
 
 ![Image of filling the column parameters inside database table](/image-files/creating-mysqltable-phpmyadmin-2.png)
-</center>
+</center><left>
 In preview button on the bottom left, you can use that syntax output if you want to speed up your process creating a database table when using a terminal.
 
 [**Also, here if you not understand about those column parameters.**](https://world.siteground.com/tutorials/phpmyadmin/create-populate-tables/)
+</left>
 
 <left>
 6. If you manage to have into this steps. Congratulation! Your database was successfully created and would look like something like below.
@@ -118,7 +112,6 @@ In preview button on the bottom left, you can use that syntax output if you want
 
 ([**Commands are putting up here**](../Database-Replication-Simulation/terminal-command.md))
 <br><center>
-
 ![Image of creating database table using MySQL query](/image-files/creating-mysqldb-and_table-1.png)
 </br></center>
 </left>
@@ -128,7 +121,7 @@ In preview button on the bottom left, you can use that syntax output if you want
 <b>B. Simulate sending MySQL query data using Python </b>
 
 <left>
-1. In this particular simulation, I'm going to make scenario like this:
+8. In this particular simulation, I'm going to make scenario like this:
 <br>- The database and the table we setup earlier is the server.
 <br>- We will access the database from outside the server using the remote ip
 that I have used already in ssh tunnel
@@ -145,20 +138,14 @@ database.</br>
 <center>
 
 ![Image When installing Python](/image-files/installation-python.png)
-
 ![Image When MySQL Connector](/image-files/installation-python-2.png)
-
 ![Image When MySQL Connector](/image-files/mysql-setup-firewall-3.png)
-
 ![Image When Configure MySQL Firewall](/image-files/mysql-setup-firewall.png)
 <br>Don't forget to type <b>ctrl + x then y and enter to save</b></br>
 
 ![Image When Configure MySQL Firewall](/image-files/mysql-setup-firewall-2.png)
-
 ![Image of MySQL Connection Test](/image-files/mysql-test-connections-py.png)
-
 ![Image of MySQL Connection Test](/image-files/mysql-test-connections-py-2.png)
-
 </center>
 
 <left>
@@ -170,9 +157,7 @@ database.</br>
 <center>
 
 ![Image of Python Code for MySQL Inser Query](/image-files/mysql-insert-py-0.png)
-
 ![Image of Python compile prompt](/image-files/mysql-insert-py-1.png)
-
 ![Image of MySQL Insert Query success inserting data](/image-files/mysql-insert-py-2.png)
 </center>
 
@@ -192,10 +177,8 @@ database.</br>
 
 <b>Using phpMyAdmin</b>
 ![Image of database dump using phpMyAdmin-1](/image-files/mysql-dump-data-1_phpmyadmin.png)
-
 ![Image of database dump using phpMyAdmin-1](/image-files/mysql-dump-data-2_phpmyadmin.png)
 </center>
-
 
 <center>
 
@@ -203,7 +186,6 @@ database.</br>
 ([**Commands are putting up here**](../Database-Replication-Simulation/terminal-command.md))
 
 ![Image of database dump using SQL query syntax](/image-files/mysql-dump-data-3.png)
-
 </center>
 
 <left>
@@ -217,9 +199,7 @@ From 2 example methods that I have provided above, <b>method 1 the sql dump file
 <center>
 
 <b>Using phpMyAdmin</b>
-
 ![Image of Drop Database via phpmyadmin](/image-files/mysql-dump-data-4.png)
-
 ![Image of Drop Database via phpmyadminn Success](/image-files/mysql-dump-data-5.png)
 
 <b>Using Linux bash on Ubuntu Server</b>
@@ -233,7 +213,6 @@ Avoid dropping the database because the mysql dump that just backed-up only work
 <center>
 
 ![Image of False Drop Database via phpmyadmin](/image-files/mysql-dump-data-8.png)
-
 ![Image of False Drop Database via SQL query](/image-files/mysql-dump-data-9.png)
 </center>
 
@@ -242,7 +221,6 @@ Avoid dropping the database because the mysql dump that just backed-up only work
 </left>
 
 [**MySQL :How to Configure Mysql master slave replication in MYSQL database**](https://www.youtube.com/watch?v=6VfE3XKXpTs)
-
 
 <b>D. Setup Database Replication for a Master Server </b>
 
@@ -330,7 +308,7 @@ Avoid dropping the database because the mysql dump that just backed-up only work
 </left>
 
 <left>
-24. If those value are the same, you now has mastered database replication and the data rom the master server can be transferred to slave server.
+24. If those value are the same, you now has mastered the database replication. Now that the data from the master server can be transferred to slave server.
 <center>
 
 ![Image of restoring data](/image-files/mysql-replica_restore-data-5.png)
