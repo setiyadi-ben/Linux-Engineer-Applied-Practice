@@ -45,7 +45,7 @@ I have make freedom from selecting those tools and materials I have provided abo
 <left>
 1. Make sure you have installed the Linux OS with database inside the virtualization software.
 
-([**Commands are putting up here**](../Database-Replication-Simulation/terminal-command.md#drs-no-1))
+<a href="https://github.com/setiyadi-ben/Linux-Engineer-Applied-Practice/blob/main/Database-Replication-Simulation/terminal-command.md#01"><b>Commands are putting up here. If not loaded please refresh the browser.</b></a>
 </left>
 <center>
 
@@ -57,17 +57,17 @@ I have make freedom from selecting those tools and materials I have provided abo
 2. Create new user and also grant the permissions.
 </left>
 
-<a href="https://github.com/setiyadi-ben/Linux-Engineer-Applied-Practice/blob/main/Database-Replication-Simulation/terminal-command.md#02">Commands are putting up here</a>
+<a href="https://github.com/setiyadi-ben/Linux-Engineer-Applied-Practice/blob/main/Database-Replication-Simulation/terminal-command.md#02"><b>Commands are putting up here. If not loaded please refresh the browser.</b></a>
 <center>
 
 ![Image when mysql installation is successful](/image-files/creating-auth-user-pass.png)
 </center>
 
 <left>
-1. Install phpMyAdmin to get easy access creating a database table for a use of master database that you can use phpmyadmin for GUI based or you just write syntax below inside myql terminal.
+3. Install phpMyAdmin <b>(Optional if you want to skip point B)</b> to get easy access creating a database table for a use of master database that you can use phpmyadmin for GUI based or you just write syntax below inside myql terminal.
 </left>
 
-[**Commands are putting up here**](https://github.com/setiyadi-ben/Linux-Engineer-Applied-Practice/main/Database-Replication-Simulation/terminal-command.md#210)
+<a href="https://github.com/setiyadi-ben/Linux-Engineer-Applied-Practice/blob/main/Database-Replication-Simulation/terminal-command.md#03"><b>Commands are putting up here. If not loaded please refresh the browser.</b></a>
 <center>
 
 ![Image when phpMyAdmin installation is successful](/image-files/installation-phpmyadmin-done.png)
@@ -76,7 +76,7 @@ I have make freedom from selecting those tools and materials I have provided abo
 </center>
 
 <left>
-1. For an example in step 3 I'm creating the database with a name <b>"id-lcm-prd1"</b> and also database table named <b>"penjualan_ikan"</b>. Why am I choosing that idea? I was thinking that it was the easiest example for anyone to understand. To give more context, you can see where is it comes from.
+4. For an example in step 3 I'm creating the database with a name <b>"id-lcm-prd1"</b> and also database table named <b>"penjualan_ikan"</b>. Why am I choosing that idea? I was thinking that it was the easiest example for anyone to understand. To give more context, you can see where is it comes from.
 </left>
 <center>
 
@@ -108,15 +108,13 @@ In preview button on the bottom left, you can use that syntax output if you want
 </center>
 
 <left>
-7. Some of you might be wanted to try creating database and database table using MySQL query language. So, here it is I'm also provided below the second database inside terminal commands. 
+7. Some of you might be wanted to try creating database and database table using MySQL query language. So, here it is I'm also provided below the second database inside terminal commands.
 
-([**Commands are putting up here**](../Database-Replication-Simulation/terminal-command.md))
+<a href="https://github.com/setiyadi-ben/Linux-Engineer-Applied-Practice/blob/main/Database-Replication-Simulation/terminal-command.md#07"><b>Commands are putting up here. If not loaded please refresh the browser.</b></a>
 <br><center>
 ![Image of creating database table using MySQL query](/image-files/creating-mysqldb-and_table-1.png)
 </br></center>
 </left>
-
-<b><u>***IT IS IMPORTANT TO DUPLICATE THE STEPS ABOVE FOR THE SECOND SERVER SET-UP UNTIL REACHING CREATE DATABASE STATEMENT.***</u></b>
 
 <b>B. Simulate sending MySQL query data using Python </b>
 
@@ -134,7 +132,7 @@ database.</br>
 9. To be able to perform the simulation, you need to have python installed in PATH, install mysql-connector, allowing the firewall inside the database server and having the syntax to be able to perform MySQL query. Below here you can pay attention to make sure you will not mess up with a bunch of errors.
 </br></left>
 
-([**Commands are putting up here**](../Database-Replication-Simulation/terminal-command.md))
+<a href="https://github.com/setiyadi-ben/Linux-Engineer-Applied-Practice/blob/main/Database-Replication-Simulation/terminal-command.md#09"><b>Commands are putting up here. If not loaded please refresh the browser.</b></a>
 <center>
 
 ![Image When installing Python](/image-files/installation-python.png)
@@ -152,7 +150,7 @@ database.</br>
 10. Once you have passed the connection check by outputting similar to the image above. Now, I'm going to send the dummy data into MySQL Database using the modified python code to make it <b>as if simulating the consecutive data flow through the database id-lcm-prd1 from another network.</b>
 </left>
 
-([**Commands are putting up here**](../Database-Replication-Simulation/terminal-command.md))
+<a href="https://github.com/setiyadi-ben/Linux-Engineer-Applied-Practice/blob/main/Database-Replication-Simulation/terminal-command.md#09"><b>Commands are putting up here. If not loaded please refresh the browser.</b></a>
 
 <center>
 
@@ -163,7 +161,7 @@ database.</br>
 
 <br>
 
-<b>C. Setup Database Replication - For the use case of Scaling-up the current databases infrastructure </b></br>
+<b>C. Setup Database Replication (mysqldump) - For the use case of Scaling-up the current databases infrastructure </b></br>
 
 <left>
 11. Before get in into replication tasks, when the condition of the current databases has the data in it what you should do is to <b>dump the current data in your databases outside (export the data)</b> with supportable format such as: SQL, CSV, JSON, XML & etc.
@@ -183,7 +181,7 @@ database.</br>
 <center>
 
 <b>Using Linux bash on Ubuntu Server</b>
-([**Commands are putting up here**](../Database-Replication-Simulation/terminal-command.md))
+<a href="https://github.com/setiyadi-ben/Linux-Engineer-Applied-Practice/blob/main/Database-Replication-Simulation/terminal-command.md#12"><b>(Commands are putting up here).</b></a>
 
 ![Image of database dump using SQL query syntax](/image-files/mysql-dump-data-3.png)
 </center>
@@ -192,7 +190,8 @@ database.</br>
 From 2 example methods that I have provided above, <b>method 1 the sql dump file is stored in your personal computer and method 2 the sql file is stored inside the linux server you have configured into.</b>
 </left>
 
-<br><left>
+<br>
+<left>
 13. Next, perform database data cleansing by clearing the table inside the database using 2 methods phpMyAdmin via web GUI and using SQL query syntax in bash shell.
 </left></br>
 
@@ -203,6 +202,7 @@ From 2 example methods that I have provided above, <b>method 1 the sql dump file
 ![Image of Drop Database via phpmyadminn Success](/image-files/mysql-dump-data-5.png)
 
 <b>Using Linux bash on Ubuntu Server</b>
+<a href="https://github.com/setiyadi-ben/Linux-Engineer-Applied-Practice/blob/main/Database-Replication-Simulation/terminal-command.md#13"><b>(Commands are putting up here).</b></a>
 
 ![Image of Drop Database Table via SQL query](/image-files/mysql-dump-data-6.png)
 </center>
@@ -226,6 +226,8 @@ Avoid dropping the database because the mysql dump that just backed-up only work
 
 <left>
 15.  I'm going to start with typing ifconfig to print the master server host ip and changing some parameters in mysqld.cnf. In this step I'm keeping the bind-address to 0.0.0.0 because this is a simulation, when you are in real work you might be binding the address to a private ip in order to limit networks that has access into database.
+
+<a href="https://github.com/setiyadi-ben/Linux-Engineer-Applied-Practice/blob/main/Database-Replication-Simulation/terminal-command.md#15"><b>Commands are putting up here. If not loaded please refresh the browser.</b></a>
 <center>
 
 ![Image of ifconfig & mysqld.cnf](/image-files/mysql-replica_set-up-1.png)

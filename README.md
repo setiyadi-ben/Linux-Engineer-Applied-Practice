@@ -5,6 +5,10 @@ If you are thinking about the ideas of "What should I learn?" You can watch this
 
 [**Gaining Experience for your Linux Career - What should you Learn?!**](https://www.youtube.com/watch?v=FaFITB2wuUQ)
 
+### A Little details you don't want to miss out about
+
+[**Linux Bash, MySQL query and .etc**](/terminal.md)
+
 ## Linux Engineer
 
-### [**Database Replication Simulation**](../main/Database-Replication-Simulation/readme.md)
+#### [**Database Replication Simulation**](../main/Database-Replication-Simulation/readme.md)

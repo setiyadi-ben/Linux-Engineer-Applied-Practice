@@ -9,10 +9,10 @@
 ~~~bash
 sudo apt-get install net-tools
 ~~~
-<a id="drs-no-1"></a>
-### Installing and configure MySQL Server
+<a id="01"></a>
+### (1.) Installing and configure MySQL Server
 
-[**back to Database Replication - Tools and materials that need to be prepared**](/Database-Replication-Simulation/readme.md)
+[**back to Database Replication Simulation**](/Database-Replication-Simulation/readme.md)
 
 [**click here for details**](https://ubuntu.com/server/docs/install-and-configure-a-mysql-server)
 
@@ -27,13 +27,14 @@ sudo apt install mysql-server
 ~~~bash
 sudo service mysql status
 ~~~
-### Create a New User and Grant Permissions in MySQL
-[**back to Database Replication - Tools and materials that need to be prepared**](/Database-Replication-Simulation/readme.md)
-
-[**click here for details**](https://www.digitalocean.com/community/tutorials/how-to-create-a-new-user-and-grant-permissions-in-mysql)
+### (2.) Create a New User and Grant Permissions in MySQL
 <a id="02"></a>
 
-**(2.) Login using user root, password are the same with your linux login password**
+[**back to Database Replication Simulation**](/Database-Replication-Simulation/readme.md)
+
+[**click here for details**](https://www.digitalocean.com/community/tutorials/how-to-create-a-new-user-and-grant-permissions-in-mysql)
+
+**Login using user root, password are the same with your linux login password**
 ~~~bash
 sudo mysql -u root -p
 ~~~
@@ -47,12 +48,23 @@ CREATE USER 'staff1-engineer'@'%' IDENTIFIED BY 'password';
 ~~~sql
 GRANT ALL PRIVILEGES ON*.*TO 'staff1-engineer'@'%' WITH GRANT OPTION;
 ~~~
+### (3.) Installing phpMyAdmin
+<a id="03"></a>
+
+[**back to Database Replication Simulation**](/Database-Replication-Simulation/readme.md)
+
+[**click here for details**](https://www.hostinger.com/tutorials/how-to-install-and-setup-phpmyadmin-on-ubuntu)
+~~~
+sudo apt-get install phpmyadmin
+~~~
+
+### (7.) Creating Database and Database Table using MySQL Query Syntax
+<a id="07"></a>
 
 **Creating database using MySQL Query**
 ~~~sql
 CREATE DATABASE `id-lcm-prd1`;
 ~~~
-
 **Creating database table using MySQL Query**
 ~~~sql
 CREATE TABLE `id-lcm-prd1`.`penjualan_ikan`
@@ -64,14 +76,8 @@ CREATE TABLE `id-lcm-prd1`.`penjualan_ikan`
       PRIMARY KEY (`id`)) ENGINE = InnoDB;
 ~~~
 
-**Installing phpMyAdmin**
-
-[**back to Database Replication - Tools and materials that need to be prepared**](/Database-Replication-Simulation/readme.md)
-
-[**click here for details**](https://www.hostinger.com/tutorials/how-to-install-and-setup-phpmyadmin-on-ubuntu)
-~~~
-sudo apt-get install phpmyadmin
-~~~
+### (9 to 10) Simulate sending MySQL query data using Python
+<a id="09"></a>
 
 **Installing MySQL Connector Driver for Python**
 ~~~python
@@ -79,7 +85,7 @@ pip install mysql-connector-python
 ~~~
 **Configure MySQL to Listen on All Interfaces**
 
-[**back to Database Replication - Tools and materials that need to be prepared**](/Database-Replication-Simulation/readme.md)
+[**back to Database Replication Simulation**](/Database-Replication-Simulation/readme.md)
 ~~~bash
 sudo nano /etc/mysql/mysql.conf.d/mysqld.cnf
 ~~~
@@ -90,14 +96,14 @@ bind-address = 0.0.0.0
 
 **Check hosts binding addresses**
 
-[**back to Database Replication - Tools and materials that need to be prepared**](/Database-Replication-Simulation/readme.md)
+[**back to Database Replication Simulation**](/Database-Replication-Simulation/readme.md)
 ~~~bash
 netstat -tan
 ~~~
 
 **Test database connections from remote address**
 
-[**back to Database Replication - Tools and materials that need to be prepared**](/Database-Replication-Simulation/readme.md)
+[**back to Database Replication Simulation**](/Database-Replication-Simulation/readme.md)
 
 **mysql-test-connections.py** - [Click here to view code](/Database-Replication-Simulation/mysql-test-connections.py)
 
@@ -111,9 +117,10 @@ python mysql-test-connections.py
 python mysql-insert_data.py
 ~~~
 
-[**back to Database Replication - Tools and materials that need to be prepared**](/Database-Replication-Simulation/readme.md)
+[**back to Database Replication Simulation**](/Database-Replication-Simulation/readme.md)
 
-**Database dump using SQL query syntax**
+### (12.) Database dump using SQL query syntax
+<a id="12"></a>
 
 ~~~bash
 sudo mysqldump -u staff1-engineer -p id-lcm-prd1 > sql_dump-db_id-lcm-prd1.sql
@@ -123,7 +130,8 @@ ls
 pwd
 ~~~
 
-**DROP Database table using SQL query syntax**
+### (13.) DROP Database table using SQL query syntax
+<a id="12"></a>
 
 ~~~bash
 sudo mysql -u staff1-engineer -p
@@ -134,16 +142,18 @@ use id-lcm-prd1;
 drop table `penjualan_ikan`;
 ~~~
 
-**Access mysqld.cnf to enable multiple parameters on master server**
+### (15 to 24.) Access mysqld.cnf to enable multiple parameters on master server
+<a id="15"></a>
+
 ~~~
 sudo nano /etc/mysql/mysql.conf.d/mysqld.cnf
 ~~~
-Scroll to the bottom and un-tick the following:
+**Scroll to the bottom and un-tick the following:**
 ~~~nano
 server-id   = 1
 log-bin     = /var/log/mysql/mysql-bin.log
 ~~~
-Restart the MySQL service
+**Restart the MySQL service**
 ~~~
 sudo systemctl restart mysql
 ~~~
@@ -156,8 +166,12 @@ CREATE USER 'replica-bot'@'%' IDENTIFIED WITH mysql_native_password BY 'password
 ~~~sql
 GRANT REPLICATION SLAVE ON *.* TO 'replica-bot'@'%' WITH GRANT OPTION;
 ~~~
+**Check if the user was already created**
+~~~
+SELECT HOST, USER FROM mysql.user;
+~~~
 
-**Try to connect replica-bot user from slave server**
+**Scroll to the bottom and un-tick the following on Master Server**
 ~~~
 sudo mysql -h 192.168.129.129 -u replica-bot -p
 ~~~
@@ -166,18 +180,23 @@ sudo mysql -h 192.168.129.129 -u replica-bot -p
 ~~~
 sudo nano /etc/mysql/mysql.conf.d/mysqld.cnf
 ~~~
-Scroll to the bottom and un-tick the following:
+
+**Restart the MySQL service**
+~~~
+sudo systemctl restart mysql
+~~~
+**Pinpoint the value of mysql master status**
+~~~
+SHOW MASTER STATUS \G
+~~~
+
+**Scroll to the bottom and un-tick the following on Slave Server:**
 ~~~nano
 server-id   = 2
 log-bin     = /var/log/mysql/mysql-bin.log
 ~~~
-Restart the MySQL service
-~~~
-sudo systemctl restart mysql
-~~~
 
-<a id="210"></a>
-Slave Server configuration in order to connect to Master Server
+**Slave Server configuration in order to connect to Master Server**
 ~~~sql
 STOP SLAVE;
 ~~~
