@@ -67,7 +67,7 @@ I have make freedom from selecting those tools and materials I have provided abo
 3. Install phpMyAdmin to get easy access creating a database table for a use of master database that you can use phpmyadmin for GUI based or you just write syntax below inside myql terminal.
 </left>
 
-([**Commands are putting up here**](../Database-Replication-Simulation/terminal-command.md))
+([**Commands are putting up here**](../Database-Replication-Simulation/terminal-command.md#drs-no-last))
 <center>
 
 ![Image when phpMyAdmin installation is successful](/image-files/installation-phpmyadmin-done.png)
