@@ -176,7 +176,7 @@ Restart the MySQL service
 sudo systemctl restart mysql
 ~~~
 
-<a="210"></a>
+<a id="210"></a>
 Slave Server configuration in order to connect to Master Server
 ~~~sql
 STOP SLAVE;
