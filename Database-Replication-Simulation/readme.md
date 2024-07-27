@@ -57,7 +57,7 @@ I have make freedom from selecting those tools and materials I have provided abo
 2. Create new user and also grant the permissions.
 </left>
 
-([**Commands are putting up here**](../Database-Replication-Simulation/terminal-command.md#drs-no-2))
+([**Commands are putting up here**](../Database-Replication-Simulation/terminal-command.md#02))
 <center>
 
 ![Image when mysql installation is successful](/image-files/creating-auth-user-pass.png)

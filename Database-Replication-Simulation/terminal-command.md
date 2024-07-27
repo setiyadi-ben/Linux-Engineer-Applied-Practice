@@ -10,7 +10,7 @@
 sudo apt-get install net-tools
 ~~~
 <a id="drs-no-1"></a>
-### Installing and configure and configuring MySQL Server
+### Installing and configure MySQL Server
 
 [**back to Database Replication - Tools and materials that need to be prepared**](/Database-Replication-Simulation/readme.md)
 
@@ -31,9 +31,9 @@ sudo service mysql status
 [**back to Database Replication - Tools and materials that need to be prepared**](/Database-Replication-Simulation/readme.md)
 
 [**click here for details**](https://www.digitalocean.com/community/tutorials/how-to-create-a-new-user-and-grant-permissions-in-mysql)
-<a id="drs-no-2"></a>
+<a id="02"></a>
 
-**Login using user root, password are the same with your linux login password**
+**(2.) Login using user root, password are the same with your linux login password**
 ~~~bash
 sudo mysql -u root -p
 ~~~
