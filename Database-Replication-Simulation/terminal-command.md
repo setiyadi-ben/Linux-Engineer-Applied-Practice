@@ -176,7 +176,7 @@ Restart the MySQL service
 sudo systemctl restart mysql
 ~~~
 
-<a = "drs-no-last"></a>
+<a="drs-no-last"></a>
 Slave Server configuration in order to connect to Master Server
 ~~~sql
 STOP SLAVE;
