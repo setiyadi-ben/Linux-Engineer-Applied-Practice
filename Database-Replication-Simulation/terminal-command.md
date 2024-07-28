@@ -148,7 +148,10 @@ drop table `penjualan_ikan`;
 ~~~
 sudo nano /etc/mysql/mysql.conf.d/mysqld.cnf
 ~~~
-**Scroll to the bottom and un-tick the following:**
+
+- Master Server Configuration
+
+**Scroll to the bottom and un-tick the following in Master Server:**
 ~~~nano
 server-id   = 1
 log-bin     = /var/log/mysql/mysql-bin.log
@@ -171,9 +174,14 @@ GRANT REPLICATION SLAVE ON *.* TO 'replica-bot'@'%' WITH GRANT OPTION;
 SELECT HOST, USER FROM mysql.user;
 ~~~
 
-**Scroll to the bottom and un-tick the following on Master Server**
+**Test login authentication using user replica-bot**
 ~~~
 sudo mysql -h 192.168.129.129 -u replica-bot -p
+~~~
+
+**Pinpoint the value of mysql master status**
+~~~
+SHOW MASTER STATUS \G
 ~~~
 
 **Access mysqld.cnf to enable multiple parameters on slave server**
@@ -185,10 +193,8 @@ sudo nano /etc/mysql/mysql.conf.d/mysqld.cnf
 ~~~
 sudo systemctl restart mysql
 ~~~
-**Pinpoint the value of mysql master status**
-~~~
-SHOW MASTER STATUS \G
-~~~
+
+- Slave server configuration
 
 **Scroll to the bottom and un-tick the following on Slave Server:**
 ~~~nano
@@ -196,7 +202,17 @@ server-id   = 2
 log-bin     = /var/log/mysql/mysql-bin.log
 ~~~
 
-**Slave Server configuration in order to connect to Master Server**
+**Restart the MySQL service**
+~~~
+sudo systemctl restart mysql
+~~~
+
+**Login with user root**
+~~~
+sudo mysql -u root -p
+~~~
+
+**Slave Server configuration in order to replicate data from Master Server**
 ~~~sql
 STOP SLAVE;
 ~~~
@@ -211,4 +227,33 @@ SOURCE_LOG_POS=5140;
 ~~~sql
 START SLAVE;
 SHOW SLAVE STATUS\G
+~~~
+
+- Restoring Data form Master Server
+
+**Restore Master Server Database Data**
+~~~bash
+mysql -u staff1-engineer -p id-lcm-prd1 < sql_dump-db_id-lcm-prd1.sql
+~~~
+
+**Check the database table data in Master Server**
+~~~sql
+USE `id-lcm-prd1`;
+~~~
+~~~sql
+SHOW TABLES;
+~~~
+
+- Check the Replication Data Delivery into the Slave Server
+~~~sql
+SHOW REPLICA STATUS \G
+~~~
+~~~sql
+SHOW DATABASES;
+~~~
+~~~sql
+USE `id-lcm-prd1`;
+~~~
+~~~sql
+SHOW TABLES;
 ~~~

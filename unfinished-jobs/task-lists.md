@@ -2,15 +2,17 @@
 # In Mind:
 
 <left>
-<li> 
-<li> 
+<li> RDBMS
+<li> DB Design
+<li> CRON Jobs
+<li> Ansible
 </left>
 
 # In-Progress:
 
 <left>
-<li> Anchoring The readme.md of Database Replication Simulation with Terminal Command.
-<li><b> Currently documenting the work progress in [readme.md](/Database-Replication-Simulation/readme.md) and [terminal-commands](/Database-Replication-Simulation/terminal-command.md)</b>
+<li> 
+<li><b> </b>
 </li></left>
 
 # To-be working on later:
@@ -22,6 +24,8 @@
 
 # Done:
 <left>
+<li><s>Anchoring The readme.md of Database Replication Simulation with Terminal 
+<li><s>Currently documenting the work progress in [readme.md](/Database-Replication-Simulation/readme.md) and [terminal-commands](/Database-Replication-Simulation/terminal-command.md)
 <li><s>Creating documentation for database Replica for Master and Slave configuration</s>
 <li><s> Error connecting to source 'replica-bot@192.168.129.129:3306'. This was attempt 6/86400, with a delay of 60 seconds between attempts. Message: Authentication plugin 'caching_sha2_password' reported error: Authentication requires secure connection. FIxed with IDENTIFIED WITH mysql_native_password BY</s>
 <li><s>Documenting previous database setup using bash

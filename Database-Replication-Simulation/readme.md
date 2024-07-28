@@ -293,7 +293,7 @@ Avoid dropping the database because the mysql dump that just backed-up only work
 </left>
 
 <left>
-22. To check if the data was inserted or not, simply navigate to check the database table data on master server.
+22. To check if the data was inserted or not, simply login and navigate to check the database table data on master server.
 <center>
 
 ![Image of Checking database table data](/image-files/mysql-replica_restore-data-2.png)
@@ -310,7 +310,7 @@ Avoid dropping the database because the mysql dump that just backed-up only work
 </left>
 
 <left>
-24. If those value are the same, you now has mastered the database replication. Now that the data from the master server can be transferred to slave server.
+24. If those value are the same, now you are already know the implementation of the database replication. You can set it up on beginning, or whenever you need to scaling-up your current infrastructure you can do with similar method like this.
 <center>
 
 ![Image of restoring data](/image-files/mysql-replica_restore-data-5.png)
