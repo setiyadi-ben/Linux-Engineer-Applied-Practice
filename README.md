@@ -7,7 +7,7 @@ If you are thinking about the ideas of "What should I learn?" You can watch this
 
 ### A Little details you don't want to miss out about
 
-[**Linux Bash, MySQL query and .etc**](/terminal.md)
+[**Linux Bash, MySQL query and .etc**](/Additional-Notes/Table-of-Contents.md)
 
 ## Linux Engineer
 
