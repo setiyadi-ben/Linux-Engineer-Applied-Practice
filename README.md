@@ -11,4 +11,6 @@ If you are thinking about the ideas of "What should I learn?" You can watch this
 
 ## Linux Engineer
 
-#### [**Database Replication Simulation**](../main/Database-Replication-Simulation/readme.md)
+#### [**1. Database Replication Simulation (completed | waiting for revisions)**](../main/Database-Replication-Simulation/readme.md)
+
+#### [**2. Java-Webapps-Simulation (in-progress)**](/Java-Webapps-Simulation/Table-of-Contents.md)
