@@ -1,0 +1,86 @@
+# Installation of Apache Tomcat and Apace HTTP Service
+### [**back to Table-of-Contents**](./Table-of-Contents.md)
+
+## Tools & materials
+- Previous requirements that is used in [**Database Replication Simulation.**](/Database-Replication-Simulation/readme.md)
+- JDK or OpenJDK, I'm using version 21.
+- Apache Tomcat
+- Apache HTTP
+
+## Simulation steps:
+<b>A. Installation of JDK or OpenJDK (Java Development Kit) </b>
+
+<left>
+1. If you using the same previous requirements, you can simply install the JDK by simply writing this command below.
+<center>
+
+![Install JDK](/image-files/jdk-install-1.png)
+</center>
+<left>
+
+<left>
+2. Check the version to verify the installation, is it successs or not.
+<center>
+
+![Very JDK](/image-files/jdk-install-2.png)
+</center>
+</left>
+
+<b>B. Installation of Apache Tomcat Webserver </b>
+
+<left>
+3. Let's begin to download the files from the official site by using wget and don't forget to place the downloaded tomcat in directory /opt.
+<center>
+
+![Download Tomcat](/image-files/apache-install-1.png)
+</center>
+</left>
+
+<left>
+4. Install the .tar.gz file with this following command.
+<center>
+
+![Install Tomcat](/image-files/apache-install-2.png)
+</center>
+</left>
+
+<left>
+5. Create the user "tomcat" and check which is created or not.
+<center>
+
+![Create Tomcat user](/image-files/apache-install-3.png)
+</center>
+</left>
+
+<left>
+6. Check the java version to write it in the next configuration.
+<center>
+
+![Create Tomcat user](/image-files/apache-install-4.png)
+</center>
+</left>
+
+<left>
+7. Check the java version to write it in the next configuration.
+<center>
+
+![Create Tomcat user](/image-files/apache-install-5.png)
+![Create Tomcat user](/image-files/apache-install-6.png)
+</center>
+</left>
+
+<left>
+8. To be able to access /opt/tomcat/bin/*.sh I'm switching to root user then restarting the service like the image shown below.
+<center>
+
+![Create Tomcat user](/image-files/apache-install-7.png)
+</center>
+</left>
+
+<left>
+9. If find any warning or errors you can also check the logs by simply typing.
+<center>
+
+![Create Tomcat user](/image-files/apache-debug.png)
+</center>
+</left>
