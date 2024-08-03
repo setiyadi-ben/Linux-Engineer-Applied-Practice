@@ -34,7 +34,7 @@ Real-time analytics: **Database replication enables data to be transmitted and a
 - Linux commands for configuring master slave simulations.
 - SSH Client for simulating a remote connection from outside local network.
 
-## Simulation steps
+## Simulation steps:
 
 <b>A. Installation and database setup </b>
 
