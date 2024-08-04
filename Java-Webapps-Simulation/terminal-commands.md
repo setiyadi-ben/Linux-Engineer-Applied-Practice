@@ -79,6 +79,15 @@ sudo systemctl status tomcat.service
 
 ## Apache HTTP Installation
 ### [back to Installation of Apache Tomcat and Apace HTTP Service](./Installing-ApacheTomcat_and_ApacheHTTP.md)
-~~~bash
 
+**10. Installing Apache HTTP Server**
+~~~bash
+sudo apt install apache2 -y
+sudo systemctl status apache2
+~~~
+**11. Check listening ports, firewall status and allow firewall**
+~~~bash
+netstat -tan
+sudo ufw status
+sudo ufw allow 'Apache Full'
 ~~~

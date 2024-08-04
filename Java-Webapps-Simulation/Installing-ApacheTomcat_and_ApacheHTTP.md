@@ -89,3 +89,75 @@
 ![Create Tomcat user](/image-files/apache-debug.png)
 </center>
 </left>
+
+<b>C. Installation of Apache HTTP </b>
+
+<left>
+10. If you already practicing the Database Replication Simulation you should have installed that when installing phpmyadmin. If you just started from this simulation you can follow step by step below.
+<center>
+
+![apache2 http](/image-files/install-apache2-1.png)
+</center></left>
+
+<left>
+11. Know that installing the apache httpd itself not always make the services running. You can see that port 443 for ssl are not listening yet. the term "ufw" are for firewall config, verify the status first. If it is says "inactive" then you do not need to allow the prompt after.
+<center>
+
+![apache http-2](/image-files/install-apache2-2.png)
+</center></left>
+
+<left>
+12.
+<center>
+
+![]()
+</center></left>
+
+<left>
+4.
+<center>
+
+![]()
+</center></left>
+
+<left>
+5.
+<center>
+
+![]()
+</center></left>
+
+<left>
+6.
+<center>
+
+![]()
+</center></left>
+
+<left>
+7.
+<center>
+
+![]()
+</center></left>
+
+<left>
+8.
+<center>
+
+![]()
+</center></left>
+
+<left>
+9.
+<center>
+
+![]()
+</center></left>
+
+<left>
+10.
+<center>
+
+![]()
+</center></left>
