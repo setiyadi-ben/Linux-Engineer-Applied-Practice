@@ -2,22 +2,25 @@
 # In Mind:
 
 <left>
-<li> RDBMS
-<li> DB Design
-<li> CRON Jobs
-<li> Ansible
+<li> Simulate Java Webapps that users able to CRUD data from web page
+<li> 
+<li> 
+<li> 
 </left>
 
 # In-Progress:
 
 <left>
-<li> 
+<li> Java-Webapps-Simulation
 <li><b> </b>
 </li></left>
 
 # To-be working on later:
 <left>
-
+<li> RDBMS
+<li> DB Design
+<li> CRON Jobs
+<li> Ansible
 
 </li></left>
 
