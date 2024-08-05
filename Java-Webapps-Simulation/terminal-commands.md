@@ -91,3 +91,35 @@ netstat -tan
 sudo ufw status
 sudo ufw allow 'Apache Full'
 ~~~
+**12. Make a directory for cert, preparing fqdn and generating cert**
+~~~bash
+sudo mkdir -p /etc/ssl/private
+hostname --fqdn
+sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/apache-selfsigned.key -out /etc/ssl/certs/apache-selfsigned.crt
+~~~
+
+**14. Configure virtual host for port 443**
+~~~bash
+sudo nano /etc/apache2/sites-available/website_ssl.conf
+~~~
+~~~sh
+<VirtualHost *:443>
+    ServerAdmin support@secure-net.id
+    ServerName 192.168.129.129
+    DocumentRoot /var/www/
+
+    SSLEngine on
+    SSLCertificateFile /etc/ssl/certs/apache-selfsigned.crt
+    SSLCertificateKeyFile /etc/ssl/private/apache-selfsigned.key
+
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+~~~
+15. Apply configuration changes
+~~~bash
+sudo a2ensite website_ssl.conf
+sudo a2enmod ssl
+sudo systemctl restart apache2
+openssl s_client -connect 192.168.129.129:443 -showcerts
+~~~

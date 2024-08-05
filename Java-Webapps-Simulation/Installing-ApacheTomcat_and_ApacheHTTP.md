@@ -100,63 +100,52 @@
 </center></left>
 
 <left>
-11. Know that installing the apache httpd itself not always make the services running. You can see that port 443 for ssl are not listening yet. the term "ufw" are for firewall config, verify the status first. If it is says "inactive" then you do not need to allow the prompt after.
+11. Know that installing the apache httpd itself not always make the services running on ssl/tls mode. You can see that port 443 for ssl/tls connection are not listening yet. the term "ufw" are for firewall config, verify the status first. If it is says "inactive" then you do not need to allow the prompt after.
 <center>
 
 ![apache http-2](/image-files/install-apache2-2.png)
 </center></left>
 
 <left>
-12.
+12. To enable ssl/tls mode we need to generate certificate using openssl library. in this simulation I'm going to start by preparing the <a href="https://www.hostinger.com/tutorials/fqdn" >fqdn</a> and self-signed certificate generate command. Why using self signed? Because I don't have any domain ready to use. 
 <center>
 
-![]()
+![apache http cert1](/image-files/install-apache2-cert-1.png)
 </center></left>
 
 <left>
-4.
+13. This is the example of how to fill the certificate value.
 <center>
 
-![]()
+![apache http cert2](/image-files/install-apache2-cert-2.png)
 </center></left>
 
 <left>
-5.
+14. After that navigate into <b>/etc/apache2/sites-available/website_ssl.conf</b> to configure virtual host for port 443.
 <center>
 
-![]()
+![apache http cert3](/image-files/install-apache2-cert-3.png)
+![apache http cert3.1](/image-files/install-apache2-cert-3.1.png)
+<br>Don't forget to type <b>ctrl + x then y and enter to save</b></br>
 </center></left>
 
 <left>
-6.
+15. To make sure configuration changes are running, I'm typing several commands listed below. Then I check the certificate by typing <b>openssl s_client -connect 192.168.129.129:443 -showcerts</b>
 <center>
 
-![]()
+![](/image-files/install-apache2-cert-4.png)
 </center></left>
 
 <left>
-7.
+16. Another way to identify the certificate was worked successfully is to access it directly from the web. If it is says not secure don't worry about it because I'm using self-signed certificate.
 <center>
 
-![]()
+![](/image-files/install-apache2-cert-5.png)
 </center></left>
 
-<left>
-8.
-<center>
-
-![]()
-</center></left>
 
 <left>
-9.
-<center>
 
-![]()
-</center></left>
-
-<left>
-10.
 <center>
 
 ![]()
