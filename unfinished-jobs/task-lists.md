@@ -12,8 +12,9 @@
 
 <left>
 <li> Java-Webapps-Simulation
-<li><b> </b>
-</li></left>
+<li> Learn Java Language
+<b> </b>
+<li></li></left>
 
 # To-be working on later:
 <left>
