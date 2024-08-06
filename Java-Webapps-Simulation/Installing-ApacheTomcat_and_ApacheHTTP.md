@@ -92,6 +92,8 @@
 
 <b>C. Installation of Apache HTTP </b>
 
+<a href="https://github.com/setiyadi-ben/Linux-Engineer-Applied-Practice/blob/main/Java-Webapps-Simulation/terminal-command.md#03"><b>Commands are putting up here. If not loaded please refresh the browser.</b></a>
+
 <left>
 10. If you already practicing the Database Replication Simulation you should have installed that when installing phpmyadmin. If you just started from this simulation you can follow step by step below.
 <center>
