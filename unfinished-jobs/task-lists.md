@@ -12,7 +12,7 @@
 
 <left>
 <li> Java-Webapps-Simulation
-<li> Learn Java Language
+<li> Learn Java Language, reading jakarta ee servlet https://jakarta.ee/specifications/servlet/6.0/jakarta-servlet-spec-6.0.pdf
 <b> </b>
 <li></li></left>
 
