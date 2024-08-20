@@ -1,8 +1,5 @@
 # Preparing the Environment for Coding in Java
 
-## Preparing the Environment for Coding Workspace
-
-**=============TO BE WORKING ON LATER=================**
 
 ## Basic Structure of a Java Program
 
