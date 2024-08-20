@@ -1,5 +1,5 @@
 ## JDK Installation
-### [back to Installation of Apache Tomcat and Apace HTTP Service](./Installing-ApacheTomcat_and_ApacheHTTP.md)
+### [back to Installation of Apache Tomcat and Apace HTTP Service](./1/Installing-ApacheTomcat_and_ApacheHTTP.md)
 <a id="01"></a>
 
 **1. Installation of JDK or OpenJDK (Java Development Kit)**
@@ -12,7 +12,7 @@ java -version
 ~~~
 
 ## Apache Tomcat Installation
-### [back to Installation of Apache Tomcat and Apace HTTP Service](./Installing-ApacheTomcat_and_ApacheHTTP.md)
+### [back to Installation of Apache Tomcat and Apace HTTP Service](./1/Installing-ApacheTomcat_and_ApacheHTTP.md)
 <a id="02"></a>
 
 **3. Downloading Tomcat from official website**
@@ -78,7 +78,7 @@ sudo systemctl status tomcat.service
 ~~~
 
 ## Apache HTTP Installation
-### [back to Installation of Apache Tomcat and Apace HTTP Service](./Installing-ApacheTomcat_and_ApacheHTTP.md)
+### [back to Installation of Apache Tomcat and Apace HTTP Service](./1/Installing-ApacheTomcat_and_ApacheHTTP.md)
 <a id="03"></a>
 
 **10. Installing Apache HTTP Server**
