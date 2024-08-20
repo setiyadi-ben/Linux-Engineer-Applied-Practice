@@ -3,11 +3,11 @@
 
 ### [**0. Mandatory! Read "Use cases knowledge" first** ](./readme.md)
 
-### [**1. Installing Apache Tomcat Server and Apache HTTP Server on Master Server** ](./Installing-ApacheTomcat_and_ApacheHTTP.md)
+### [**1. Installing Apache Tomcat Server and Apache HTTP Server on Master Server** ](./1/Installing-ApacheTomcat_and_ApacheHTTP.md)
 
 - You might ask something like this, "I think using **Apache HTTP** server is neough to host my web page, why do I need **Apache Tomcat**?" [**This video will help you out.**](https://www.youtube.com/watch?v=XABDkzxA6hM)
 
-### [**2. Preparing the Environment to Start Coding on your Desktop Workspace** ](./Installing-JavaSDK_and_start-coding.md)
+### **2. Preparing the Environment to Start Coding on your Desktop Workspace**
 
 **There are several things that you need to understand and prepare before you want to set-up your coding environment which are listed as follows:**
 
