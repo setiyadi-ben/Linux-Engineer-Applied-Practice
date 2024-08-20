@@ -12,7 +12,7 @@
 
 <left>
 <li> Java-Webapps-Simulation
-<li> Learn Java Language, reading jakarta ee servlet https://jakarta.ee/specifications/servlet/6.0/jakarta-servlet-spec-6.0.pdf
+<li> Performing Documentation to prepare Workspace for Coding Environment
 <b> </b>
 <li></li></left>
 
@@ -40,6 +40,7 @@
 # Abandoned Jobs:
 
 <left>
+<li><s>Learn Java Language, reading jakarta ee servlet https://jakarta.ee/specifications/servlet/6.0/jakarta-servlet-spec-6.0.pdf
 <li><s> Simulating MySQL dump for export & import database data in <b>".xml"</b> extension due to characters limit.
 <li><s> Simulating MySQL dump for export & import database data in ".csv" extension
 <li> Simulating MySQL dump for export & import database data in ".json" extension
