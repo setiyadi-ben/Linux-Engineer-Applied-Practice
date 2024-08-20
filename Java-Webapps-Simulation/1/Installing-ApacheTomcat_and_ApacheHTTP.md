@@ -1,4 +1,4 @@
-# Installation of Apache Tomcat and Apace HTTP Service
+# Installation of Apache Tomcat Server and Apace HTTP Server on Master Server
 ### [**back to Table-of-Contents**](./Table-of-Contents.md)
 
 ## Tools & materials
