@@ -1,5 +1,5 @@
 # Installing Java SDK or OpenJDK and Apache Maven on Windows.
-### [**back to Table-of-Contents**](./Table-of-Contents.md)
+### [**back to Table-of-Contents**](../Table-of-Contents.md)
 
 **Note:** If you have another OS besides Windows, search for an alternative that matches your system.
 
