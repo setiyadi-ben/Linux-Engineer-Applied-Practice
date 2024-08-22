@@ -12,7 +12,7 @@
 **There are several things that you need to understand and prepare before you want to set-up your coding environment which are listed as follows:**
 
 - Knowledge in **Java Programming** Language. [**Here are the basic structure of Java Program.**](/Additional-Notes/Basic-Structure_of_Java-Program.md)
-- Installing **Java SDK** or **OpenJDK** and **Apache Maven** on Windows. [**Here's the steps**]()
+- Installing **Java SDK** or **OpenJDK** and **Apache Maven** on Windows. [**Here's the steps**](/Java-Webapps-Simulation/2/java-jdk-maven_installation.md)
 - Deciding to code either using **VSCode** or **IntellIj Community edition**. [**Here's why**]()
 - Choosing your skeleton project using **Maven Archetype** or **Spring Boot**. [**Here's why**]()
 

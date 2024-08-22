@@ -43,8 +43,22 @@
 ## Install Apache Maven
 
 <left>
-
+6. Open any search engine and put keyword "apache maven". Go to download package and select the file that has ".zip" extension.
 <center>
 
-![]()
+![Download maven](/image-files/maven-install-1.png)
+</center></left>
+
+<left>
+7. Same as Java, You need to put maven into <b>PATH</b> directory.
+<center>
+
+![Set-up env variable](/image-files/maven-install-2.png)
+</center></left>
+
+<left>
+8. Also verify the installation of maven by typing <b>mvn --version</b> on cmd. If it is suceeded, then you can continue to the next step.
+<center>
+
+![maven verify](/image-files/maven-install-4.png)
 </center></left>
