@@ -13,8 +13,7 @@
 
 - Knowledge in **Java Programming** Language. [**Here are the basic structure of Java Program.**](/Additional-Notes/Basic-Structure_of_Java-Program.md)
 - Installing **Java SDK** or **OpenJDK** and **Apache Maven** on Windows. [**Here's the steps**](/Java-Webapps-Simulation/2/java-jdk-maven_installation.md)
-- Code editor and choosing your skeleton project using **Maven Archetype** or **Spring Boot**. [**Here's why**](./2/Code-editor_setup.md)
-- . [**Here's why**]()
+- Start Code and choosing your skeleton project using **Spring Boot** or **Maven Archetype**. [**Here's why**](./2/Code-editor_setup.md)
 
 ### [**3. Perform webapps Integration to MySQL Databas**e](./Perform-Webapps-Integration_to_mysql-database.md)
 
