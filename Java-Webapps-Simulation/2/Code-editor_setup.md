@@ -1,8 +1,5 @@
-# Code editor and Choosing Skeleton Project for Java
+# Choosing Code Editor and Skeleton Project for Java
 ### [**back to Table-of-Contents**](../Table-of-Contents.md)
-
-## Visual Studio Code and IntelliJ Idea
-**Note:** Since the beginning I'm documenting this repo using VSCode, most of the tutorial I found in internet when developing java web apps are using IntelliJ IDE and Eclipse IDE so I'm also using that.
 
 ## Skeleton Project 
 In summary, a skeleton project, especially in the context of Spring Boot and Maven Archetypes, is a ready-to-use project template that helps you kickstart your application development with a predefined structure and configuration, ensuring consistency and saving time in the setup phase.
