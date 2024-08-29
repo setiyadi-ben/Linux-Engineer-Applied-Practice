@@ -3,4 +3,4 @@ cat .gitignore
 # https://git-scm.com/book/en/v2/Git-Basics-Recording-Changes-to-the-Repository#_ignoring
 #ignore files inside .gitignore-files
 .gitignore-files/
-/.metadata/
+/Java-Webapps-Simulation/Dev-Project/SpringTools4_Eclipse/.metadata/
