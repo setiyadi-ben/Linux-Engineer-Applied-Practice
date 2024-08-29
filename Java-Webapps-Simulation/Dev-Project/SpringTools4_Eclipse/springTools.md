@@ -1,6 +1,6 @@
 # Start Code Java Webapps Project - Eclipse IDE
 ## Using Spring Tools 4
-### [**back to Table-of-Contents**](../Table-of-Contents.md)
+### [**back to Table-of-Contents**](/Java-Webapps-Simulation/2/Code-editor_setup.md)
 ### [**back to Code-editor_setup**](/Java-Webapps-Simulation/2/Code-editor_setup.md)
 
 ## Quick Note
@@ -32,4 +32,19 @@ Continue your steps by following Mr. [**McKenzie's video on YouTube**](https://w
 
 if you can manage into this result, let's head over to the serious coding process.
 
-## Start Coding
+## Start Practice Coding in Java
+Like most of the elders said, in order to master something in your field you need to try it out by yourself. 
+
+In my view, the most important thing is to replicate the work that is available on YouTube especially until you are familiar with the environment of that code. 
+
+So, when you have successfully doing that, you will be having an insight of what's going to do next or you will probably be able to solve the real world problem with your self driven mentality.
+
+### 1. Practice Spring Boot Restful APIS 
+- **Source 1** [**YouTube Tutorial**](https://www.youtube.com/watch?v=9brw7UzFdTA)
+Lesson learned:
+
+    a. Theory at duration 03:14 until 07:45.
+    
+    b. Rest is not CRUD, [**read more here**](/Additional-Notes/RestAPI&CRUD.md).
+
+    c. 
