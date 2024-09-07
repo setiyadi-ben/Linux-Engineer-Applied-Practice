@@ -5,6 +5,7 @@ package com.bennyjrx.rps;
 
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 // @RestController & @CrossOrigin 
@@ -28,5 +29,37 @@ public class ScoreController {
 	public Score getScore() {
 //		returning the static score value from line 17
 		return score;
+	}
+	
+	/*
+//	return only wins, losses and ties
+	@GetMapping ("/score/wins")
+	public int getWins() {
+//		all return value are reference from  Score.java class
+		return score.wins;
+	}
+	
+	@GetMapping ("/score/losses")
+	public int getLosses() {
+		return score.losses;
+	}
+	
+	@GetMapping ("/score/ties")
+	public int getTies() {
+		return score.ties;
+	}
+	*/
+	
+//	performing @PathVariable
+	@GetMapping("/score/{winslossesorties}")
+//	untuk winlossesorties di-copy saja ke if di bawah untuk menghindari error
+	public int getWinsLossesOrTies(@PathVariable String winslossesorties) {
+		if (winslossesorties.equalsIgnoreCase("wins")) {
+			return score.wins;
+		}
+		if (winslossesorties.equalsIgnoreCase("ties")) {
+			return score.ties;
+		}
+		return score.losses;
 	}
 }
