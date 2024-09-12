@@ -6,6 +6,7 @@ package com.bennyjrx.rps;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 // @RestController & @CrossOrigin 
@@ -62,4 +63,30 @@ public class ScoreController {
 		}
 		return score.losses;
 	}
+	
+//	Increase the number of wins by one and return the user full score
+	@PostMapping("/score/wins") //@PostMapping can't directly accessing it from the browser
+	public Score increaseWins() {
+		score.wins++;
+		return score;
+	}
+	
+	@PostMapping("/score/losses") 
+	public Score increaseLosses() {
+		score.losses++;
+		return score;
+	}
+	
+	@PostMapping("/score/ties") 
+	public Score increaseTies() {
+		score.ties++;
+		return score;
+	}
+	
+	/*
+	Try to invoke @PostMapping via MS PowerShell
+	curl.exe -X POST http://127.0.0.1:8080/score/wins
+	curl.exe -X POST http://127.0.0.1:8080/score/losses
+	curl.exe -X POST http://127.0.0.1:8080/score/ties
+	 */
 }

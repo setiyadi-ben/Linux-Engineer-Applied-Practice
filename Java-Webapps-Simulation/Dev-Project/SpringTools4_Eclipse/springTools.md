@@ -47,4 +47,17 @@ Lesson learned:
     
     b. Rest is not CRUD, [**read more here**](/Additional-Notes/RestAPI&CRUD.md).
 
-    c. 
+    c. There are 8 commonly used HTTP methods, [**read more here**](/Additional-Notes/HTTP_Methods.md).
+
+    d. Progress as follows
+
+    <center>
+    
+    ![1](/image-files/sts4_progress-1.png)
+    <b>@GetMapping</b> invocation and return the value in JSON format 
+
+    ![2](/image-files/sts4_progress-2.png)
+    <b>@PostMapping</b> increase the number of wins by one and return the user full score
+
+    
+    </center>
