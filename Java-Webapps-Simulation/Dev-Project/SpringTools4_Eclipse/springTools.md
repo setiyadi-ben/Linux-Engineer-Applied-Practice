@@ -54,10 +54,12 @@ Lesson learned:
     <center>
     
     ![1](/image-files/sts4_progress-1.png)
-    <b>@GetMapping</b> invocation and return the value in JSON format 
+    <br><b>@GetMapping</b> invocation and return the value in JSON format</br>
 
     ![2](/image-files/sts4_progress-2.png)
-    <b>@PostMapping</b> increase the number of wins by one and return the user full score
+    <br><b>@PostMapping</b> increase the number of wins by one and return the user full score</br>
 
+    ![3](/image-files/sts4_progress-3.png)
+    <br><b>@PatchMapping & RequestParam</b> to able to perform query request<br>
     
     </center>

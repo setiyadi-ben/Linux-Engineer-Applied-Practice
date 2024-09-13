@@ -5,8 +5,10 @@ package com.bennyjrx.rps;
 
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 // @RestController & @CrossOrigin 
@@ -89,4 +91,11 @@ public class ScoreController {
 	curl.exe -X POST http://127.0.0.1:8080/score/losses
 	curl.exe -X POST http://127.0.0.1:8080/score/ties
 	 */
+	
+//	Update new data only for wins (one property) using query request or @RequestParameter
+	@PatchMapping("/score/wins")
+	public Score updateWins(@RequestParam(name="new-value")int newvalue) {
+		score.wins = newvalue;
+		return score;
+	}
 }
