@@ -98,4 +98,19 @@ public class ScoreController {
 		score.wins = newvalue;
 		return score;
 	}
+	
+//	Update new data only for losses (one property) using query request or @RequestParameter
+	@PatchMapping("/score/losses")
+	public Score updateLosses(@RequestParam(name="new-value")int newValue) {
+		score.losses = newValue;
+		return score;
+	}
+	
+//	Update new data only for ties (one property) using query request or @RequestParameter
+	@PatchMapping("score/ties")
+//	trying to make the value of @RequestParam different, will it make a conflict?
+	public Score updateTies(@RequestParam(name="new-value1")int newValue1) {
+		score.ties = newValue1;
+		return score;
+	}
 }
