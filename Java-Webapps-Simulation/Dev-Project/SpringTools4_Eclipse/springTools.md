@@ -47,7 +47,7 @@ Lesson learned:
     
     b. Rest is not CRUD, [**read more here**](/Additional-Notes/RestAPI&CRUD.md).
 
-    c. There are 8 commonly used HTTP methods, [**read more here**](/Additional-Notes/HTTP_Methods.md).
+    c. There are **8 commonly used HTTP methods** and also the **concept of idempotent and non idempotent**, [**read more here**](/Additional-Notes/HTTP_Methods.md).
 
     d. Progress as follows
 
@@ -70,4 +70,7 @@ Lesson learned:
 
     ![6](/image-files/sts4_progress-6.png)
     <br><b>@DeleteMapping</b> will erase the entire data on the server and can be restored back using <b>@PostMapping</b></br>
+
+    ![7](/image-files/sts4_progress-7.png)
+    <br>Creating a new folder for a html file in order to make rock paper scissor game </br>
     </center>
