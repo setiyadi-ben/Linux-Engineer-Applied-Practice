@@ -4,6 +4,7 @@
 package com.bennyjrx.rps;
 
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -116,10 +117,18 @@ public class ScoreController {
 		return score;
 	}
 	
-//	Completely replace the data from the server using @PutMapping
+//	Completely replace the data from the server using @PutMapping and @RequestBody is used in order to be able to send raw data especially in JSON format
 	@PutMapping("/score")
 	public Score replaceScore(@RequestBody Score newScore) {
 		score = newScore;
 		return score;
 	}
+	
+// Completely remove data from the server
+	@DeleteMapping("/score")
+	public void deleteScore() {
+		score = null;
+	}
+	
+	
 }
