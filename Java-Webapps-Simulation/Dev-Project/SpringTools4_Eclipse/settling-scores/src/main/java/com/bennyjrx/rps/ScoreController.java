@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -111,6 +113,13 @@ public class ScoreController {
 //	trying to make the value of @RequestParam different, will it make a conflict?
 	public Score updateTies(@RequestParam(name="new-value1")int newValue1) {
 		score.ties = newValue1;
+		return score;
+	}
+	
+//	Completely replace the data from the server using @PutMapping
+	@PutMapping("/score")
+	public Score replaceScore(@RequestBody Score newScore) {
+		score = newScore;
 		return score;
 	}
 }

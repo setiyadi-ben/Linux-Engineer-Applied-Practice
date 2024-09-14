@@ -61,5 +61,10 @@ Lesson learned:
 
     ![3](/image-files/sts4_progress-3.png)
     <br><b>@PatchMapping & RequestParam</b> to able to perform query request<br>
+
+    ![4](/image-files/sts4_progress-4.png)
+    <br><b>@PutMapping</b> is used to completely replace the resource from the server, while <b>@RequestBody</b> is used to send raw data especially using JSON format</br>
     
+    ![5](/image-files/sts4_progress-5.png)
+    <br>Verify the new data from the server using <b>GET</b> method.<br>
     </center>
