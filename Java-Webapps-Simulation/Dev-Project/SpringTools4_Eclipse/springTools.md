@@ -73,4 +73,6 @@ Lesson learned:
 
     ![7](/image-files/sts4_progress-7.png)
     <br>Creating a new folder for a html file in order to make rock paper scissor game </br>
+
+    ![8](/image-files/sts4_progress-8.png)
     </center>
