@@ -1,10 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Rock Paper Scissor App!</title>
+    <!-- Specifies the character encoding and the document's title -->
+    <meta charset="UTF-8">  <!-- Defines character encoding (UTF-8) for correct text display -->
+    <title>Rock Paper Scissor App!</title>  <!-- Title of the web page displayed in the browser tab -->
 </head>
-<body>
-    <!-- Content goes here -->
+<!-- The body contains all visible content on the page -->
+<br>  <!-- Creates a line break (though not needed here) -->
+    <!-- Content starts -->
+    Which one will be? <br>  <!-- Question prompting the user to make a choice, followed by a line break -->
+    
+    <!-- Three clickable links (rock, paper, scissor) with JavaScript functions called on click -->
+    <a href="#" onclick="playRoshambo('rock')">rock</a> &nbsp; &nbsp;  <!-- Calls the function with 'rock' as argument -->
+    <a href="#" onclick="playRoshambo('paper')">paper</a> &nbsp; &nbsp; <!-- Calls the function with 'paper' as argument -->
+    <a href="#" onclick="playRoshambo('scissor')">scissor</a> &nbsp; &nbsp; <!-- Calls the function with 'scissor' as argument -->
+
+<!-- An area to display results dynamically using JavaScript -->
+<i><div id="results"></div></i> <!-- The div will be updated with the result (italic is unnecessary here) -->
+
+<!-- Areas where win, tie, and loss counts will be displayed dynamically -->
+<span id="wins"></span>  <!-- Placeholder for the number of wins -->
+<span id="ties"></span>  <!-- Placeholder for the number of ties -->
+<span id="losses"></span>  <!-- Placeholder for the number of losses -->
 </body>
+
+<script>
+    // Define the playRoshambo function which will handle the game logic
+    playRoshambo = async function(clientGesture) {
+        // Default values for result and URL (used for tracking wins)
+        let url = "http://localhost:8080/score/wins";  // API endpoint for "win" score
+        let result = "win";  // Default result as "win"
+        
+        // Check if the user chose 'rock' and adjust the result and URL accordingly
+        if (clientGesture == 'rock') {
+            result = "tie";  // Change result to "tie"
+            url = "http://localhost:8080/score/ties";  // Change URL to the "ties" endpoint
+        }
+        
+        // Check if the user chose 'scissor' (misspelled, should be 'scissors') and adjust result/URL
+        if (clientGesture == 'scissor') {
+            result = "loss";  // Change result to "loss"
+            url = "http://localhost:8080/score/losses";  // Change URL to the "losses" endpoint
+        }
+
+        try {
+            // Make an asynchronous POST request to the server
+            const response = await fetch(url, {method: "POST"});
+            const theScore = await response.json();  // Get the response in JSON format
+            
+            // Update the HTML content with the scores (wins, ties, losses) fetched from the server
+            document.getElementById('wins').innerHTML = "<b> Wins: </b> " + theScore.wins;
+            document.getElementById('ties').innerHTML = "<b> Ties: </b> " + theScore.ties;
+            document.getElementById('losses').innerHTML = "<b> Losses: </b> " + theScore.losses;
+
+            // Display the result of the user's choice (win, tie, or loss)
+            document.getElementById('results').innerHTML = "The result was a: " + result;
+        } catch(error) {
+            console.log(error.message);  // Log any errors that occur during the fetch request
+        }
+    }
+</script>
 </html>
