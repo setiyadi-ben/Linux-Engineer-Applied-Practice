@@ -1,7 +1,8 @@
 
 # Linux Expertise Coverage
 ## [**back to Linux-Engineer-Applied-Practice**](../README.md)
-### [**back to Table of Contents**](../README.md)
+### [**back to Table of Contents**](/Additional-Notes/Table-of-Contents.md)
+
 
 This document provides an overview of independent fields that fall under the umbrella of Linux expertise. It covers common skills, tools, and roles that are typically associated with each field based on real-world job descriptions.
 

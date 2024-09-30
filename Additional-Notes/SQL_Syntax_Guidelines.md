@@ -1,7 +1,8 @@
 
 # SQL Syntax Guidelines
 ## [**back to Linux-Engineer-Applied-Practice**](../README.md)
-### [**back to Table of Contents**](../README.md)
+### [**back to Table of Contents**](/Additional-Notes/Table-of-Contents.md)
+
 
 ## 1. Backticks (`` ` ``)
 

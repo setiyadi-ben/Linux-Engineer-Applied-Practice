@@ -1,6 +1,6 @@
 # Preparing the Environment for Coding in Java
 ## [**back to Linux-Engineer-Applied-Practice**](../README.md)
-### [**back to Table of Contents**](../README.md)
+### [**back to Table of Contents**](/Additional-Notes/Table-of-Contents.md)
 
 ## Basic Structure of a Java Program
 
