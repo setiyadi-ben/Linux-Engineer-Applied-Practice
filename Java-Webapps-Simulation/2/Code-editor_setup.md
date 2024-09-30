@@ -1,5 +1,6 @@
 # Choosing Code Editor and Skeleton Project for Java
-### [**back to Table-of-Contents**](../Table-of-Contents.md)
+## [**back to Linux-Engineer-Applied-Practice**](/README.md)
+### [**back to Java Procedure**](/Java-Webapps-Simulation/Java-Procedure.md)
 
 ## Skeleton Project 
 In summary, a skeleton project, especially in the context of Spring Boot and Maven Archetypes, is a ready-to-use project template that helps you kickstart your application development with a predefined structure and configuration, ensuring consistency and saving time in the setup phase.

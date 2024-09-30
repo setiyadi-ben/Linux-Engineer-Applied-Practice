@@ -1,7 +1,7 @@
-# Table of Contents
+# Step by step Java Procedure for Web App Development
 ## [**back to Linux-Engineer-Applied-Practice**](../README.md)
 
-### [**0. Mandatory! Read "Use cases knowledge" first** ](./readme.md)
+### [**0. **MANDATORY!** Read "Use cases knowledge" first** ](./readme.md)
 
 ### [**1. Installing Apache Tomcat Server and Apache HTTP Server on Master Server** ](./1/Installing-ApacheTomcat_and_ApacheHTTP.md)
 

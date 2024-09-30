@@ -1,5 +1,6 @@
 # Installing Java SDK or OpenJDK and Apache Maven on Windows.
-### [**back to Table-of-Contents**](../Table-of-Contents.md)
+## [**back to Linux-Engineer-Applied-Practice**](/README.md)
+### [**back to Java Procedure**](/Java-Webapps-Simulation/Java-Procedure.md)
 
 **Note:** If you have another OS besides Windows, search for an alternative that matches your system.
 
