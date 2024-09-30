@@ -21,4 +21,4 @@ Currently, **my learning path are starting from Database Administration** to und
 #### [**1. Database Replication Simulation (completed | waiting for revisions)**](/Database-Replication-Simulation/readme.md)
 
 ## Software Development and Scripting
-#### [**1. Java-Webapps-Simulation (in-progress, still learning | ~~REST API~~,)**](/Java-Webapps-Simulation/Table-of-Contents.md)
+#### [**1. Java-Webapps-Simulation (in-progress, still learning | ~~REST API~~,)**](/Java-Webapps-Simulation/Java-Procedure.md)
