@@ -19,7 +19,9 @@
 	@Transient: Indicates that a field should not be stored in the database.
   */
  import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
 
+ @Table(name = "TASK")
 public class Task {
 	
 	@Id

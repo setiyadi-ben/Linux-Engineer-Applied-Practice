@@ -2,13 +2,20 @@ package com.bennyjrx.spring.data;
 
 import java.util.List;
 
-//Uning CRUD Repository
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+//Using CRUD Repository
+@Component
 public class MagicalTaskDAO implements TaskDAO {
+	
+	@Autowired
+	TaskRepository taskRepository;
 
 	@Override
 	public void create(Task task) {
 		// TODO Auto-generated method stub
-
+		taskRepository.save(task);
 	}
 
 	@Override
