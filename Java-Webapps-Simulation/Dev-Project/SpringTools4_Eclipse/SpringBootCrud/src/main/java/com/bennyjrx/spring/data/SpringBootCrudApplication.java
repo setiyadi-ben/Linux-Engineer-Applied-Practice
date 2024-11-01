@@ -12,30 +12,29 @@ import org.springframework.stereotype.Component;
 @Component
 public class SpringBootCrudApplication implements CommandLineRunner {
 	@Autowired
-//	HonestTaskDAO taskDAO;
-	MagicalTaskDAO taskDAO;
+//	Select which type to run, is it jdbcTemplate or TaskRepository
+	HonestTaskDAO taskDAO;
+//	MagicalTaskDAO taskDAO;
 
 	public static void main(String[] args) {
 		SpringApplication.run(SpringBootCrudApplication.class, args);
 	}
 	
-//	@Override
-//	public void run(String... args) throws Exception {
-//		Task task = new Task("Make my bed.", false);
-//		taskDAO.create(task);
-//		System.out.println("Created!");
-//	}
+//	Used in Delete Operation
 	@Override
 	public void run(String... args) throws Exception {
 //		Creating records inside mysql using object on Task.java, 
 //		MagicalTaskDAO.java and TaskDAO.java
-		Task task = new Task("Do meal prep.", false);
+		Task task = new Task("learn Mojo!!!.", false);
 		taskDAO.create(task);
 //		Update the records inside mysql using object on Task.java,
 //		MagicalTaskDAO.java and TaskDAO.java
 //		Target the primary key (Id) on mysql to change the data
-		Task updatedTask = new Task(4, "Do meal prep.", true);
+		Task updatedTask = new Task(4, "Learn Jakarta EE.", true);
 		taskDAO.update(updatedTask);
+//		Delete task
+		Task task2d = new Task(16);
+		taskDAO.delete(task2d);
 //		Read the data inside mysql using object on Task.java,
 //		Target the primary key (Id) on mysql to change the data
 		List<Task> taskList = taskDAO.retrieveALL();
@@ -47,5 +46,37 @@ public class SpringBootCrudApplication implements CommandLineRunner {
 //		Show that the procedure was done
 		System.out.println("Done!!!");
 	}
+
+	
+	
+	
+//	@Override
+//	public void run(String... args) throws Exception {
+//		Task task = new Task("Make my bed.", false);
+//		taskDAO.create(task);
+//		System.out.println("Created!");
+//	}
+//	@Override
+//	public void run(String... args) throws Exception {
+////		Creating records inside mysql using object on Task.java, 
+////		MagicalTaskDAO.java and TaskDAO.java
+//		Task task = new Task("Do meal prep.", false);
+//		taskDAO.create(task);
+////		Update the records inside mysql using object on Task.java,
+////		MagicalTaskDAO.java and TaskDAO.java
+////		Target the primary key (Id) on mysql to change the data
+//		Task updatedTask = new Task(4, "Do meal prep.", true);
+//		taskDAO.update(updatedTask);
+////		Read the data inside mysql using object on Task.java,
+////		Target the primary key (Id) on mysql to change the data
+//		List<Task> taskList = taskDAO.retrieveALL();
+//		for (Task t : taskList) {
+////			Show the data in console
+//			System.out.println(t);
+//		}
+//		
+////		Show that the procedure was done
+//		System.out.println("Done!!!");
+//	}
 
 }
