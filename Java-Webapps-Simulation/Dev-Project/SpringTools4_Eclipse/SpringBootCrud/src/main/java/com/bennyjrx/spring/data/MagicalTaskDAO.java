@@ -16,6 +16,10 @@ public class MagicalTaskDAO implements TaskDAO {
 	@Override
 	public void create(Task task) {
 		// TODO Auto-generated method stub
+		/*
+		 * The `TaskRepository` has a `delete` that returns a group that will
+		 * be able to delete the record inside the mysql database
+		 */
 		taskRepository.save(task);
 	}
 
@@ -54,6 +58,11 @@ public class MagicalTaskDAO implements TaskDAO {
 	@Override
 	public void delete(Task task) {
 		// TODO Auto-generated method stub
+		/*
+		 * The `TaskRepository` has a `delete` that returns a group that will
+		 * be able to delete the record inside the mysql database
+		 */
+		taskRepository.delete(task);
 
 	}
 

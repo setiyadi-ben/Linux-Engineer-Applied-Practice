@@ -37,14 +37,14 @@ public class HonestTaskDAO implements TaskDAO {
 		 */
 		var bprm = new BeanPropertyRowMapper<Task>(Task.class);
 		List <Task> taskList = jdbcTemplate.query(sql,  bprm);
-		return null;
+		return taskList;
 	}
 
 	@Override
 	public void update(Task task) {
 		// TODO Auto-generated method stub
 		// Same as taskRepository.save(task); but using jdbcTemplate
-		var sql = "UPDATE TASK SET name =?, completed =?, WHERE id =?";
+		var sql = "UPDATE TASK SET name =?, completed =? WHERE id =?";
 		jdbcTemplate.update(sql, task.name, task.completed, task.id);
 
 	}
@@ -52,6 +52,11 @@ public class HonestTaskDAO implements TaskDAO {
 	@Override
 	public void delete(Task task) {
 		// TODO Auto-generated method stub
+		/*
+		 * Delete database records by finding the match primary key (id)
+		 */
+		var sql = "DELETE FROM TASK WHERE id =?";
+		jdbcTemplate.update(sql, task.id);
 
 	}
 
