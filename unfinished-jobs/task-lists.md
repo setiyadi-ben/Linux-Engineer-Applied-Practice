@@ -1,3 +1,47 @@
+# Java Spring Boot Web Application Development Flow
+
+1. **Multiparadigm Programming**  
+   ↓
+2. **Java Basics**  
+   ↓
+3. **MVC Architecture**  
+   ↓
+4. **Spring Basics**  
+   ↓
+5. **Spring Boot Intro**  
+   ↓
+6. **Setup Spring Tools 4**  
+   ↓
+7. **Build RESTful APIs**  
+   ↓
+8. **Database Models & Repositories**  
+   ↓
+9. **CRUD Operations**  
+   ↓
+10. **Database Connection**  
+   ↓
+11. **Services**  
+   ↓
+12. **Testing**  
+   ↓
+13. **Debugging**  
+   ↓
+14. **Security**  
+   ↓
+15. **Packaging**  
+   ↓
+16. **Deployment**  
+
+
+
+
+
+
+
+
+
+
+
 **created 02:55 AM, Friday 19 July, 2024**
 # In Mind:
 
@@ -45,3 +89,4 @@
 <li><s> Simulating MySQL dump for export & import database data in ".csv" extension
 <li> Simulating MySQL dump for export & import database data in ".json" extension
 </li></left>
+
