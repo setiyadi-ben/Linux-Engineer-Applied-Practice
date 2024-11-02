@@ -4,11 +4,11 @@
 ## Use cases knowledge
 (Hover the mouse to read below)
 
-<span style="display: inline-block; cursor: pointer;">
-  <span style="visibility: hidden;" onmouseover="this.style.visibility='visible';" onmouseout="this.style.visibility='hidden';">
+<p><span style="display: inline-block; cursor: pointer;">
+  <span style="visibility: hidden;" onmouseover="this.style.visibility='visible';" onmouseout="this.style.visibility='hidden'">
     Hover to reveal this text!
   </span>
-</span>
+</span></p>
 
 <justify>
 Database replication is a crucial technique in the IT world that enables data duplication from one database (master) to another (slave). This brings many benefits to various applications and businesses, especially in improving data performance and availability. Here are some common use cases for database replication:
