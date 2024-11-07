@@ -34,7 +34,8 @@ Disaster recovery solutions: **Database replication in different locations enabl
 **4. Data Analytics and Reporting:**
 
 Distributed data warehouses: Database replication allows data from various sources to be centralized in one location for easier analysis and reporting.
-Real-time analytics: **Database replication enables data to be transmitted and analyzed in real-time across multiple locations for faster decision-making.**</p>
+Real-time analytics: **Database replication enables data to be transmitted and analyzed in real-time across multiple locations for faster decision-making.**
+</p>
 
 ## Tools & materials
 
@@ -50,43 +51,40 @@ Real-time analytics: **Database replication enables data to be transmitted and a
 
 <p align="justify">
 I have make freedom from selecting those tools and materials I have provided above. So, I'm will straight to the things that are important below and I'm assuming you have understand the basics setup like installation process.
-</p>
 
-<left>
 1. Make sure you have installed the Linux OS with database inside the virtualization software.
 
 <a href="https://github.com/setiyadi-ben/Linux-Engineer-Applied-Practice/blob/main/Database-Replication-Simulation/terminal-command.md#01"><b>Commands are putting up here. If not loaded please refresh the browser.</b></a>
-</left>
-<p align="center">
+</p>
+
+<p align ="center">
 
 ![Image when installation is successful](/image-files/installation-done.png)
 ![Image when mysql installation is successful](/image-files/installation-mysql-done.png)
-<!-- </center> -->
+</p>
 
-<left>
+<p align="justify">
 2. Create new user and also grant the permissions.
-</left>
 
 <a href="https://github.com/setiyadi-ben/Linux-Engineer-Applied-Practice/blob/main/Database-Replication-Simulation/terminal-command.md#02"><b>Commands are putting up here. If not loaded please refresh the browser.</b></a>
-<!-- <center> -->
+</p>
+<p align ="center">
 
 ![Image when mysql installation is successful](/image-files/creating-auth-user-pass.png)
-<!-- </center> -->
-
-<left>
+</p>
+<p align="justify">
 3. Install phpMyAdmin <b>(Optional if you want to skip point B)</b> to get easy access creating a database table for a use of master database that you can use phpmyadmin for GUI based or you just write syntax below inside myql terminal.
-</left>
 
 <a href="https://github.com/setiyadi-ben/Linux-Engineer-Applied-Practice/blob/main/Database-Replication-Simulation/terminal-command.md#03"><b>Commands are putting up here. If not loaded please refresh the browser.</b></a>
-<!-- <center> -->
-
+</p>
+<p align ="center">
 ![Image when phpMyAdmin installation is successful](/image-files/installation-phpmyadmin-done.png)
 ![image creating new mysqldb](/image-files/creating-mysqldb-phpmyadmin-1.png)
 ![Image creating mysqltable](/image-files/creating-mysqltable-phpmyadmin-1.png)
-<!-- </center> -->
+</p>
 
 <left>
-4. For an example in step 3 I'm creating the database with a name <b>"id-lcm-prd1"</b> and also database table named <b>"penjualan_ikan"</b>. Why am I choosing that idea? I was thinking that it was the easiest example for anyone to understand. To give more context, you can see where is it comes from.
+1. For an example in step 3 I'm creating the database with a name <b>"id-lcm-prd1"</b> and also database table named <b>"penjualan_ikan"</b>. Why am I choosing that idea? I was thinking that it was the easiest example for anyone to understand. To give more context, you can see where is it comes from.
 </left>
 <!-- <center> -->
 
