@@ -3,15 +3,18 @@
 
 ## In-Summary, what will we do?
 
-<p align="justify">The repository’s guide details a step-by-step setup for simulating database replication on Linux, focusing on MySQL. It covers configuring a master and a slave server for replication, preparing the environment, establishing connections, and synchronizing data to ensure redundancy. Key checkpoints include:
+<p align="justify">
+The repository’s guide details a step-by-step setup for simulating database replication on Linux, focusing on MySQL. It covers configuring a master and a slave server for replication, preparing the environment, establishing connections, and synchronizing data to ensure redundancy. Key checkpoints include:
+</p>
 <b>
-<br>1. Environment and server setup.
-<br>2. Configuring MySQL on the master.
-<br>3. Setting up replication permissions.
-<br>4. Configuring MySQL on the slave.
-<br>5. Testing replication for data consistency.
+1. Environment and server setup.<br>
+2. Configuring MySQL on the master.<br>
+3. Setting up replication permissions.<br>
+4. Configuring MySQL on the slave.<br>
+5. Testing replication for data consistency.<br>
 </b>
-<br>
+</br>
+<p align="justify">
 This is my first work when creating Linux-Enginner-Applied-Practice repository, and this is one way typed gateway to unlock or access the other simulation inside this repository. You can skip when you have been able to set-up the server yourself.</p>
 
 ## Use cases knowledge
@@ -57,73 +60,62 @@ I have make freedom from selecting those tools and materials I have provided abo
 1. Make sure you have installed the Linux OS with database inside the virtualization software.
 <a href="https://github.com/setiyadi-ben/Linux-Engineer-Applied-Practice/blob/main/Database-Replication-Simulation/terminal-command.md#01"><b>Commands are putting up here. If not loaded please refresh the browser.</b></a>
 </p>
-
+<!-- USING HTML TAG TO CENTER IMAGE, BECAUSE IN MID 2024 GITHUB DISABLE ALIGNMENT FOR IMAGE -->
+<p align="center"><img src="/image-files/installation-done.png"></p>
+<!-- ![Image when installation is successful](/image-files/installation-done.png) -->
 <p align="center"><img src="/image-files/installation-mysql-done.png"></p>
-
-![Image when installation is successful](/image-files/installation-done.png)
-
-![Image when mysql installation is successful](/image-files/installation-mysql-done.png)
-
+<!-- ![Image when mysql installation is successful](/image-files/installation-mysql-done.png) -->
 
 <p align="justify">
 2. Create new user and also grant the permissions.
-
 <a href="https://github.com/setiyadi-ben/Linux-Engineer-Applied-Practice/blob/main/Database-Replication-Simulation/terminal-command.md#02"><b>Commands are putting up here. If not loaded please refresh the browser.</b></a>
 </p>
-<p align ="center">
+<p align="center"><img src="/image-files/creating-auth-user-pass.png"></p>
+<!-- ![Image when mysql installation is successful](/image-files/creating-auth-user-pass.png) -->
 
-![Image when mysql installation is successful](/image-files/creating-auth-user-pass.png)
-</p>
 <p align="justify">
 3. Install phpMyAdmin <b>(Optional if you want to skip point B)</b> to get easy access creating a database table for a use of master database that you can use phpmyadmin for GUI based or you just write syntax below inside myql terminal.
-
 <a href="https://github.com/setiyadi-ben/Linux-Engineer-Applied-Practice/blob/main/Database-Replication-Simulation/terminal-command.md#03"><b>Commands are putting up here. If not loaded please refresh the browser.</b></a>
 </p>
-<p align ="center">
-![Image when phpMyAdmin installation is successful](/image-files/installation-phpmyadmin-done.png)
-![image creating new mysqldb](/image-files/creating-mysqldb-phpmyadmin-1.png)
-![Image creating mysqltable](/image-files/creating-mysqltable-phpmyadmin-1.png)
+<p align="center"><img src="/image-files/installation-phpmyadmin-done.png"></p>
+<!-- ![Image when phpMyAdmin installation is successful](/image-files/installation-phpmyadmin-done.png) -->
+<p align="center"><img src="/image-files/creating-mysqldb-phpmyadmin-1.png"></p>
+<!-- ![image creating new mysqldb](/image-files/creating-mysqldb-phpmyadmin-1.png) -->
+<p align="center"><img src="/image-files/creating-mysqltable-phpmyadmin-1.png"></p>
+<!-- ![Image creating mysqltable](/image-files/creating-mysqltable-phpmyadmin-1.png) -->
+
+<p align="justify">
+4. For an example in step 3 I'm creating the database with a name <b>"id-lcm-prd1"</b> and also database table named <b>"penjualan_ikan"</b>. Why am I choosing that idea? I was thinking that it was the easiest example for anyone to understand. To give more context, you can see where is it comes from.
+</p>
+<p align="center"><img src="/image-files/table-references-spreadsheet.png"></p>
+<!-- ![Image of reference table for mysql table](/image-files/table-references-spreadsheet.png) -->
+
+<p align="justify">
+5. When you have successfully creating database table, you will be able to fill those columns inside phpMyAdmin web. This is my configuration for my table below.
 </p>
 
-<left>
-1. For an example in step 3 I'm creating the database with a name <b>"id-lcm-prd1"</b> and also database table named <b>"penjualan_ikan"</b>. Why am I choosing that idea? I was thinking that it was the easiest example for anyone to understand. To give more context, you can see where is it comes from.
-</left>
-<!-- <center> -->
-
-![Image of reference table for mysql table](/image-files/table-references-spreadsheet.png)
-<!-- </center> -->
-
-<left>
-5. When you have successfully creating database table, you will be able to fill those columns inside phpMyAdmin web. This is my configuration for my table below.
-</left>
-
 [**For more info, you can learn more about mysql data types.**](https://www.w3schools.com/mysql/mysql_datatypes.asp)
-
-<!-- <center> -->
-
-![Image of filling the column parameters inside database table](/image-files/creating-mysqltable-phpmyadmin-2.png)
-<!-- </center> -->
-<left>
+<p align="center"><img src="/image-files/creating-mysqltable-phpmyadmin-2.png"></p>
+<!-- ![Image of filling the column parameters inside database table](/image-files/creating-mysqltable-phpmyadmin-2.png) -->
+<p align="justify">
 In preview button on the bottom left, you can use that syntax output if you want to speed up your process creating a database table when using a terminal.
 
 [**Also, here if you not understand about those column parameters.**](https://world.siteground.com/tutorials/phpmyadmin/create-populate-tables/)
-</left>
+</p>
 
-<left>
+<p align="justify">
 6. If you manage to have into this steps. Congratulation! Your database was successfully created and would look like something like below.
-</left>
-<!-- <center> -->
+</p>
+<p align="center"><img src="/image-files/creating-mysqltable-phpmyadmin-3.png"></p>
+<!-- ![Image When Creating mysql table is done](/image-files/creating-mysqltable-phpmyadmin-3.png) -->
 
-![Image When Creating mysql table is done](/image-files/creating-mysqltable-phpmyadmin-3.png)
-
-<!-- </center> -->
-
-<left>
+<p align="justify">
 7. Some of you might be wanted to try creating database and database table using MySQL query language. So, here it is I'm also provided below the second database inside terminal commands.
-
 <a href="https://github.com/setiyadi-ben/Linux-Engineer-Applied-Practice/blob/main/Database-Replication-Simulation/terminal-command.md#07"><b>Commands are putting up here. If not loaded please refresh the browser.</b></a>
+
 <br>
 <!-- <center> -->
+
 ![Image of creating database table using MySQL query](/image-files/creating-mysqldb-and_table-1.png)
 </br>
 <!-- </center> -->
