@@ -4,37 +4,39 @@
 ## In-Summary, what will we do?
 
 <p align="justify">The repository’s guide details a step-by-step setup for simulating database replication on Linux, focusing on MySQL. It covers configuring a master and a slave server for replication, preparing the environment, establishing connections, and synchronizing data to ensure redundancy. Key checkpoints include:
-
-1. Environment and server setup.
-2. Configuring MySQL on the master.
-3. Setting up replication permissions.
-4. Configuring MySQL on the slave.
-5. Testing replication for data consistency.
-
+<b>
+<br>1. Environment and server setup.
+<br>2. Configuring MySQL on the master.
+<br>3. Setting up replication permissions.
+<br>4. Configuring MySQL on the slave.
+<br>5. Testing replication for data consistency.
+</b>
+<br>
 This is my first work when creating Linux-Enginner-Applied-Practice repository, and this is one way typed gateway to unlock or access the other simulation inside this repository. You can skip when you have been able to set-up the server yourself.</p>
 
 ## Use cases knowledge
 
-<p align="justify">Database replication is a crucial technique in the IT world that enables data duplication from one database (master) to another (slave). This brings many benefits to various applications and businesses, especially in improving data performance and availability. Here are some common use cases for database replication:
-
-**1. Scalability and High Performance:**
-
+<p align="justify">
+Database replication is a crucial technique in the IT world that enables data duplication from one database (master) to another (slave). This brings many benefits to various applications and businesses, especially in improving data performance and availability. Here are some common use cases for database replication:
+</p>
+<b>1. Scalability and High Performance:</b>
+<p align="justify">
 High-traffic e-commerce websites: Database replication can distribute product, price, and inventory data to multiple servers, allowing the website to serve many users simultaneously without experiencing bottlenecks on a single central server.
-Mobile apps with a global user base: **Database replication allows data to be stored on servers in different regions, so users worldwide can access data with low latency.**
-
-**2. Disaster Recovery and Data Availability:**
-
-Financial and banking applications: Database replication ensures transaction data and customer balances remain available even if the central server fails. Replicated data on other servers can be used to continue operations without downtime. News websites or social media platforms: **Database replication ensures the website remains online and accessible to users even in the event of natural disasters or infrastructure disruptions in one location.**
-
-**3. Disaster Recovery and Backup Solutions:**
-
+Mobile apps with a global user base: <b>Database replication allows data to be stored on servers in different regions, so users worldwide can access data with low latency.</b>
+</p>
+<b>2. Disaster Recovery and Data Availability:</b>
+<p align="justify">
+Financial and banking applications: Database replication ensures transaction data and customer balances remain available even if the central server fails. Replicated data on other servers can be used to continue operations without downtime. News websites or social media platforms: <b>Database replication ensures the website remains online and accessible to users even in the event of natural disasters or infrastructure disruptions in one location.</b>
+</p>
+<b>3. Disaster Recovery and Backup Solutions:</b>
+<p align="justify">
 Point-in-Time (PIT) Replication: Allows restoring the database to a specific point in time in the past, useful for recovering data after cyberattacks or human errors.
-Disaster recovery solutions: **Database replication in different locations enables rapid system recovery after natural disasters or infrastructure failures in one location.**
-
-**4. Data Analytics and Reporting:**
-
+Disaster recovery solutions: <b>Database replication in different locations enables rapid system recovery after natural disasters or infrastructure failures in one location.</b>
+</p>
+<b>4. Data Analytics and Reporting:</b>
+<p align="justify">
 Distributed data warehouses: Database replication allows data from various sources to be centralized in one location for easier analysis and reporting.
-Real-time analytics: **Database replication enables data to be transmitted and analyzed in real-time across multiple locations for faster decision-making.**
+Real-time analytics: <b>Database replication enables data to be transmitted and analyzed in real-time across multiple locations for faster decision-making.</b>
 </p>
 
 ## Tools & materials
@@ -48,20 +50,20 @@ Real-time analytics: **Database replication enables data to be transmitted and a
 ## Simulation steps:
 
 <b>A. Installation and database setup </b>
-
 <p align="justify">
 I have make freedom from selecting those tools and materials I have provided above. So, I'm will straight to the things that are important below and I'm assuming you have understand the basics setup like installation process.
-
+</p>
+<p align="justify">
 1. Make sure you have installed the Linux OS with database inside the virtualization software.
-
 <a href="https://github.com/setiyadi-ben/Linux-Engineer-Applied-Practice/blob/main/Database-Replication-Simulation/terminal-command.md#01"><b>Commands are putting up here. If not loaded please refresh the browser.</b></a>
 </p>
 
-<p align ="center">
+<p align="center"><img src="/image-files/installation-mysql-done.png"></p>
 
 ![Image when installation is successful](/image-files/installation-done.png)
+
 ![Image when mysql installation is successful](/image-files/installation-mysql-done.png)
-</p>
+
 
 <p align="justify">
 2. Create new user and also grant the permissions.
