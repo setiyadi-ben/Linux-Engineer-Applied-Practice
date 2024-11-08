@@ -112,161 +112,142 @@ In preview button on the bottom left, you can use that syntax output if you want
 <p align="justify">
 7. Some of you might be wanted to try creating database and database table using MySQL query language. So, here it is I'm also provided below the second database inside terminal commands.
 <a href="https://github.com/setiyadi-ben/Linux-Engineer-Applied-Practice/blob/main/Database-Replication-Simulation/terminal-command.md#07"><b>Commands are putting up here. If not loaded please refresh the browser.</b></a>
+</p>
+<p align="center"><img src="/image-files/creating-mysqldb-and_table-1.png"></p>
+<!-- ![Image of creating database table using MySQL query](/image-files/creating-mysqldb-and_table-1.png) -->
 
-<br>
-<!-- <center> -->
-
-![Image of creating database table using MySQL query](/image-files/creating-mysqldb-and_table-1.png)
-</br>
-<!-- </center> -->
-</left>
-
-<b>B. Simulate sending MySQL query data using Python </b>
-
-<left>
+<p align="justify">
+<b>B. Simulate sending MySQL query data using Python </b><br><br>
 8. In this particular simulation, I'm going to make scenario like this:
 <br>- The database and the table we setup earlier is the server.
 <br>- We will access the database from outside the server using the remote ip
 that I have used already in ssh tunnel
 <br>- Perform sending a random dummy data in every 5 minutes inside MySQL
-database.</br>
+database.
+</p>
 
-</left>
-<br>
-<left>
+
+<p align="justify">
 9. To be able to perform the simulation, you need to have python installed in PATH, install mysql-connector, allowing the firewall inside the database server and having the syntax to be able to perform MySQL query. Below here you can pay attention to make sure you will not mess up with a bunch of errors.
-</br></left>
-
 <a href="https://github.com/setiyadi-ben/Linux-Engineer-Applied-Practice/blob/main/Database-Replication-Simulation/terminal-command.md#09"><b>Commands are putting up here. If not loaded please refresh the browser.</b></a>
-<!-- <center> -->
+</p>
 
-![Image When installing Python](/image-files/installation-python.png)
-![Image When MySQL Connector](/image-files/installation-python-2.png)
-![Image When MySQL Connector](/image-files/mysql-setup-firewall-3.png)
-![Image When Configure MySQL Firewall](/image-files/mysql-setup-firewall.png)
-<br>Don't forget to type <b>ctrl + x then y and enter to save</b></br>
+<p align="center"><img src="/image-files/installation-python.png"></p>
+<!-- ![Image When installing Python](/image-files/installation-python.png) -->
+<p align="center"><img src="/image-files/installation-python-2.png"></p>
+<!-- ![Image When MySQL Connector](/image-files/installation-python-2.png) -->
+<p align="center"><img src="/image-files/mysql-setup-firewall-3.png"></p>
+<!-- ![Image When MySQL Connector](/image-files/mysql-setup-firewall-3.png) -->
+<p align="center"><img src="/image-files/mysql-setup-firewall.png"></p>
+<!-- ![Image When Configure MySQL Firewall](/image-files/mysql-setup-firewall.png) -->
+<p align="center">Don't forget to type <b>ctrl + x then y and enter to save</b></p>
+<p align="center"><img src="/image-files/mysql-setup-firewall-2.png"></p>
+<!-- ![Image When Configure MySQL Firewall](/image-files/mysql-setup-firewall-2.png) -->
+<p align="center"><img src="/image-files/mysql-test-connections-py.png"></p>
+<!-- ![Image of MySQL Connection Test](/image-files/mysql-test-connections-py.png) -->
+<p align="center"><img src="/image-files/mysql-test-connections-py-2.png"></p>
+<!-- ![Image of MySQL Connection Test](/image-files/mysql-test-connections-py-2.png) -->
 
-![Image When Configure MySQL Firewall](/image-files/mysql-setup-firewall-2.png)
-![Image of MySQL Connection Test](/image-files/mysql-test-connections-py.png)
-![Image of MySQL Connection Test](/image-files/mysql-test-connections-py-2.png)
-<!-- </center> -->
-
-<left>
-10. Once you have passed the connection check by outputting similar to the image above. Now, I'm going to send the dummy data into MySQL Database using the modified python code to make it <b>as if simulating the consecutive data flow through the database id-lcm-prd1 from another network.</b>
-</left>
-
+<p align="justify">
+10.   Once you have passed the connection check by outputting similar to the image above. Now, I'm going to send the dummy data into MySQL Database using the modified python code to make it <b>as if simulating the consecutive data flow through the database id-lcm-prd1 from another network.</b>
 <a href="https://github.com/setiyadi-ben/Linux-Engineer-Applied-Practice/blob/main/Database-Replication-Simulation/terminal-command.md#09"><b>Commands are putting up here. If not loaded please refresh the browser.</b></a>
+</p>
+<p align="center"><img src="/image-files/mysql-insert-py-0.png"></p>
+<!-- ![Image of Python Code for MySQL Inser Query](/image-files/mysql-insert-py-0.png) -->
+<p align="center"><img src="/image-files/mysql-insert-py-1.png"></p>
+<!-- ![Image of Python compile prompt](/image-files/mysql-insert-py-1.png) -->
+<p align="center"><img src="/image-files/mysql-insert-py-2.png"></p>
+<!-- ![Image of MySQL Insert Query success inserting data](/image-files/mysql-insert-py-2.png) -->
 
-<!-- <center> -->
+<p align="justify">
+<b>C. Setup Database Replication (mysqldump) - For the use case of Scaling-up the current databases infrastructure </b></br><br>
+11.   Before get in into replication tasks, when the condition of the current databases has the data in it what you should do is to <b>dump the current data in your databases outside (export the data)</b> with supportable format such as: SQL, CSV, JSON, XML & etc.
+</p>
 
-![Image of Python Code for MySQL Inser Query](/image-files/mysql-insert-py-0.png)
-![Image of Python compile prompt](/image-files/mysql-insert-py-1.png)
-![Image of MySQL Insert Query success inserting data](/image-files/mysql-insert-py-2.png)
-<!-- </center> -->
+<p align="justify">
+12.   To simulate SQL dump or you can say export database, I have provided 2 methods using phpMyAdmin via web GUI and using SQL query syntax using in bash shell.
+</p>
+<p align="center"><b>Using phpMyAdmin</b></p>
+<p align="center"><img src="/image-files/mysql-dump-data-1_phpmyadmin.png"></p>
+<!-- ![Image of database dump using phpMyAdmin-1](/image-files/mysql-dump-data-1_phpmyadmin.png) -->
+<p align="center"><img src="/image-files/mysql-dump-data-2_phpmyadmin.png"></p>
+<!-- ![Image of database dump using phpMyAdmin-1](/image-files/mysql-dump-data-2_phpmyadmin.png) -->
 
-<br>
-
-<b>C. Setup Database Replication (mysqldump) - For the use case of Scaling-up the current databases infrastructure </b></br>
-
-<left>
-11. Before get in into replication tasks, when the condition of the current databases has the data in it what you should do is to <b>dump the current data in your databases outside (export the data)</b> with supportable format such as: SQL, CSV, JSON, XML & etc.
-</left><br></br>
-
-<left>
-12. To simulate SQL dump or you can say export database, I have provided 2 methods using phpMyAdmin via web GUI and using SQL query syntax using in bash shell.
-</left>
-
-<!-- <center> -->
-
-<b>Using phpMyAdmin</b>
-![Image of database dump using phpMyAdmin-1](/image-files/mysql-dump-data-1_phpmyadmin.png)
-![Image of database dump using phpMyAdmin-1](/image-files/mysql-dump-data-2_phpmyadmin.png)
-<!-- </center> -->
-
-<!-- <center> -->
-
-<b>Using Linux bash on Ubuntu Server</b>
+<p align="center"><b>Using Linux bash on Ubuntu Server</b>
 <a href="https://github.com/setiyadi-ben/Linux-Engineer-Applied-Practice/blob/main/Database-Replication-Simulation/terminal-command.md#12"><b>(Commands are putting up here).</b></a>
-
-![Image of database dump using SQL query syntax](/image-files/mysql-dump-data-3.png)
-<!-- </center> -->
-
-<left>
+</p>
+<p align="center"><img src="/image-files/mysql-dump-data-3.png"></p>
+<!-- ![Image of database dump using SQL query syntax](/image-files/mysql-dump-data-3.png) -->
+<p align="justify">
 From 2 example methods that I have provided above, <b>method 1 the sql dump file is stored in your personal computer and method 2 the sql file is stored inside the linux server you have configured into.</b>
-</left>
+</p>
 
-<br>
-<left>
-13. Next, perform database data cleansing by clearing the table inside the database using 2 methods phpMyAdmin via web GUI and using SQL query syntax in bash shell.
-</left></br>
+<p align="justify">
+13.  Next, perform database data cleansing by clearing the table inside the database using 2 methods phpMyAdmin via web GUI and using SQL query syntax in bash shell.
+</p>
+<p align="center"><b>Using phpMyAdmin</b></p>
+<p align="center"><img src="/image-files/mysql-dump-data-4.png"></p>
+<!-- ![Image of Drop Database via phpmyadmin](/image-files/mysql-dump-data-4.png) -->
+<p align="center"><img src="/image-files/mysql-dump-data-5.png"></p>
+<!-- ![Image of Drop Database via phpmyadminn Success](/image-files/mysql-dump-data-5.png) -->
 
-<!-- <center> -->
-
-<b>Using phpMyAdmin</b>
-![Image of Drop Database via phpmyadmin](/image-files/mysql-dump-data-4.png)
-![Image of Drop Database via phpmyadminn Success](/image-files/mysql-dump-data-5.png)
-
-<b>Using Linux bash on Ubuntu Server</b>
+<p align="center"><b>Using Linux bash on Ubuntu Server</b>
 <a href="https://github.com/setiyadi-ben/Linux-Engineer-Applied-Practice/blob/main/Database-Replication-Simulation/terminal-command.md#13"><b>(Commands are putting up here).</b></a>
+</p>
+<p align="center"><img src="/image-files/mysql-dump-data-6.png"></p>
+<!-- ![Image of Drop Database Table via SQL query](/image-files/mysql-dump-data-6.png) -->
+<p align="justify">
+Avoid dropping the database, because the mysql dump that just backed-up only work when the database are still availabe in the server. I'm also providing the error first in order to you understand the situation.
+</p>
+<p align="center"><img src="/image-files/mysql-dump-data-8.png"></p>
+<!-- ![Image of False Drop Database via phpmyadmin](/image-files/mysql-dump-data-8.png) -->
+<p align="center"><img src="/image-files/mysql-dump-data-9.png"></p>
+<!-- ![Image of False Drop Database via SQL query](/image-files/mysql-dump-data-9.png) -->
 
-![Image of Drop Database Table via SQL query](/image-files/mysql-dump-data-6.png)
-<!-- </center> -->
-<left>
-Avoid dropping the database because the mysql dump that just backed-up only work when the database are still availabe in the server. I'm also providing the error first in order to you understand the situation.
-</left>
-
-<!-- <center> -->
-
-![Image of False Drop Database via phpmyadmin](/image-files/mysql-dump-data-8.png)
-![Image of False Drop Database via SQL query](/image-files/mysql-dump-data-9.png)
-<!-- </center> -->
-
-<left>
-14. From here I'm going to set-up the replicas first. After that, continue to push the database data back into the master server and then checking the slave server to verify the database data is already inside.
-</left>
+<p align="justify">
+14.  From here I'm going to set-up the replicas first. After that, continue to push the database data back into the master server and then checking the slave server to verify the database data is already inside.
+</p>
 
 [**MySQL :How to Configure Mysql master slave replication in MYSQL database**](https://www.youtube.com/watch?v=6VfE3XKXpTs)
 
 <b>D. Setup Database Replication for a Master Server </b>
 
-<left>
+<p align="justify">
 15.  I'm going to start with typing ifconfig to print the master server host ip and changing some parameters in mysqld.cnf. In this step I'm keeping the bind-address to 0.0.0.0 because this is a simulation, when you are in real work you might be binding the address to a private ip in order to limit networks that has access into database.
-
 <a href="https://github.com/setiyadi-ben/Linux-Engineer-Applied-Practice/blob/main/Database-Replication-Simulation/terminal-command.md#15"><b>Commands are putting up here. If not loaded please refresh the browser.</b></a>
-<!-- <center> -->
+</p>
+<p align="center"><img src="/image-files/mysql-replica_set-up-1.png"></p>
+<!-- ![Image of ifconfig & mysqld.cnf](/image-files/mysql-replica_set-up-1.png) -->
+<p align="center"><img src="/image-files/mysqld.cnf_master-1.png"></p>
+<!-- ![Image of mysqld.cnf config](/image-files/mysqld.cnf_master-1.png) -->
+<p align="center">Don't forget to type <b>ctrl + x then y and enter to save</b></p>
 
-![Image of ifconfig & mysqld.cnf](/image-files/mysql-replica_set-up-1.png)
-![Image of mysqld.cnf config](/image-files/mysqld.cnf_master-1.png)
-<br>Don't forget to type <b>ctrl + x then y and enter to save</b></br>
-<!-- </center> -->
-</left>
+<p align="justify">
+16.  The next step is to create replica user for a way slave server gain access to the master server to able to perform the replica. You can also check if the user you have created is exist or not. Also check that users in slave server is it can be connected or not.
+</p>
+<p align="center"><img src="/image-files/mysql-replica_set-up-3.png"></p>
+<!-- ![image of creating user for slave server replica's](/image-files/mysql-replica_set-up-3.png) -->
+<p align="center"><img src="/image-files/mysql-replica_set-up-4.png"></p>
+<!-- ![Image of granting access to slave server replica's](/image-files/mysql-replica_set-up-4.png) -->
+<p align="center"><img src="/image-files/mysql-replica_set-up-5.png"></p>
+<!-- ![image of checking slave server connection](/image-files/mysql-replica_set-up-5.png) -->
 
-<left>
-16. The next step is to create replica user for a way slave server gain access to the master server to able to perform the replica. You can also check if the user you have created is exist or not. Also check that users in slave server is it can be connected or not.
-<!-- <center> -->
-
-![image of creating user for slave server replica's](/image-files/mysql-replica_set-up-3.png)
-![Image of granting access to slave server replica's](/image-files/mysql-replica_set-up-4.png)
-![image of checking slave server connection](/image-files/mysql-replica_set-up-5.png)
-<!-- </center> -->
-</left>
-
-<left>
-17. After the replica user has been successfully created, the next step is pinpoint the value of mysql master status to be used later.
-<!-- <center> -->
-
-![Image of mysql master status](/image-files/mysql-replica_set-up-2.png)
-<!-- </center> -->
-</left>
+<p align="justify">
+17.  After the replica user has been successfully created, the next step is pinpoint the value of mysql master status to be used later.
+</p>
+<p align="center"><img src="/image-files/mysql-replica_set-up-2.png"></p>
+<!-- ![Image of mysql master status](/image-files/mysql-replica_set-up-2.png) -->
 
 <b>E. Setup Database Replication for a Slave Server </b>
 
-<left>
-18. This step is similar to number 15, only change the server-id from 1 to 2.
-<!-- <center> -->
+<p align="justify">
+18.  This step is similar to number 15, only change the server-id from 1 to 2.
+</p>
 
 ![Image of ifconfig & mysqld.cnf](/image-files/mysql-replica_set-up-6.png)
+
 ![Image of mysqld.cnf config](/image-files/mysqld.cnf_slave-2.png)
+
 <br>Don't forget to type <b>ctrl + x then y and enter to save</b></br>
 <!-- </center> -->
 </left>
