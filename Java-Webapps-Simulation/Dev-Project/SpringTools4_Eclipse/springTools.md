@@ -10,29 +10,31 @@ Using Eclipse IDE with Spring Tools built-in has an **advantages compared to the
 
 ## Installation, Setup and Exercising the Demo Project
   
-For the installation steps, I'm referring to Mr. [**McKenzie's video on YouTube**](https://www.youtube.com/watch?v=U-6_gJoWYwM). As a beginner of "Educationist Documenter", I'm only change my directory installation file into .gitginore-files in this repository. The intention is to bypass the file being tracked by git and make the repository lighter on storage usage.
+For the installation steps, I'm referring to Mr. [**McKenzie's video on YouTube**](https://www.youtube.com/watch?v=U-6_gJoWYwM). For the installation only on Spring Tools 4, I'm changing my directory installation files into .gitginore-files in this repository. The intention is to bypass the file being tracked by git and make the repository lighter on storage usage.
 
-<center>
+<p align="center"><b>Extract and unzip "contents.zip", follow Mr. McKenzie instructional video</b></p>
+<p align="center"><img src="/image-files/spring-tools4-1.png"></p>
+<!-- ![Extracting the files](/image-files/spring-tools4-1.png) -->
 
-<b>Extract and unzip "contents.zip", follow Mr. McKenzie instructional video
-![Extracting the files](/image-files/spring-tools4-1.png)
+<p align="center"><b>Select your Workspace</b></p>
+<p align="center"><img src="/image-files/spring-tools4-2.png"></p>
+<!-- ![Select workspace](/image-files/spring-tools4-2.png)  -->
+ 
+<p align="center"><b>Filling the Project Metadata</b></p>
+<p align="center"><img src="/image-files/spring-tools4-3.png"></p>
+<!-- ![Project Metadata](/image-files/spring-tools4-3.png) -->
 
-Select your Workspace
-![Select workspace](/image-files/spring-tools4-2.png) 
-
-Filling the Project Metadata
-![Project Metadata](/image-files/spring-tools4-3.png)
-
-Selecting Dependencies
-![Dependencies](/image-files/spring-tools4-4.png)
+<p align="center"><b>Selecting Dependencies</b></p>
+<p align="center"><img src="/image-files/spring-tools4-4.png"></p>
+<!-- ![Dependencies](/image-files/spring-tools4-4.png) -->
 
 Continue your steps by following Mr. [**McKenzie's video on YouTube**](https://www.youtube.com/watch?v=U-6_gJoWYwM)</b>
-![Code](/image-files/spring-tools4-5.png)
+<p align="center"><img src="/image-files/spring-tools4-5.png"></p>
+<!-- ![Code](/image-files/spring-tools4-5.png) -->
+<p align="center"><img src="/image-files/spring-tools4-6.png"></p>
+<!-- ![results](/image-files/spring-tools4-6.png) -->
 
-![results](/image-files/spring-tools4-6.png)
-</center>
-
-if you can manage into this result, let's head over to the serious coding process.
+If you can manage into this result, let's head over to the serious coding process.
 
 ## Start Practice Coding in Java
 Like most of the elders said, in order to master something in your field you need to try it out by yourself. 
