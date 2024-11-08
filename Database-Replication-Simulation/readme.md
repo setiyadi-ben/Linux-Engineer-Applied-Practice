@@ -208,7 +208,7 @@ Avoid dropping the database, because the mysql dump that just backed-up only wor
 14.  From here I'm going to set-up the replicas first. After that, continue to push the database data back into the master server and then checking the slave server to verify the database data is already inside.
 </p>
 
-[**MySQL :How to Configure Mysql master slave replication in MYSQL database**](https://www.youtube.com/watch?v=6VfE3XKXpTs)
+[**MySQL: How to Configure MySQL Master Slave Replication in MySQL Database**](https://www.youtube.com/watch?v=6VfE3XKXpTs)
 
 <b>D. Setup Database Replication for a Master Server </b>
 
@@ -243,64 +243,49 @@ Avoid dropping the database, because the mysql dump that just backed-up only wor
 <p align="justify">
 18.  This step is similar to number 15, only change the server-id from 1 to 2.
 </p>
+<p align="center"><img src="/image-files/mysql-replica_set-up-6.png"></p>
+<!-- ![Image of ifconfig & mysqld.cnf](/image-files/mysql-replica_set-up-6.png) -->
+<p align="center"><img src="/image-files/mysqld.cnf_slave-2.png"></p>
+<!-- ![Image of mysqld.cnf config](/image-files/mysqld.cnf_slave-2.png) -->
+<p align="center">Don't forget to type <b>ctrl + x then y and enter to save</b></p>
 
-![Image of ifconfig & mysqld.cnf](/image-files/mysql-replica_set-up-6.png)
+<p align="justify">
+19.  From step number 18, after succesfully login as root user I'm going to configure the slave server for listening to master server in order to replicate every database data from there. Those value below are from previous steps that I have done already.
+</p>
+<p align="center"><img src="/image-files/mysql-replica_set-up-7.png"></p>
+<!-- ![Image of ](/image-files/mysql-replica_set-up-7.png) -->
 
-![Image of mysqld.cnf config](/image-files/mysqld.cnf_slave-2.png)
-
-<br>Don't forget to type <b>ctrl + x then y and enter to save</b></br>
-<!-- </center> -->
-</left>
-
-<left>
-19. From step number 18, after succesfully login as root user I'm going to configure the slave server for listening to master server in order to replicate every database data from there. Those value below are from previous steps that I have done already.
-<!-- <center> -->
-
-![Image of ](/image-files/mysql-replica_set-up-7.png)
-</center>
-</left>
-
-<left>
-20. To check if your configuration is rightly applied, type this prompt below to verify your configuration by checking the mysql slave status.
-<!-- <center> -->
-
-![Image of check slave status](/image-files/mysql-replica_set-up-8.png)
-<!-- </center> -->
-</left>
+<p align="justify">
+20.  To check if your configuration is rightly applied, type this prompt below to verify your configuration by checking the mysql slave status.
+</p>
+<p align="center"><img src="/image-files/mysql-replica_set-up-8.png"></p>
+<!-- ![Image of check slave status](/image-files/mysql-replica_set-up-8.png) -->
 
 <b>F. Restore Master Server Database Data to Test Replication on Slave Server</b>
 
-<left>
-21. In step 12, I have stored the database data inside /home/admintelecom. Now I'm gonna restore the database data back by importing this file using SQL syntax below.
-<!-- <center> -->
-
-![Image of restoring database data](/image-files/mysql-replica_restore-data-1.png)
-<!-- </center> -->
-</left>
-
-<left>
-22. To check if the data was inserted or not, simply login and navigate to check the database table data on master server.
-<!-- <center> -->
-
-![Image of Checking database table data](/image-files/mysql-replica_restore-data-2.png)
-<!-- </center> -->
-</left>
-
-<left>
-23. Technically, the database replication would sync the data asynchronously from the master source. To verify if the replication process is running correctly, you need to check the status on both master and slave server like this below. You can see that a match connection between master and slave server by just seeing Source_log_File and Read_Source_Log_Pos values.
-<!-- <center> -->
-
-![Image of replication check on master server](/image-files/mysql-replica_restore-data-3.png)
-![Image of replication check on slave server](/image-files/mysql-replica_restore-data-4.png)
-<!-- </center> -->
-</left>
-
-<left>
-24. If those value are the same, now you are already know the implementation of the database replication. You can set it up on beginning, or whenever you need to scaling-up your current infrastructure you can do with similar method like this.
-<!-- <center> -->
-
-![Image of restoring data](/image-files/mysql-replica_restore-data-5.png)
-<!-- </center> -->
-</left>
-
+<p align="justify">
+21.  In step 12, I have stored the database data inside /home/admintelecom. Now I'm gonna restore the database data back by importing this file using SQL syntax below.
 </p>
+<p align="center"><img src="/image-files/mysql-replica_restore-data-1.png"></p>
+<!-- ![Image of restoring database data](/image-files/mysql-replica_restore-data-1.png) -->
+
+<p align="justify">
+22.  To check if the data was inserted or not, simply login and navigate to check the database table data on master server.
+</p>
+<p align="center"><img src="/image-files/mysql-replica_restore-data-2.png"></p>
+<!-- ![Image of Checking database table data](/image-files/mysql-replica_restore-data-2.png) -->
+</p>
+
+<p align="justify">
+23.  Technically, the database replication would sync the data asynchronously from the master source. To verify if the replication process is running correctly, you need to check the status on both master and slave server like this below. You can see that a match connection between master and slave server by just seeing Source_log_File and Read_Source_Log_Pos values.
+</p>
+<p align="center"><img src="/image-files/mysql-replica_restore-data-3.png"></p>
+<!-- ![Image of replication check on master server](/image-files/mysql-replica_restore-data-3.png) -->
+<p align="center"><img src="/image-files/mysql-replica_restore-data-4.png"></p>
+<!-- ![Image of replication check on slave server](/image-files/mysql-replica_restore-data-4.png) -->
+
+<p align="justify">
+24.  If those value are the same, now you are already know the implementation of the database replication. You can set it up on beginning, or whenever you need to scaling-up your current infrastructure you can do with similar method like this.
+</p>
+<p align="center"><img src="/image-files/mysql-replica_restore-data-5.png"></p>
+<!-- ![Image of restoring data](/image-files/mysql-replica_restore-data-5.png) -->
