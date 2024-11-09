@@ -55,30 +55,29 @@ Lesson learned:
 
     d. Progress as follows
 
-    <center>
-    
-    ![1](/image-files/sts4_progress-1.png)
-    <br><b>@GetMapping</b> invocation and return the value in JSON format</br>
-
-    ![2](/image-files/sts4_progress-2.png)
-    <br><b>@PostMapping</b> increase the number of wins by one and return the user full score</br>
-
-    ![3](/image-files/sts4_progress-3.png)
-    <br><b>@PatchMapping & RequestParam</b> to able to perform query request<br>
-
-    ![4](/image-files/sts4_progress-4.png)
-    <br><b>@PutMapping</b> is used to completely replace the resource from the server, while <b>@RequestBody</b> is used in order to able to send raw data especially using JSON format</br>
-    
-    ![5](/image-files/sts4_progress-5.png)
-    <br>Verify the new data from the server using <b>GET</b> method.<br>
-
-    ![6](/image-files/sts4_progress-6.png)
-    <br><b>@DeleteMapping</b> will erase the entire data on the server and can be restored back using <b>@PostMapping</b></br>
-
-    ![7](/image-files/sts4_progress-7.png)
-    <br>Creating a new folder for a html file in order to make rock paper scissor game </br>
-
-    ![8](/image-files/sts4_progress-8.png)
-    </center>
+<p align="center"><img src="/image-files/sts4_progress-1.png"></p>
+    <!-- ![1](/image-files/sts4_progress-1.png) -->
+    <p align="center"><b>@GetMapping</b> invocation and return the value in JSON format</p>
+<p align="center"><img src="/image-files/sts4_progress-2.png"></p>
+    <!-- ![2](/image-files/sts4_progress-2.png) -->
+    <p align="center"><b>@PostMapping</b> increase the number of wins by one and return the user full score</p>
+<p align="center"><img src="/image-files/sts4_progress-3.png"></p>
+    <!-- ![3](/image-files/sts4_progress-3.png) -->
+    <p align="center"><b>@PatchMapping & RequestParam</b> to able to perform query request<br>
+<p align="center"><img src="/image-files/sts4_progress-4.png"></p>
+    <!-- ![4](/image-files/sts4_progress-4.png) -->
+    <p align="center"><b>@PutMapping</b> is used to completely replace the resource from the server, while <b>@RequestBody</b> is used in order to able to send raw data especially using JSON format</p>
+<p align="center"><img src="/image-files/sts4_progress-5.png"></p>    
+    <!-- ![5](/image-files/sts4_progress-5.png) -->
+    <p align="center">Verify the new data from the server using <b>GET</b> method.<br>
+<p align="center"><img src="/image-files/sts4_progress-6.png"></p>
+    <!-- ![6](/image-files/sts4_progress-6.png) -->
+    <p align="center"><b>@DeleteMapping</b> will erase the entire data on the server and can be restored back using <b>@PostMapping</b></p>
+<p align="center"><img src="/image-files/sts4_progress-7.png"></p>
+    <!-- ![7](/image-files/sts4_progress-7.png) -->
+   <p align="center">Creating a new folder for a html file in order to make rock paper scissor game </p>
+<p align="center"><img src="/image-files/sts4_progress-8.png"></p>
+    <!-- ![8](/image-files/sts4_progress-8.png) -->
+  
 
 ### 2. Crud Operations with Spring Data & Spring JDBC
