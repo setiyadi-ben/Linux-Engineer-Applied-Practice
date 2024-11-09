@@ -81,3 +81,26 @@ Lesson learned:
   
 
 ### 2. Crud Operations with Spring Data & Spring JDBC
+- **Source 1** [**YouTube Tutorial**](https://www.youtube.com/watch?v=oE3h-YNlqss&t=741s)
+Lesson learned:
+
+    a. Theory duration 0:30 until
+
+    b. CRUD concept
+
+    c.
+
+    d. Progress as follows
+
+<p align="Justify">
+<b>Main topic:</b> Creating a Persistance Layer for a To-Do Application. This kind of job can be achieved by using
+CRUD Operations using 2 ways, like: Spring Data (TaskRepository | MagicalTaskDAO.java) & Spring JDBC (Jdbctemplate | HonestTaskDAO.java).
+<br><b>Additional Notes:</b>
+<ol>
+<li>Creating a database called TODO and a table called Task (I'm using the same MySQL database that is used in 
+<a href="https://github.com/setiyadi-ben/Linux-Engineer-Applied-Practice/blob/main/Database-Replication-Simulation/readme.md">
+<b>Database Replication Simulation</b></a>).</li>
+<li>Inside the database table, a row has multiple columns inside such as: id (primary key & auto increment), name (varchar) and completed (boolean).</li>
+
+</ol>
+</p>
