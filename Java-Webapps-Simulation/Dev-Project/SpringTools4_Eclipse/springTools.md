@@ -84,23 +84,41 @@ Lesson learned:
 - **Source 1** [**YouTube Tutorial**](https://www.youtube.com/watch?v=oE3h-YNlqss&t=741s)
 Lesson learned:
 
-    a. Theory duration 0:30 until
+    a. Theory duration 0:30 until 01:30.
 
     b. CRUD concept
 
     c.
 
-    d. Progress as follows
+    d. Progress as follows (Timestamps to jump in: 2:37, 3:09, 4:29, 5:45 )
 
 <p align="Justify">
 <b>Main topic:</b> Creating a Persistance Layer for a To-Do Application. This kind of job can be achieved by using
 CRUD Operations using 2 ways, like: Spring Data (TaskRepository | MagicalTaskDAO.java) & Spring JDBC (Jdbctemplate | HonestTaskDAO.java).
 <br><b>Additional Notes:</b>
 <ol>
-<li>Creating a database called TODO and a table called Task (I'm using the same MySQL database that is used in 
+<li>Creating a database called TODO (while I'm using the existing database "id-lcm-prd1" that is used in previous simulation) and a table called Task (I'm using the same MySQL database that is used in 
 <a href="https://github.com/setiyadi-ben/Linux-Engineer-Applied-Practice/blob/main/Database-Replication-Simulation/readme.md">
 <b>Database Replication Simulation</b></a>).</li>
+<p align="center"><img src="/image-files/crud-db1.png"></p>
 <li>Inside the database table, a row has multiple columns inside such as: id (primary key & auto increment), name (varchar) and completed (boolean).</li>
 
+~~~sql
+CREATE TABLE `id-lcm-prd1`.`TASK` 
+(`id` INT NOT NULL AUTO_INCREMENT ,
+ `name` VARCHAR(45) NOT NULL ,
+  `completed` BOOLEAN NOT NULL ,
+   PRIMARY KEY (`id`)) ENGINE = InnoDB;
+~~~
+
+<p align="center"><img src="/image-files/crud-db2.png"></p>
+<li>Setup <b>application.properties</b> in order to make Java program gain access to the database.</li>
+<p align="center"><img src="/image-files/crud-db3.png"></p>
+
+<li>Create Java class called "Task.java", in order to declare the following variables below.</li>
+
+
+<!-- <li></li> -->
 </ol>
+
 </p>

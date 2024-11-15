@@ -21,10 +21,11 @@
  import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 
- @Table(name = "TASK")
+ @Table(name = "TASK") //Specify the table name with the database
 public class Task {
 	
 	@Id
+//	These are the variables that is used inside TASK table as an individual columns
 	int id;
 	String name;
 	boolean completed;
