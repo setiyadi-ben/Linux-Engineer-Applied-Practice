@@ -115,7 +115,76 @@ CREATE TABLE `id-lcm-prd1`.`TASK`
 <li>Setup <b>application.properties</b> in order to make Java program gain access to the database.</li>
 <p align="center"><img src="/image-files/crud-db3.png"></p>
 
-<li>Create Java class called "Task.java", in order to declare the following variables below.</li>
+<li>Create Java class called "Task.java", and here are the explanations that I've gathered so far.</li>
+<a href="/Java-Webapps-Simulation/Dev-Project/SpringTools4_Eclipse/SpringBootCrud/src/main/java/com/bennyjrx/spring/data/">file can be found here</a>
+
+## Use Cases of the Code
+- Represents tasks in a task management system.  
+- Maps Java objects (`Task`) to database records (rows in `TASK` table).  
+- Supports basic CRUD operations:  
+  - **Create**: Use the constructor without `id`.  
+  - **Read/Update**: Use getters and setters.  
+  - **Delete**: Use the constructor with `id`.
+
+## Key Concepts | TERMINOLOGIES THAT MATTERS
+
+### 1. Constructor
+A **constructor** is a special method used to initialize objects. It is called automatically when an object of the class is created.
+
+- **Default Constructor**: 
+  ~~~java
+  public Task() { } 
+  ~~~ 
+  
+  - Initializes the object without any arguments.
+
+- **Parameterized Constructor**:  
+  ~~~java
+  public Task(int id, String name, boolean completed) {
+    this.id = id;
+    this.name = name;
+    this.completed = completed;
+
+    /*
+    - The fields id, name, and completed are package-private (accessible within the same package but not outside it).
+    - These fields should be declared private to strictly follow the JavaBean conventions.
+    */
+    
+  }
+  ~~~
+  - Allows initializing the object with specific values.
+
+---
+
+### 2. JavaBean
+A **JavaBean** is a reusable class that follows specific conventions:  
+- **Encapsulate its fields (make them** `private`).
+  - Why Encapsulation Matters?
+   1. Protects the `internal state` of an object from `unintended changes`.
+   2. Allows validation or additional logic when setting/getting values.
+   ~~~java
+   // Example: Ensuring name is not null:
+    public void setName(String name) {
+        if (name == null || name.isEmpty()) {
+            throw new IllegalArgumentException("Name cannot be null or empty");
+        }
+        this.name = name;
+    }
+   ~~~
+- Provide **public getters and setters** to access the fields.
+- Include a **zero-argument constructor**.
+- Optionally, override methods like `toString`, `equals`, and `hashCode`.
+
+**Purpose**: Simplifies data sharing between layers of an application.
+
+---
+### 3. How Fields, Getters, and Setters Work Together
+
+1. `Fields` store the data.
+2. `Getters` allow reading the data in a controlled way.
+3. `Setters` allow modifying the data, often with validation.
+
+---
 
 
 <!-- <li></li> -->
