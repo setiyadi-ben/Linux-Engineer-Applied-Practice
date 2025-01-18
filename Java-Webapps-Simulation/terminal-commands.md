@@ -18,15 +18,17 @@ java -version
 **3. Downloading Tomcat from official website**
 ~~~bash
 cd /opt
-sudo wget https://dlcdn.apache.org/tomcat/tomcat-10/v10.1.26/bin/apache-tomcat-10.1.26.tar.gz
+sudo wget https://dlcdn.apache.org/tomcat/tomcat-10/v10.1.34/bin/apache-tomcat-10.1.34.tar.gz
 ~~~
 **4. Install the tomcat package**
 ~~~bash
-sudo tar xzvf apache-tomcat-10.1.26.tar.gz
+ls
+sudo mkdir /opt/tomcat
+sudo tar xzvf apache-tomcat-10.1.34.tar.gz -C /opt/tomcat --strip-components=1
 ~~~
 **5. Adding new user "tomcat"**
 ~~~bash
-sudo useradd -m -U -d /opt/tomcat -s /bin/false tomcat
+sudo useradd -m -d /opt/tomcat -U -s /bin/false tomcat
 ~~~
 **6. Verify that the user "tomcat" is already created**
 ~~~bash

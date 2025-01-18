@@ -9,56 +9,59 @@
 - Apache HTTP
 
 ## Simulation steps:
+
+Adapted from [**Digital Ocean Community Tutorials**](https://www.digitalocean.com/community/tutorials/how-to-install-apache-tomcat-10-on-ubuntu-20-04)
+
 <b>A. Installation of JDK or OpenJDK (Java Development Kit) </b>
 
 <a href="https://github.com/setiyadi-ben/Linux-Engineer-Applied-Practice/blob/main/Java-Webapps-Simulation/terminal-commands.md#01"><b>Commands are putting up here. If not loaded please refresh the browser.</b></a>
 
-<left>
+<p align="justify">
 1. If you using the same previous requirements, you can simply install the JDK by simply writing this command below.
-<center>
+<!-- ![Install JDK](/image-files/jdk-install-1.png) -->
+<p align="center"><img src="/image-files/jdk-install-1.png"></p>
+</p>
 
-![Install JDK](/image-files/jdk-install-1.png)
-</center>
-<left>
-
-<left>
+<p align="justify">
 2. Check the version to verify the installation, is it successs or not.
-<center>
-
-![Very JDK](/image-files/jdk-install-2.png)
-</center>
-</left>
+<!-- ![Very JDK](/image-files/jdk-install-2.png) -->
+<p align="center"><img src="/image-files/jdk-install-1.png"></p>
+</p>
 
 <b>B. Installation of Apache Tomcat Webserver </b>
 
 <a href="https://github.com/setiyadi-ben/Linux-Engineer-Applied-Practice/blob/main/Java-Webapps-Simulation/terminal-commands.md#02"><b>Commands are putting up here. If not loaded please refresh the browser.</b></a>
 
-<left>
+<p align="justify">
 3. Let's begin to download the files from the official site by using wget and don't forget to place the downloaded tomcat in directory /opt.
-<center>
 
-![Download Tomcat](/image-files/apache-install-1.png)
-</center>
-</left>
+<!-- ![download apache from source](/image-files/apache-download-1.png) -->
+<p align="center"><img src="/image-files/apache-download-1.png"></p>
+<!-- ![download apache from source2](/image-files/apache-download-2.png) -->
+<p align="center"><img src="/image-files/apache-download-2.png"></p>
+<!-- ![Download Tomcat](/image-files/apache-install-1.png) -->
+<p align="center"><img src="/image-files/apache-install-1.png"></p>
+</p>
 
-<left>
+<p align="justify">
 4. Install the .tar.gz file with this following command.
-<center>
+<!-- ![Install Tomcat](/image-files/apache-install-2.png) -->
+<p align="center"><img src="/image-files/apache-install-2.png"></p>
+</p>
 
-![Install Tomcat](/image-files/apache-install-2.png)
-</center>
-</left>
-
-<left>
+<p align="justify">
 5. Create the user "tomcat" and check which is created or not.
-<center>
+<!-- ![Create Tomcat user](/image-files/apache-install-3.png) -->
+<p align="center"><img src="/image-files/apache-install-3.png"></p>
+</p>
 
-![Create Tomcat user](/image-files/apache-install-3.png)
-</center>
-</left>
+<p align="justify">
+6. Since you have already created a user, you can now grant tomcat ownership over the extracted installation by running:
+<p align="center"><img src="/image-files/apache-tomcat-ownership.png"></p>
+</p>
 
 <left>
-6. Check the java version to write it in the next configuration.
+1. Check the java version to write it in the next configuration.
 <center>
 
 ![Create Tomcat user](/image-files/apache-install-4.png)
