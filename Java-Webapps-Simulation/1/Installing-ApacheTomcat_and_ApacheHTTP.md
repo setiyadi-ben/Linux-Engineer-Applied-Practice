@@ -34,13 +34,14 @@ Adapted from [**Digital Ocean Community Tutorials**](https://www.digitalocean.co
 
 <p align="justify">
 3. Let's begin to download the files from the official site by using wget and don't forget to place the downloaded tomcat in directory /opt.
-
+<!-- ![Download Tomcat](/image-files/apache-install-1.png) -->
+<p align="center"><img src="/image-files/apache-install-1.png"></p>
+If in the future the downloadable file error you, can visit this main website to get the official available apache tomcat on <b><a href="https://tomcat.apache.org/">https://tomcat.apache.org/</a> or <a href="https://dlcdn.apache.org/tomcat/">https://dlcdn.apache.org/tomcat/</a></b>
 <!-- ![download apache from source](/image-files/apache-download-1.png) -->
 <p align="center"><img src="/image-files/apache-download-1.png"></p>
 <!-- ![download apache from source2](/image-files/apache-download-2.png) -->
 <p align="center"><img src="/image-files/apache-download-2.png"></p>
-<!-- ![Download Tomcat](/image-files/apache-install-1.png) -->
-<p align="center"><img src="/image-files/apache-install-1.png"></p>
+
 </p>
 
 <p align="justify">
