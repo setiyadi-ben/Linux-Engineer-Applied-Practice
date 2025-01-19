@@ -41,8 +41,8 @@ If in the future the downloadable file error you, can visit this main website to
 <p align="center"><img src="/image-files/apache-download-1.png"></p>
 <!-- ![download apache from source2](/image-files/apache-download-2.png) -->
 <p align="center"><img src="/image-files/apache-download-2.png"></p>
-
 </p>
+
 
 <p align="justify">
 4. Install the .tar.gz file with this following command.
@@ -51,7 +51,7 @@ If in the future the downloadable file error you, can visit this main website to
 </p>
 
 <p align="justify">
-5. Create the user "tomcat" and check which is created or not.
+5. By supplying /bin/false as the user’s default shell, you ensure that it’s not possible to log in as tomcat
 <!-- ![Create Tomcat user](/image-files/apache-install-3.png) -->
 <p align="center"><img src="/image-files/apache-install-3.png"></p>
 </p>
@@ -61,19 +61,27 @@ If in the future the downloadable file error you, can visit this main website to
 <p align="center"><img src="/image-files/apache-tomcat-ownership.png"></p>
 </p>
 
+<p align="justify">
+7. Check the java version to write it in the next configuration.
+<!-- ![Create Tomcat user](/image-files/apache-install-4.png) -->
+<p align="center"><img src="/image-files/apache-install-4.png"></p>
+</p>
+
+<b>C. Configuring Admin Users</b>
+
+<p align="justify">
+8. Tomcat users are defined in /opt/tomcat/conf/tomcat-users.xml. Open the file for editing with the following command:
+
+
+</p>
+
 <left>
 1. Check the java version to write it in the next configuration.
 <center>
 
-![Create Tomcat user](/image-files/apache-install-4.png)
-</center>
-</left>
-
-<left>
-7. Check the java version to write it in the next configuration.
-<center>
-
 ![Create Tomcat user](/image-files/apache-install-5.png)
+
+
 ![Create Tomcat user](/image-files/apache-install-6.png)
 <br>Don't forget to type <b>ctrl + x then y and enter to save</b></br>
 </center>

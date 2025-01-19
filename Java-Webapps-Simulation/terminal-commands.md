@@ -26,19 +26,27 @@ ls
 sudo mkdir /opt/tomcat
 sudo tar xzvf apache-tomcat-10.1.34.tar.gz -C /opt/tomcat --strip-components=1
 ~~~
-**5. Adding new user "tomcat"**
+**5. By supplying /bin/false as the user’s default shell, you ensure that it’s not possible to log in as tomcat.**
 ~~~bash
 sudo useradd -m -d /opt/tomcat -U -s /bin/false tomcat
 ~~~
-**6. Verify that the user "tomcat" is already created**
-~~~bash
-grep '^tomcat:' /etc/passwd
+**6. Tomcat users are defined in /opt/tomcat/conf/tomcat-users.xml. Open the file for editing with the following command:**
 ~~~
-**7. Verify the newly installed java version to put inside tomcat.service**
+sudo nano /opt/tomcat/conf/tomcat-users.xml
+~~~
+Add the following lines before the ending tag:
+~~~xml
+<role rolename="manager-gui" />
+<user username="manager" password="manager_password" roles="manager-gui" />
+
+<role rolename="admin-gui" />
+<user username="admin" password="admin_password" roles="manager-gui,admin-gui" />
+~~~
+**6. Verify the newly installed java version to put inside tomcat.service**
 ~~~bash
 sudo update-alternatives --config java
 ~~~
-**8. Writing the configuration inside tomcat.service**
+**7. Writing the configuration inside tomcat.service**
 ~~~bash
 sudo nano /etc/systemd/system/tomcat.service
 ~~~
