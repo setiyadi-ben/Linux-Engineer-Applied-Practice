@@ -26,22 +26,47 @@ ls
 sudo mkdir /opt/tomcat
 sudo tar xzvf apache-tomcat-10.1.34.tar.gz -C /opt/tomcat --strip-components=1
 ~~~
+
 **5. By supplying /bin/false as the user’s default shell, you ensure that it’s not possible to log in as tomcat.**
 ~~~bash
 sudo useradd -m -d /opt/tomcat -U -s /bin/false tomcat
 ~~~
+
+## Apache Tomcat Admin Configuration
+### [back to Installation of Apache Tomcat and Apace HTTP Service](./1/Installing-ApacheTomcat_and_ApacheHTTP.md)
+<a id="03"></a>
+
 **6. Tomcat users are defined in /opt/tomcat/conf/tomcat-users.xml. Open the file for editing with the following command:**
-~~~
+~~~bash
 sudo nano /opt/tomcat/conf/tomcat-users.xml
 ~~~
 Add the following lines before the ending tag:
 ~~~xml
+ <!-- Define roles | to be used later -->
+<role rolename="manager-script"/>
+<role rolename="manager-jmx"/>
+<role rolename="manager-status"/>
+<!-- Standard roles-->
 <role rolename="manager-gui" />
+
 <user username="manager" password="manager_password" roles="manager-gui" />
+<user username="staff1-engineer" password="password" roles="manager-gui,manager-script,manager-jmx,manager-status" />
 
 <role rolename="admin-gui" />
 <user username="admin" password="admin_password" roles="manager-gui,admin-gui" />
+<user username=""/>
 ~~~
+
+**7. To remove the restriction for the Manager page, open its config file for editing:**
+~~~xml
+sudo nano /opt/tomcat/webapps/manager/META-INF/context.xml
+~~~
+Save and close the file, then repeat for Host Manager:
+~~~bash
+sudo nano /opt/tomcat/webapps/host-manager/META-INF/context.xml
+~~~
+
+
 **6. Verify the newly installed java version to put inside tomcat.service**
 ~~~bash
 sudo update-alternatives --config java

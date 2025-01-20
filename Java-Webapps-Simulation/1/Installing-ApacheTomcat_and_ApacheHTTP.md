@@ -69,26 +69,48 @@ If in the future the downloadable file error you, can visit this main website to
 
 <b>C. Configuring Admin Users</b>
 
+<a href="https://github.com/setiyadi-ben/Linux-Engineer-Applied-Practice/blob/main/Java-Webapps-Simulation/terminal-commands.md#02"><b>Commands are putting up here. If not loaded please refresh the browser.</b></a>
+
+
 <p align="justify">
 8. Tomcat users are defined in /opt/tomcat/conf/tomcat-users.xml. Open the file for editing with the following command:
 
+<p align="center"><img src="/image-files/apache-config-1.png"></p>
 
+<p align="center"><img src="/image-files/apache-config-2.png"></p>
 </p>
 
-<left>
-1. Check the java version to write it in the next configuration.
-<center>
+<p align="justify">
+9. To remove the restriction for the Manager page, open its config file for editing:
 
-![Create Tomcat user](/image-files/apache-install-5.png)
+<p align="center"><img src="/image-files/apache-config-3.png"></p>
+Comment out the Valve definition, as shown:
+<p align="center"><img src="/image-files/apache-config-4.png"></p>
 
+<p align="center"><img src="/image-files/apache-config-5.png"></p>
+Save and close the file, then repeat for Host Manager:
+
+<p align="center"><img src="/image-files/apache-config-6.png"></p>
+</p>
+
+<b>D. Creating a systemd service </b>
+
+<a href="https://github.com/setiyadi-ben/Linux-Engineer-Applied-Practice/blob/main/Java-Webapps-Simulation/terminal-commands.md#02"><b>Commands are putting up here. If not loaded please refresh the browser.</b></a>
+
+<p align="justify">
+10. Check the java version to write it in the next configuration.
+
+<p align="center"><img src="/image-files/apache-install-4.png"></p>
+You’ll store the tomcat service in a file named tomcat.service, under /etc/systemd/system. Create the file for editing by running:
+<!-- ![Create Tomcat user](/image-files/apache-install-5.png) -->
+<p align="center"><img src="/image-files/apache-install-5.png"></p>
 
 ![Create Tomcat user](/image-files/apache-install-6.png)
 <br>Don't forget to type <b>ctrl + x then y and enter to save</b></br>
-</center>
-</left>
+</p>
 
 <left>
-8. To be able to access /opt/tomcat/bin/*.sh I'm switching to root user then restarting the service like the image shown below.
+1. To be able to access /opt/tomcat/bin/*.sh I'm switching to root user then restarting the service like the image shown below.
 <center>
 
 ![Create Tomcat user](/image-files/apache-install-7.png)
