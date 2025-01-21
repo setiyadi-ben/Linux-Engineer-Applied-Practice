@@ -63,7 +63,7 @@ If in the future the downloadable file error you, can visit this main website to
 
 <b>C. Configuring Admin Users</b>
 
-<a href="https://github.com/setiyadi-ben/Linux-Engineer-Applied-Practice/blob/main/Java-Webapps-Simulation/terminal-commands.md#02"><b>Commands are putting up here. If not loaded please refresh the browser.</b></a>
+<a href="https://github.com/setiyadi-ben/Linux-Engineer-Applied-Practice/blob/main/Java-Webapps-Simulation/terminal-commands.md#03"><b>Commands are putting up here. If not loaded please refresh the browser.</b></a>
 
 
 <p align="justify">
@@ -93,7 +93,7 @@ Save and close the file, then repeat for Host Manager:
 
 <b>D. Creating a systemd service </b>
 
-<a href="https://github.com/setiyadi-ben/Linux-Engineer-Applied-Practice/blob/main/Java-Webapps-Simulation/terminal-commands.md#02"><b>Commands are putting up here. If not loaded please refresh the browser.</b></a>
+<a href="https://github.com/setiyadi-ben/Linux-Engineer-Applied-Practice/blob/main/Java-Webapps-Simulation/terminal-commands.md#04"><b>Commands are putting up here. If not loaded please refresh the browser.</b></a>
 
 <p align="justify">
 9. Check the java version to write it in the next configuration.
@@ -109,28 +109,47 @@ Modify the highlighted value of JAVA_HOME if it differs from the one you noted p
 <p align="center">Don't forget to type <b>ctrl + x then y and enter to save</b></p>
 </p>
 
-<left>
-1.  To be able to access /opt/tomcat/bin/*.sh I'm switching to root user then restarting the service like the image shown below.
-<center>
+<p align="justify">
+10. Reload the systemd daemon so that it becomes aware of the new service:
+</p>
 
-![Create Tomcat user](/image-files/apache-install-7.png)
-</center>
-</left>
+~~~
+sudo systemctl daemon-reload
+~~~
 
-<left>
-9. If find any warning or errors you can also check the logs by simply typing.
-<center>
+<p align="justify">
+11. Enable Tomcat starting up with the system, run the following command:
+</p>
 
-![Create Tomcat user](/image-files/apache-debug.png)
-</center>
-</left>
+~~~
+sudo systemctl start tomcat
+sudo systemctl enable tomcat
+~~~
 
-<b>C. Installation of Apache HTTP </b>
+<p align="justify">
+12. Then, look at its status to confirm that it started successfully:
+</p>
+
+~~~
+sudo systemctl status tomcat
+~~~
+<p align="center"><img src="/image-files/apache-install-7.png"></p>
+
+<p align="center"><img src="/image-files/apache-tomcat-install-success.png"></p>
+
+
+<p align="justify">
+13. If find any warning or errors you can also check the logs by simply typing.
+<!-- ![Create Tomcat user](/image-files/apache-debug.png) -->
+<p align="center"><img src="/image-files/apache-debug.png"></p>
+</p>
+
+<b>E. Installation of Apache HTTP HTTPS Certificate </b>
 
 <a href="https://github.com/setiyadi-ben/Linux-Engineer-Applied-Practice/blob/main/Java-Webapps-Simulation/terminal-commands.md#03"><b>Commands are putting up here. If not loaded please refresh the browser.</b></a>
 
 <left>
-10. If you already practicing the Database Replication Simulation you should have installed that when installing phpmyadmin. If you just started from this simulation you can follow step by step below.
+1.  If you already practicing the Database Replication Simulation you should have installed that when installing phpmyadmin. If you just started from this simulation you can follow step by step below.
 <center>
 
 ![apache2 http](/image-files/install-apache2-1.png)

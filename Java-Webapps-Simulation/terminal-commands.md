@@ -1,5 +1,5 @@
 ## JDK Installation
-### [back to Installation of Apache Tomcat and Apace HTTP Service](./1/Installing-ApacheTomcat_and_ApacheHTTP.md)
+### [back to Installation of Apache Tomcat and Apache HTTP Service](./1/Installing-ApacheTomcat_and_ApacheHTTP.md)
 <a id="01"></a>
 
 **1. Installation of JDK or OpenJDK (Java Development Kit)**
@@ -12,7 +12,7 @@ java -version
 ~~~
 
 ## Apache Tomcat Installation
-### [back to Installation of Apache Tomcat and Apace HTTP Service](./1/Installing-ApacheTomcat_and_ApacheHTTP.md)
+### [back to Installation of Apache Tomcat and Apache HTTP Service](./1/Installing-ApacheTomcat_and_ApacheHTTP.md)
 <a id="02"></a>
 
 **3. Downloading Tomcat from official website**
@@ -33,7 +33,7 @@ sudo useradd -m -d /opt/tomcat -U -s /bin/false tomcat
 ~~~
 
 ## Apache Tomcat Admin Configuration
-### [back to Installation of Apache Tomcat and Apace HTTP Service](./1/Installing-ApacheTomcat_and_ApacheHTTP.md)
+### [back to Installation of Apache Tomcat and Apache HTTP Service](./1/Installing-ApacheTomcat_and_ApacheHTTP.md)
 <a id="03"></a>
 
 **6. Tomcat users are defined in /opt/tomcat/conf/tomcat-users.xml. Open the file for editing with the following command:**
@@ -66,6 +66,9 @@ Save and close the file, then repeat for Host Manager:
 sudo nano /opt/tomcat/webapps/host-manager/META-INF/context.xml
 ~~~
 
+## Apache Tomcat Systemd Configuration
+### [back to Installation of Apache Tomcat and Apache HTTP Service](./1/Installing-ApacheTomcat_and_ApacheHTTP.md)
+<a id="04"></a>
 
 **6. Verify the newly installed java version to put inside tomcat.service**
 ~~~bash
@@ -106,18 +109,23 @@ StandardError=inherit
 [Install]
 WantedBy=multi-user.target
 ~~~
-**9. Gain root access to enable execute command in directory /opt/tomcat/bin/*.sh and turn on tomcat.service**
-~~~bash
-sudo su
-sudo chmod +x /opt/tomcat/bin/*.sh
+**8. Reload the systemd daemon so that it becomes aware of the new service:**
+~~~
 sudo systemctl daemon-reload
-sudo systemctl start tomcat.service
-sudo systemctl status tomcat.service
+~~~
+**9. Enable Tomcat starting up with the system, run the following command:**
+~~~
+sudo systemctl start tomcat
+sudo systemctl enable tomcat
+~~~
+**10. Then, look at its status to confirm that it started successfully:**
+~~~
+sudo systemctl status tomcat
 ~~~
 
-## Apache HTTP Installation
+## Apache HTTP HTTPS Certificate Installation
 ### [back to Installation of Apache Tomcat and Apace HTTP Service](./1/Installing-ApacheTomcat_and_ApacheHTTP.md)
-<a id="03"></a>
+<a id="05"></a>
 
 **10. Installing Apache HTTP Server**
 ~~~bash
