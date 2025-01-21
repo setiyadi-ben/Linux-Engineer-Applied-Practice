@@ -78,13 +78,17 @@ If in the future the downloadable file error you, can visit this main website to
 8. To remove the restriction for the Manager page, open its config file for editing:
 
 <p align="center"><img src="/image-files/apache-config-3.png"></p>
-Comment out the Valve definition, as shown:
-<p align="center"><img src="/image-files/apache-config-4.png"></p>
 
-<p align="center"><img src="/image-files/apache-config-5.png"></p>
+Comment out the Valve definition, as shown:
+
+<p align="center"><img src="/image-files/apache-config-4.png"></p>
+<p align="center">Don't forget to type <b>ctrl + x then y and enter to save</b></p>
+
 Save and close the file, then repeat for Host Manager:
+<p align="center"><img src="/image-files/apache-config-5.png"></p>
 
 <p align="center"><img src="/image-files/apache-config-6.png"></p>
+<p align="center">Don't forget to type <b>ctrl + x then y and enter to save</b></p>
 </p>
 
 <b>D. Creating a systemd service </b>
@@ -93,7 +97,9 @@ Save and close the file, then repeat for Host Manager:
 
 <p align="justify">
 9. Check the java version to write it in the next configuration.
+
 <p align="center"><img src="/image-files/apache-install-4.png"></p>
+
 You’ll store the tomcat service in a file named tomcat.service, under /etc/systemd/system. Create the file for editing by running:
 <!-- ![Create Tomcat user](/image-files/apache-install-5.png) -->
 <p align="center"><img src="/image-files/apache-install-5.png"></p>
@@ -104,7 +110,7 @@ Modify the highlighted value of JAVA_HOME if it differs from the one you noted p
 </p>
 
 <left>
-10. To be able to access /opt/tomcat/bin/*.sh I'm switching to root user then restarting the service like the image shown below.
+1.  To be able to access /opt/tomcat/bin/*.sh I'm switching to root user then restarting the service like the image shown below.
 <center>
 
 ![Create Tomcat user](/image-files/apache-install-7.png)
