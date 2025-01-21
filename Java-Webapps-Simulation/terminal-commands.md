@@ -50,7 +50,7 @@ Add the following lines before the ending tag:
 <role rolename="manager-gui" />
 
 <user username="manager" password="manager_password" roles="manager-gui" />
-<user username="staff1-engineer" password="password" roles="manager-gui,manager-script,manager-jmx,manager-status" />
+<user username="staff1-engineer" password="password" roles="manager-gui,admin-gui,manager-script,manager-jmx,manager-status" />
 
 <role rolename="admin-gui" />
 <user username="admin" password="admin_password" roles="manager-gui,admin-gui" />

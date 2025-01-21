@@ -72,6 +72,13 @@ If in the future the downloadable file error you, can visit this main website to
 <p align="center"><img src="/image-files/apache-config-1.png"></p>
 
 <p align="center"><img src="/image-files/apache-config-2.png"></p>
+<p align="center">Don't forget to type <b>ctrl + x then y and enter to save</b></p>
+</p>
+
+<p align="justify">
+By default, Tomcat is configured to restrict access to the admin pages, unless the connection comes from the server itself. To access those pages with the users you just defined, you will need to edit config files for those pages.
+
+<p align="center"><img src="/image-files/tomcat-directory-locking.png"></p>
 </p>
 
 <p align="justify">
