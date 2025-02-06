@@ -7,11 +7,23 @@
 The repository’s guide details a step-by-step setup for simulating database replication on Linux, focusing on MySQL. It covers configuring a master and a slave server for replication, preparing the environment, establishing connections, and synchronizing data to ensure redundancy. Key checkpoints include:
 </p>
 <b>
-1. Environment and server setup.<br>
-2. Configuring MySQL on the master.<br>
-3. Setting up replication permissions.<br>
-4. Configuring MySQL on the slave.<br>
-5. Testing replication for data consistency.<br>
+<b>A. Installation and database setup </b>
+<br>1. Environment and server setup.
+
+
+<br><b>B. Simulate sending MySQL query data using Python </b>
+<br>2. Configuring MySQL on the master.<br>
+
+<b>C. Setup Database Replication (mysqldump) - For the use case of Scaling-up the current databases infrastructure </b>
+<br>3. Setting up replication permissions.<br>
+
+<b>D. Setup Database Replication for a Master Server </b>
+<br>4. Configuring MySQL on the slave.
+
+<b>E. Setup Database Replication for a Slave Server </b>
+<br>5. Testing replication for data consistency.
+
+
 </b>
 </br>
 <p align="justify">
