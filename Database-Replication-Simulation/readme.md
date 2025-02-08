@@ -30,35 +30,36 @@ This repository provides a detailed, step-by-step guide for simulating database 
 <br>
 <b>F. Restoring Master Server Database Data</b> to Tests the synchronization of replication data between the master and slave servers.
 
+<p align="justify"><br>
+This project represents my initial work on the Linux-Engineer-Applied-Practice repository and serves as an introductory gateway to access other simulations within the repository. You may skip this guide if you have already set up the server independently.
+</p>
 
-</b>
-</br>
-<p align="justify">
-This project represents my initial work on the Linux-Engineer-Applied-Practice repository and serves as an introductory gateway to access other simulations within the repository. You may skip this guide if you have already set up the server independently.</p>
-
-## Use cases knowledge
+## Database Replication Use Cases
 
 <p align="justify">
-Database replication is a crucial technique in the IT world that enables data duplication from one database (master) to another (slave). This brings many benefits to various applications and businesses, especially in improving data performance and availability. Here are some common use cases for database replication:
+<Database replication is a critical technique in the field of information technology, enabling the duplication of data from one database (the master) to another (the slave). This process offers numerous advantages for various applications and businesses, particularly in enhancing data performance and availability. The following are common use cases for database replication:>
 </p>
 <b>1. Scalability and High Performance:</b>
 <p align="justify">
-High-traffic e-commerce websites: Database replication can distribute product, price, and inventory data to multiple servers, allowing the website to serve many users simultaneously without experiencing bottlenecks on a single central server.
-Mobile apps with a global user base: <b>Database replication allows data to be stored on servers in different regions, so users worldwide can access data with low latency.</b>
+<li>E-commerce sites distribute data to multiple servers to handle high traffic.</li>
+<li>Global mobile apps store data regionally to reduce latency.</li>
+
 </p>
 <b>2. Disaster Recovery and Data Availability:</b>
 <p align="justify">
-Financial and banking applications: Database replication ensures transaction data and customer balances remain available even if the central server fails. Replicated data on other servers can be used to continue operations without downtime. News websites or social media platforms: <b>Database replication ensures the website remains online and accessible to users even in the event of natural disasters or infrastructure disruptions in one location.</b>
+<li>Financial services use replication to ensure continuous access to critical data despite server failures.</li>
+<li>News and social media platforms maintain online presence during localized disruptions.</li>
 </p>
 <b>3. Disaster Recovery and Backup Solutions:</b>
 <p align="justify">
-Point-in-Time (PIT) Replication: Allows restoring the database to a specific point in time in the past, useful for recovering data after cyberattacks or human errors.
-Disaster recovery solutions: <b>Database replication in different locations enables rapid system recovery after natural disasters or infrastructure failures in one location.</b>
+<li>Point-in-Time Replication allows restoration to a specific past state, aiding recovery from errors or attacks.</li>
+<li>Distributed replication enables rapid recovery after disasters.</li>
+
 </p>
 <b>4. Data Analytics and Reporting:</b>
 <p align="justify">
-Distributed data warehouses: Database replication allows data from various sources to be centralized in one location for easier analysis and reporting.
-Real-time analytics: <b>Database replication enables data to be transmitted and analyzed in real-time across multiple locations for faster decision-making.</b>
+<li>Centralizing data via replication improves analytical efficiency and reporting.</li>
+<li>Real-time replication supports faster decision-making.</li>
 </p>
 
 ## Tools & materials
@@ -71,7 +72,7 @@ Real-time analytics: <b>Database replication enables data to be transmitted and 
 
 ## Simulation steps:
 
-<b>A. Installation and database setup </b>
+## <b>A. Installation and database setup </b>
 <p align="justify">
 I have make freedom from selecting those tools and materials I have provided above. So, I'm will straight to the things that are important below and I'm assuming you have understand the basics setup like installation process.
 </p>
