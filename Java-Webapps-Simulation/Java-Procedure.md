@@ -1,14 +1,14 @@
-# Step by step Java Procedure for Web App Development
+# Step by step Java Procedure for Web App Deployment and Development
 ## [**back to Linux-Engineer-Applied-Practice**](../README.md)
 
-### [**0. **MANDATORY!** Read "Overview of HTTP Server" first** ](./0/Overview-HTTP.md)
+### [**0. **MANDATORY!** Read "Overview of How the Server Runs" first** ](./0/Overview-HTTP.md)
 Once you read that, you are now knowing that in order to run a website indeed needed a running http service inside the linux server. After that, let's jump in into installation process.
 
 ### [**1. Installing Apache Tomcat Server and Apache HTTP Server on Master Server** ](./1/Installing-ApacheTomcat_and_ApacheHTTP.md)
 
-- You might ask something like this, "I think using **Apache HTTP** server is neough to host my web page, why do I need **Apache Tomcat**?" [**This video will help you out.**](https://www.youtube.com/watch?v=XABDkzxA6hM)
+- You might ask something like this, "I think using **Apache HTTP** server is enough to host my web page, why do I need **Apache Tomcat**?" [**This video will help you out.**](https://www.youtube.com/watch?v=XABDkzxA6hM)
 
-### **2. Preparing the Environment to Start Coding on your Desktop Workspace**
+### **2. (Optional!) Preparing the Environment to Start Coding on your Desktop Workspace**
 
 **There are several things that you need to understand and prepare before you want to set-up your coding environment which are listed as follows:**
 
