@@ -1,7 +1,7 @@
 # Step by step Java Procedure for Web App Deployment and Development
 ## [**back to Linux-Engineer-Applied-Practice**](../README.md)
 
-### [**0. **MANDATORY!** Read "Overview of How the Server Runs" first** ](./0/Overview-HTTP.md)
+### [**0. (**Mandatory!)** Read ```"Overview of How the Server Runs"``` first.** ](./0/Overview-HTTP.md)
 Once you read that, you are now knowing that in order to run a website indeed needed a running http service inside the linux server. After that, let's jump in into installation process.
 
 ### [**1. Installing Apache Tomcat Server and Apache HTTP Server on Master Server** ](./1/Installing-ApacheTomcat_and_ApacheHTTP.md)
@@ -17,11 +17,14 @@ Once you read that, you are now knowing that in order to run a website indeed ne
 - Installing **Java SDK** or **OpenJDK** and **Apache Maven** on Windows. [**Here's the steps**](/Java-Webapps-Simulation/2/java-jdk-maven_installation.md)
 - Start Code and choosing your skeleton project using **Spring Boot** or **Maven Archetype**. [**Here's the steps**](./2/Code-editor_setup.md)
 
-### [**3. Here are the package files in ".jar" & ".war" for Simulation if you wanted to skip coding progress.**](./TBD)
+### [**3. Here are the package files in ```".jar" & ".war"``` for Simulation if you wanted to skip coding progress.**](/installer/)
+
+### [**4. Deploy webapps in Apache Tomcat and Reverse the Requests to Apache HTTP using ```mod_proxy.```**](/TBD)
+
+### [**5. Deploy webapps in Apache Tomcat and Broadcast It on Apache HTTP using ```mod_jk.```**]()
 
 
-### [**4. Perform webapps Integration to MySQL Database**](./TBD)
+### [**6. Perform webapps Integration with existing MySQL Database**](./TBD)
 
-### [**5. Deploy webapps in Apache Tomcat and Broadcast It on Apache HTTP using Mod_JK**](/TBD)
 
 ### []()
