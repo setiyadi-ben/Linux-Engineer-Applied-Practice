@@ -151,7 +151,35 @@ sudo systemctl status tomcat
 <p align="center"><img src="/image-files/apache-debug.png"></p>
 </p>
 
-<b>E. Installation of Apache HTTP HTTPS Certificate </b>
+<b>E. Installing Apache Tomcat HTTPS Certificate and Disable port 8080</b>
+
+<p align="justify">
+In this step what I'm gonna doing is to generate  ssl certificate and then installing that certificate into apache tomcat since https protocol only works with that certificate. After that, I change the current http port 8080 to https port on 8443. With that, port 8080 is being disabled and being redirected to port 8443. Why you might ask? The aim is to follow the current security standards which is use an encryption between server and client. 
+</p>
+
+<p align="justify">
+14. Start by generating certificate by put this following syntax below and don't forget to change the <b>"tomcatpassword"</b> or you can leave it.
+
+<p align="center"><img src="/image-files/tomcat-cert-install-1.png"></p>
+</p>
+
+<p align="justify">
+15. Update server.xml file with the new keystore file. I'm also added the following settings to block access on port 8080 and make a reference to redirecting port 8080 to port 8443.
+
+<p align="center"><img src="/image-files/tomcat-cert-install-2sh.png"></p>
+
+<p align="center"><img src="/image-files/tomcat-cert-install-2.png"></p>
+</p>
+
+<p align="justify">
+16. Then force HTTPS Redirection via web.xml
+
+<p align="center"><img src="/image-files/tomcat-cert-install-3.png"></p>
+
+<p align="center"><img src="/image-files/tomcat-cert-install-3.png"></p>
+</p>
+
+<b>F. Installation of Apache HTTP HTTPS Certificate </b>
 
 <a href="https://github.com/setiyadi-ben/Linux-Engineer-Applied-Practice/blob/main/Java-Webapps-Simulation/terminal-commands.md#03"><b>Commands are putting up here. If not loaded please refresh the browser.</b></a>
 
@@ -213,3 +241,64 @@ sudo systemctl status tomcat
 
 ![]()
 </center></left>
+<security-constraint>
+        <display-name>No anonymous access</display-name>
+        <web-resource-collection>
+            <web-resource-name>All areas</web-resource-name>
+            <url-pattern>/*</url-pattern>
+        </web-resource-collection>
+        <!-- Since tomcat 8.5, should be able to remove 'auth-constraint' -->
+
+        <auth-constraint>
+           <!-- Using role "users" that is defined from /opt/tomcat/conf/tomcat-users.xml  -->
+           <!-- To bypass authentications-->
+           <role-name>users</role-name>
+        </auth-constraint>
+
+<!--     <auth-constraint>
+            <role-name>probeuser</role-name>
+            <role-name>poweruser</role-name>
+            <role-name>manager</role-name>
+            <role-name>manager-gui</role-name>
+            <role-name>poweruserplus</role-name>
+        </auth-constraint>
+        -->
+<!--        <user-data-constraint>
+            <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+        </user-data-constraint>
+-->
+    </security-constraint>
+<!-- Defines the Login Configuration for this Application -->
+<!--
+ <login-config>
+        <auth-method>BASIC</auth-method>
+        <realm-name>PSI Probe</realm-name>
+    </login-config>
+-->
+
+    <!--Security roles referenced by this web application -->
+        <security-role>
+           <role-name>users</role-name>
+        </security-role>
+
+<!-- <security-role>
+        <role-name>manager-gui</role-name>
+    </security-role>
+
+    <security-role>
+        <role-name>manager</role-name>
+    </security-role>
+
+    <security-role>
+        <role-name>poweruser</role-name>
+    </security-role>
+
+    <security-role>
+        <role-name>poweruserplus</role-name>
+    </security-role>
+
+    <security-role>
+        <role-name>probeuser</role-name>
+    </security-role>
+-->
+
