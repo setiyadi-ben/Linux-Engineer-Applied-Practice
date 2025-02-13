@@ -174,7 +174,7 @@ In this step what I'm gonna doing is to generate  ssl certificate and then insta
 <p align="justify">
 16. Then force HTTPS Redirection via web.xml
 
-<p align="center"><img src="/image-files/tomcat-cert-install-3.png"></p>
+<p align="center"><img src="/image-files/tomcat-cert-install-3sh.png"></p>
 
 <p align="center"><img src="/image-files/tomcat-cert-install-3.png"></p>
 </p>
