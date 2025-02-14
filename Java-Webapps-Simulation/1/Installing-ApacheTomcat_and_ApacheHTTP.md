@@ -179,6 +179,15 @@ In this step what I'm gonna doing is to generate  ssl certificate and then insta
 <p align="center"><img src="/image-files/tomcat-cert-install-3.png"></p>
 </p>
 
+<p align+="justify">
+17. Let's try to accesss <a href="http://192.168.129.129:8080"><b>http://192.168.129.129:8080</b></a> 
+through your browser it will be automatically redirected to port 8443 like the following figure below.
+
+<p align="center"><img src="/image-files/tomcat-cert-install-succes.png"></p>
+
+
+</p>
+
 <b>F. Installation of Apache HTTP HTTPS Certificate </b>
 
 <a href="https://github.com/setiyadi-ben/Linux-Engineer-Applied-Practice/blob/main/Java-Webapps-Simulation/terminal-commands.md#03"><b>Commands are putting up here. If not loaded please refresh the browser.</b></a>
