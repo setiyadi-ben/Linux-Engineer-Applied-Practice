@@ -231,7 +231,7 @@ openssl s_client -connect 192.168.129.129:8443 -showcerts
 </p>
 
 ```
-openssl s_client -connect 192.168.129.129:8443 -showcerts
+openssl s_client -connect 192.168.129.129:443 -showcerts
 ```
 <!-- ![](/image-files/install-apache2-cert-4.png) -->
 <p align="center"><img src="/image-files/install-apache2-cert-4.png"></p>
@@ -241,3 +241,14 @@ openssl s_client -connect 192.168.129.129:8443 -showcerts
 </p>
 <!-- ![](/image-files/install-apache2-cert-5.png) -->
 <p align="center"><img src="/image-files/install-apache2-cert-5.png"></p>
+
+<p align="justify">
+24. In the end, to redirect port 80 to 443 you can edit this configuration by accessing directory
+<b>/etc/apache2/sites-available/000_default.conf</b> 
+</p>
+
+<p align="center"><img src="/image-files/install-apache2-cert-6.png"></p>
+
+<p align="center"><img src="/image-files/install-apache2-cert-7.png"></p>
+
+<p align="center">Don't forget to type <b>ctrl + x then y and enter to save</b></p>
