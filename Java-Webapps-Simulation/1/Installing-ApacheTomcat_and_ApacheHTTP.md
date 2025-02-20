@@ -170,6 +170,7 @@ In this step what I'm gonna doing is to generate  ssl certificate and then insta
 
 <p align="center"><img src="/image-files/tomcat-cert-install-2.png"></p>
 </p>
+<p align="center">Don't forget to type <b>ctrl + x then y and enter to save</b></p>
 
 <p align="justify">
 16. Then force HTTPS Redirection via web.xml
@@ -178,136 +179,65 @@ In this step what I'm gonna doing is to generate  ssl certificate and then insta
 
 <p align="center"><img src="/image-files/tomcat-cert-install-3.png"></p>
 </p>
+<p align="center">Don't forget to type <b>ctrl + x then y and enter to save</b></p>
 
-<p align+="justify">
-17. Let's try to accesss <a href="http://192.168.129.129:8080"><b>http://192.168.129.129:8080</b></a> 
-through your browser it will be automatically redirected to port 8443 like the following figure below.
+<p align="justify">
+17. Let's try to accesss <a href="http://192.168.129.129:8080"><b>http://192.168.129.129:8080</b></a> through your browser it will be automatically redirected to port 8443 like the following figure below. If it is says not secure don't worry about it because I'm using self-signed certificate.
+</p>
 
 <p align="center"><img src="/image-files/tomcat-cert-install-succes.png"></p>
+18. You can check the detailed certificate by typing <b>openssl s_client -connect 192.168.129.129:8443 -showcerts</b>
+</p>
 
+```
+openssl s_client -connect 192.168.129.129:8443 -showcerts
+```
 
 </p>
 
-<b>F. Installation of Apache HTTP HTTPS Certificate </b>
+<b>F. Installation of Apache HTTP HTTPS Certificate and Disable port 80 </b>
 
 <a href="https://github.com/setiyadi-ben/Linux-Engineer-Applied-Practice/blob/main/Java-Webapps-Simulation/terminal-commands.md#03"><b>Commands are putting up here. If not loaded please refresh the browser.</b></a>
 
-<left>
-1.  If you already practicing the Database Replication Simulation you should have installed that when installing phpmyadmin. If you just started from this simulation you can follow step by step below.
-<center>
+<p align="justify">
+1.   If you already practicing the <a href="/Database-Replication-Simulation/readme.md"><b>Database Replication Simulation</b></a> you should have installed that when installing phpmyadmin. If you just started from this simulation you can follow step by step below.
+</p>
+<!-- ![apache2 http](/image-files/install-apache2-1.png) -->
+<p align="center"><img src="/image-files/install-apache2-1.png"></p>
 
-![apache2 http](/image-files/install-apache2-1.png)
-</center></left>
+<p align="justify">
+19. To enable ssl/tls mode we need to generate certificate using openssl library. in this simulation I'm going to start by preparing the <a href="https://www.hostinger.com/tutorials/fqdn" >fqdn</a> and self-signed certificate generate command. Why using self signed? Because I don't have any domain ready to use.
+</p>
+<!-- ![apache http cert1](/image-files/install-apache2-cert-1.png) -->
+<p align="center"><img src="/image-files/install-apache2-cert-1.png"></p>
 
-<left>
-11. Know that installing the apache httpd itself not always make the services running on ssl/tls mode. You can see that port 443 for ssl/tls connection are not listening yet. the term "ufw" are for firewall config, verify the status first. If it is says "inactive" then you do not need to allow the prompt after.
-<center>
+<p align="justify">
+20.  This is the example of how to fill the certificate value.
+</p>
+<!-- ![apache http cert2](/image-files/install-apache2-cert-2.png) -->
+<p align="center"><img src="/image-files/install-apache2-cert-2.png"></p>
 
-![apache http-2](/image-files/install-apache2-2.png)
-</center></left>
+<p align="justify">
+21.  After that navigate into <b>/etc/apache2/sites-available/website_ssl.conf</b> to configure virtual host for port 443.
+</p>
+<!-- ![apache http cert3](/image-files/install-apache2-cert-3.png) -->
+<p align="center"><img src="/image-files/install-apache2-cert-3.png"></p>
+<!-- ![apache http cert3.1](/image-files/install-apache2-cert-3.1.png) -->
+<p align="center"><img src="/image-files/install-apache2-cert-3.1.png"></p>
+<p align="center">Don't forget to type <b>ctrl + x then y and enter to save</b></p>
 
-<left>
-12. To enable ssl/tls mode we need to generate certificate using openssl library. in this simulation I'm going to start by preparing the <a href="https://www.hostinger.com/tutorials/fqdn" >fqdn</a> and self-signed certificate generate command. Why using self signed? Because I don't have any domain ready to use. 
-<center>
+<p align="justify">
+22. To make sure configuration changes are running, I'm typing several commands listed below. Then I check the certificate by typing <b>openssl s_client -connect 192.168.129.129:443 -showcerts</b>
+</p>
 
-![apache http cert1](/image-files/install-apache2-cert-1.png)
-</center></left>
+```
+openssl s_client -connect 192.168.129.129:8443 -showcerts
+```
+<!-- ![](/image-files/install-apache2-cert-4.png) -->
+<p align="center"><img src="/image-files/install-apache2-cert-4.png"></p>
 
-<left>
-13. This is the example of how to fill the certificate value.
-<center>
-
-![apache http cert2](/image-files/install-apache2-cert-2.png)
-</center></left>
-
-<left>
-14. After that navigate into <b>/etc/apache2/sites-available/website_ssl.conf</b> to configure virtual host for port 443.
-<center>
-
-![apache http cert3](/image-files/install-apache2-cert-3.png)
-![apache http cert3.1](/image-files/install-apache2-cert-3.1.png)
-<br>Don't forget to type <b>ctrl + x then y and enter to save</b></br>
-</center></left>
-
-<left>
-15. To make sure configuration changes are running, I'm typing several commands listed below. Then I check the certificate by typing <b>openssl s_client -connect 192.168.129.129:443 -showcerts</b>
-<center>
-
-![](/image-files/install-apache2-cert-4.png)
-</center></left>
-
-<left>
-16. Another way to identify the certificate was worked successfully is to access it directly from the web. If it is says not secure don't worry about it because I'm using self-signed certificate.
-<center>
-
-![](/image-files/install-apache2-cert-5.png)
-</center></left>
-
-
-<left>
-
-<center>
-
-![]()
-</center></left>
-<security-constraint>
-        <display-name>No anonymous access</display-name>
-        <web-resource-collection>
-            <web-resource-name>All areas</web-resource-name>
-            <url-pattern>/*</url-pattern>
-        </web-resource-collection>
-        <!-- Since tomcat 8.5, should be able to remove 'auth-constraint' -->
-
-        <auth-constraint>
-           <!-- Using role "users" that is defined from /opt/tomcat/conf/tomcat-users.xml  -->
-           <!-- To bypass authentications-->
-           <role-name>users</role-name>
-        </auth-constraint>
-
-<!--     <auth-constraint>
-            <role-name>probeuser</role-name>
-            <role-name>poweruser</role-name>
-            <role-name>manager</role-name>
-            <role-name>manager-gui</role-name>
-            <role-name>poweruserplus</role-name>
-        </auth-constraint>
-        -->
-<!--        <user-data-constraint>
-            <transport-guarantee>CONFIDENTIAL</transport-guarantee>
-        </user-data-constraint>
--->
-    </security-constraint>
-<!-- Defines the Login Configuration for this Application -->
-<!--
- <login-config>
-        <auth-method>BASIC</auth-method>
-        <realm-name>PSI Probe</realm-name>
-    </login-config>
--->
-
-    <!--Security roles referenced by this web application -->
-        <security-role>
-           <role-name>users</role-name>
-        </security-role>
-
-<!-- <security-role>
-        <role-name>manager-gui</role-name>
-    </security-role>
-
-    <security-role>
-        <role-name>manager</role-name>
-    </security-role>
-
-    <security-role>
-        <role-name>poweruser</role-name>
-    </security-role>
-
-    <security-role>
-        <role-name>poweruserplus</role-name>
-    </security-role>
-
-    <security-role>
-        <role-name>probeuser</role-name>
-    </security-role>
--->
-
+<p align="justify">
+23.  Another way to identify the certificate was installed successfully is to access it directly from the web. 
+</p>
+<!-- ![](/image-files/install-apache2-cert-5.png) -->
+<p align="center"><img src="/image-files/install-apache2-cert-5.png"></p>
