@@ -13,6 +13,7 @@
 Adapted from [**Digital Ocean Community Tutorials**](https://www.digitalocean.com/community/tutorials/how-to-install-apache-tomcat-10-on-ubuntu-20-04)
 
 <b>A. Installation of JDK or OpenJDK (Java Development Kit) </b>
+<a id="01"></a>
 
 <a href="https://github.com/setiyadi-ben/Linux-Engineer-Applied-Practice/blob/main/Java-Webapps-Simulation/terminal-commands.md#01"><b>Commands are putting up here. If not loaded please refresh the browser.</b></a>
 
@@ -29,6 +30,7 @@ Adapted from [**Digital Ocean Community Tutorials**](https://www.digitalocean.co
 </p>
 
 <b>B. Installation of Apache Tomcat Webserver </b>
+<a id="02"></a>
 
 <a href="https://github.com/setiyadi-ben/Linux-Engineer-Applied-Practice/blob/main/Java-Webapps-Simulation/terminal-commands.md#02"><b>Commands are putting up here. If not loaded please refresh the browser.</b></a>
 
@@ -62,6 +64,7 @@ If in the future the downloadable file error you, can visit this main website to
 </p>
 
 <b>C. Configuring Admin Users</b>
+<a id="03"></a>
 
 <a href="https://github.com/setiyadi-ben/Linux-Engineer-Applied-Practice/blob/main/Java-Webapps-Simulation/terminal-commands.md#03"><b>Commands are putting up here. If not loaded please refresh the browser.</b></a>
 
@@ -99,6 +102,7 @@ Save and close the file, then repeat for Host Manager:
 </p>
 
 <b>D. Creating a systemd service </b>
+<a id="04"></a>
 
 <a href="https://github.com/setiyadi-ben/Linux-Engineer-Applied-Practice/blob/main/Java-Webapps-Simulation/terminal-commands.md#04"><b>Commands are putting up here. If not loaded please refresh the browser.</b></a>
 
@@ -128,10 +132,12 @@ sudo systemctl daemon-reload
 11. Enable Tomcat starting up with the system, run the following command:
 </p>
 
-~~~
+```
 sudo systemctl start tomcat
+```
+```
 sudo systemctl enable tomcat
-~~~
+```
 
 <p align="justify">
 12. Then, look at its status to confirm that it started successfully:
@@ -152,6 +158,9 @@ sudo systemctl status tomcat
 </p>
 
 <b>E. Installing Apache Tomcat HTTPS Certificate and Disable port 8080</b>
+<a id="05"></a>
+
+<a href="https://github.com/setiyadi-ben/Linux-Engineer-Applied-Practice/blob/main/Java-Webapps-Simulation/terminal-commands.md#05"><b>Commands are putting up here. If not loaded please refresh the browser.</b></a>
 
 <p align="justify">
 In this step what I'm gonna doing is to generate  ssl certificate and then installing that certificate into apache tomcat since https protocol only works with that certificate. After that, I change the current http port 8080 to https port on 8443. With that, port 8080 is being disabled and being redirected to port 8443. Why you might ask? The aim is to follow the current security standards which is use an encryption between server and client. 
@@ -164,7 +173,7 @@ In this step what I'm gonna doing is to generate  ssl certificate and then insta
 </p>
 
 <p align="justify">
-15. Update server.xml file with the new keystore file. I'm also added the following settings to block access on port 8080 and make a reference to redirecting port 8080 to port 8443.
+15. Update server.xml file with linking the new keystore file that have just generated. I'm also added the following settings to block access on port 8080 and make a reference to redirecting port 8080 to port 8443.
 
 <p align="center"><img src="/image-files/tomcat-cert-install-2sh.png"></p>
 
@@ -177,6 +186,8 @@ In this step what I'm gonna doing is to generate  ssl certificate and then insta
 
 <p align="center"><img src="/image-files/tomcat-cert-install-3sh.png"></p>
 
+In nano, find the ```"</web-app>"```, to find that press <b>```ctrl+w```</b> and then type that ```"</web-app>"``` and paste the following config below at the end of the file, just before the closing ```</web-app>``` tag.
+
 <p align="center"><img src="/image-files/tomcat-cert-install-3.png"></p>
 </p>
 <p align="center">Don't forget to type <b>ctrl + x then y and enter to save</b></p>
@@ -185,40 +196,47 @@ In this step what I'm gonna doing is to generate  ssl certificate and then insta
 17. Let's try to accesss <a href="http://192.168.129.129:8080"><b>http://192.168.129.129:8080</b></a> through your browser it will be automatically redirected to port 8443 like the following figure below. If it is says not secure don't worry about it because I'm using self-signed certificate.
 </p>
 
+<p align="justify">
+18. Restart the Tomcat service in order to make the changes applied.
+</p>
+
+```sh
+systemctl restart tomcat
+```
+
 <p align="center"><img src="/image-files/tomcat-cert-install-succes.png"></p>
-18. You can check the detailed certificate by typing <b>openssl s_client -connect 192.168.129.129:8443 -showcerts</b>
+19. You can check the detailed certificate by typing <b>openssl s_client -connect 192.168.129.129:8443 -showcerts</b>
 </p>
 
 ```
 openssl s_client -connect 192.168.129.129:8443 -showcerts
 ```
 
-</p>
-
 <b>F. Installation of Apache HTTP HTTPS Certificate and Disable port 80 </b>
+<a id="06"></a>
 
-<a href="https://github.com/setiyadi-ben/Linux-Engineer-Applied-Practice/blob/main/Java-Webapps-Simulation/terminal-commands.md#03"><b>Commands are putting up here. If not loaded please refresh the browser.</b></a>
+<a href="https://github.com/setiyadi-ben/Linux-Engineer-Applied-Practice/blob/main/Java-Webapps-Simulation/terminal-commands.md#06"><b>Commands are putting up here. If not loaded please refresh the browser.</b></a>
 
 <p align="justify">
-1.   If you already practicing the <a href="/Database-Replication-Simulation/readme.md"><b>Database Replication Simulation</b></a> you should have installed that when installing phpmyadmin. If you just started from this simulation you can follow step by step below.
+20. If you already practicing the <a href="/Database-Replication-Simulation/readme.md"><b>Database Replication Simulation</b></a> you should have installed that when installing phpmyadmin. If you just started from this simulation you can follow step by step below.
 </p>
 <!-- ![apache2 http](/image-files/install-apache2-1.png) -->
 <p align="center"><img src="/image-files/install-apache2-1.png"></p>
 
 <p align="justify">
-19. To enable ssl/tls mode we need to generate certificate using openssl library. in this simulation I'm going to start by preparing the <a href="https://www.hostinger.com/tutorials/fqdn" >fqdn</a> and self-signed certificate generate command. Why using self signed? Because I don't have any domain ready to use.
+21. To enable ssl/tls mode we need to generate certificate using openssl library. in this simulation I'm going to start by preparing the <a href="https://www.hostinger.com/tutorials/fqdn" >fqdn</a> and self-signed certificate generate command. Why using self signed? Because I don't have any domain ready to use.
 </p>
 <!-- ![apache http cert1](/image-files/install-apache2-cert-1.png) -->
 <p align="center"><img src="/image-files/install-apache2-cert-1.png"></p>
 
 <p align="justify">
-20.  This is the example of how to fill the certificate value.
+22.  This is the example of how to fill the certificate value.
 </p>
 <!-- ![apache http cert2](/image-files/install-apache2-cert-2.png) -->
 <p align="center"><img src="/image-files/install-apache2-cert-2.png"></p>
 
 <p align="justify">
-21.  After that navigate into <b>/etc/apache2/sites-available/website_ssl.conf</b> to configure virtual host for port 443.
+23.  After that navigate into <b>/etc/apache2/sites-available/website_ssl.conf</b> to configure virtual host for port 443.
 </p>
 <!-- ![apache http cert3](/image-files/install-apache2-cert-3.png) -->
 <p align="center"><img src="/image-files/install-apache2-cert-3.png"></p>
@@ -227,7 +245,15 @@ openssl s_client -connect 192.168.129.129:8443 -showcerts
 <p align="center">Don't forget to type <b>ctrl + x then y and enter to save</b></p>
 
 <p align="justify">
-22. To make sure configuration changes are running, I'm typing several commands listed below. Then I check the certificate by typing <b>openssl s_client -connect 192.168.129.129:443 -showcerts</b>
+24. Restart the Apache HTTPD service in order to make the changes applied.
+</p>
+
+```sh
+systemctl restart apache2
+```
+
+<p align="justify">
+25. To make sure configuration changes are running, I'm typing several commands listed below. Then I check the certificate by typing <b>openssl s_client -connect 192.168.129.129:443 -showcerts</b>
 </p>
 
 ```
@@ -237,13 +263,13 @@ openssl s_client -connect 192.168.129.129:443 -showcerts
 <p align="center"><img src="/image-files/install-apache2-cert-4.png"></p>
 
 <p align="justify">
-23.  Another way to identify the certificate was installed successfully is to access it directly from the web. 
+25.  Another way to identify the certificate was installed successfully is to access it directly from the web. 
 </p>
 <!-- ![](/image-files/install-apache2-cert-5.png) -->
 <p align="center"><img src="/image-files/install-apache2-cert-5.png"></p>
 
 <p align="justify">
-24. In the end, to redirect port 80 to 443 you can edit this configuration by accessing directory
+26. In the end, to redirect port 80 to 443 you can edit this configuration by accessing directory
 <b>/etc/apache2/sites-available/000_default.conf</b> 
 </p>
 
@@ -252,3 +278,11 @@ openssl s_client -connect 192.168.129.129:443 -showcerts
 <p align="center"><img src="/image-files/install-apache2-cert-7.png"></p>
 
 <p align="center">Don't forget to type <b>ctrl + x then y and enter to save</b></p>
+
+<p align="justify">
+27. Restart the Apache HTTPD service in order to make the changes applied.
+</p>
+
+```sh
+systemctl restart apache2
+```
