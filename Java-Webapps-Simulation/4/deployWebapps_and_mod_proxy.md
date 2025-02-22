@@ -19,3 +19,47 @@ Despite all of the explanation above, my requirements are focusing on the things
 
 <p align="center"><img src="/image-files/mod_proxy-explanation.png"></p>
 <p align="center">This is my implementation for this simulation in a form of simulation.</p>
+
+
+
+
+
+
+<!-- <VirtualHost *:443>
+    ServerAdmin support@secure-net.id
+    ServerName 192.168.129.129
+    DocumentRoot /var/www/
+
+    SSLEngine on
+    SSLCertificateFile /etc/ssl/certs/apache-selfsigned.crt
+    SSLCertificateKeyFile /etc/ssl/private/apache-selfsigned.key
+
+    # Enable SSL Proxy
+    SSLProxyEngine On
+    SSLProxyVerify none
+    SSLProxyCheckPeerCN off
+    SSLProxyCheckPeerName off
+
+    ProxyPreserveHost On
+
+    ProxyPass "/probe" "https://192.168.129.129:8443/probe"
+    ProxyPassReverse "/probe" "https://192.168.129.129:8443/probe"
+
+    ProxyPass "/examples" "https://192.168.129.129:8443/examples"
+    ProxyPassReverse "/examples" "https://192.168.129.129:8443/examples"
+
+    ProxyPass "/sample" "https://192.168.129.129:8443/sample"
+    ProxyPassReverse "/sample" "https://192.168.129.129:8443/sample"
+
+    <Proxy *>
+        Require all granted
+    </Proxy>
+
+    <Directory "/opt/tomcat/webapps/probe">
+        Require all granted
+    </Directory>
+
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+ -->
