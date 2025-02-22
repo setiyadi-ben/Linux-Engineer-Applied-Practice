@@ -109,12 +109,14 @@ StandardError=inherit
 [Install]
 WantedBy=multi-user.target
 ~~~
-**8. Reload the systemd daemon so that it becomes aware of the new service**
-~~~
-sudo systemctl daemon-reload
+**8. Using chown and chmod to make tomcat service are able to run**
+~~~sh
+sudo chown -R tomcat:tomcat /opt/tomcat
+sudo chmod -R  u+x  /opt/tomcat/bin
 ~~~
 **9. Enable Tomcat starting up with the system, run the following command**
-~~~
+~~~sh
+sudo systemctl daemon-reload
 sudo systemctl start tomcat
 sudo systemctl enable tomcat
 ~~~
