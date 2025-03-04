@@ -154,19 +154,19 @@ sudo systemctl status tomcat
 <b>E. Installing Apache Tomcat HTTPS Certificate and Disable port 8080</b>
 
 <p align="justify">
-In this step what I'm gonna doing is to generate  ssl certificate and then installing that certificate into apache tomcat since https protocol only works with that certificate. After that, I change the current http port 8080 to https port on 8443. With that, port 8080 is being disabled and being redirected to port 8443. Why you might ask? The aim is to follow the current security standards which is use an encryption between server and client. 
+In this step what I'm gonna doing is to generate  ssl certificate and then installing that certificate into apache tomcat since https protocol only works with certificates. After that, I change the current http port from 8080 to https port on 8443. With that, the port 8080 is being disabled and being redirected to port 8443. Why you might ask? The aim is to follow the current security standards which is use an encryption between server and client. 
 </p>
 
 <p align="justify">
-14. Start by generating certificate by put this following syntax below and don't forget to change the <b>"tomcatpassword"</b> or you can leave it.
+14. Navigate into this directory on <b>opt/tomcat/conf</b>. After that, start by generating certificate by put this following syntax below and don't forget to change the <b>"tomcatpassword"</b> or you can leave it.
+
+<p align="center"><img src="/image-files/tomcat-cert-install-2sh.png"></p>
 
 <p align="center"><img src="/image-files/tomcat-cert-install-1.png"></p>
 </p>
 
 <p align="justify">
 15. Update server.xml file with the new keystore file. I'm also added the following settings to block access on port 8080 and make a reference to redirecting port 8080 to port 8443.
-
-<p align="center"><img src="/image-files/tomcat-cert-install-2sh.png"></p>
 
 <p align="center"><img src="/image-files/tomcat-cert-install-2.png"></p>
 </p>
