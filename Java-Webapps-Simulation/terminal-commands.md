@@ -1,5 +1,5 @@
 ## JDK Installation
-### [back to Installation of Apache Tomcat and Apache HTTP Service](./1/Installing-ApacheTomcat_and_ApacheHTTP.md)
+### [back to Installation of Apache Tomcat and Apache HTTP Service](./1/Installing-ApacheTomcat_and_ApacheHTTP.md#01)
 <a id="01"></a>
 
 **1. Installation of JDK or OpenJDK (Java Development Kit)**
@@ -12,7 +12,7 @@ java -version
 ~~~
 
 ## Apache Tomcat Installation
-### [back to Installation of Apache Tomcat and Apache HTTP Service](./1/Installing-ApacheTomcat_and_ApacheHTTP.md)
+### [back to Installation of Apache Tomcat and Apache HTTP Service](./1/Installing-ApacheTomcat_and_ApacheHTTP.md#02)
 <a id="02"></a>
 
 **3. Downloading Tomcat from official website**
@@ -33,7 +33,7 @@ sudo useradd -m -d /opt/tomcat -U -s /bin/false tomcat
 ~~~
 
 ## Apache Tomcat Admin Configuration
-### [back to Installation of Apache Tomcat and Apache HTTP Service](./1/Installing-ApacheTomcat_and_ApacheHTTP.md)
+### [back to Installation of Apache Tomcat and Apache HTTP Service](./1/Installing-ApacheTomcat_and_ApacheHTTP.md#03)
 <a id="03"></a>
 
 **6. Tomcat users are defined in /opt/tomcat/conf/tomcat-users.xml. Open the file for editing with the following command:**
@@ -67,7 +67,7 @@ sudo nano /opt/tomcat/webapps/host-manager/META-INF/context.xml
 ~~~
 
 ## Apache Tomcat Systemd Configuration
-### [back to Installation of Apache Tomcat and Apache HTTP Service](./1/Installing-ApacheTomcat_and_ApacheHTTP.md)
+### [back to Installation of Apache Tomcat and Apache HTTP Service](./1/Installing-ApacheTomcat_and_ApacheHTTP.md#04)
 <a id="04"></a>
 
 **6. Verify the newly installed java version to put inside tomcat.service**
@@ -109,12 +109,14 @@ StandardError=inherit
 [Install]
 WantedBy=multi-user.target
 ~~~
-**8. Reload the systemd daemon so that it becomes aware of the new service:**
+**8. Using chown and chmod to make tomcat service are able to run**
+~~~sh
+sudo chown -R tomcat:tomcat /opt/tomcat
+sudo chmod -R  u+x  /opt/tomcat/bin
 ~~~
+**9. Enable Tomcat starting up with the system, run the following command**
+~~~sh
 sudo systemctl daemon-reload
-~~~
-**9. Enable Tomcat starting up with the system, run the following command:**
-~~~
 sudo systemctl start tomcat
 sudo systemctl enable tomcat
 ~~~
@@ -123,22 +125,84 @@ sudo systemctl enable tomcat
 sudo systemctl status tomcat
 ~~~
 
-## Apache HTTP HTTPS Certificate Installation
-### [back to Installation of Apache Tomcat and Apace HTTP Service](./1/Installing-ApacheTomcat_and_ApacheHTTP.md)
+## Apache Tomcat HTTPS Certificate Installation
+### [back to Installation of Apache Tomcat and Apace HTTP Service](./1/Installing-ApacheTomcat_and_ApacheHTTP.md#05)
 <a id="05"></a>
 
-**10. Installing Apache HTTP Server**
+**11. Navigate to this directory /opt/tomcat/conf to generate SSL certificate**
+
+~~~sh
+sudo su
+cd /opt/tomcat/conf
+ls
+~~~
+**12. Update server.xml file with linking the keystore file that have just generated**
+~~~sh
+keytool -genkey -alias tomcat -keyalg RSA -keystore localhost-rsa.jks -storepass tomcatpassword -validity 365
+~~~
+
+~~~
+nano server.xml
+~~~
+
+~~~xml
+<!-- Disable HTTP by commenting out the HTTP connector or redirecting it -->
+<!--    <Connector port="8080" protocol="HTTP/1.1"
+               connectionTimeout="20000"
+               redirectPort="8443"
+               maxParameterCount="1000"
+               />
+-->
+
+<Connector port="8443" protocol="org.apache.coyote.http11.Http11NioProtocol"
+            maxThreads="150" SSLEnabled="true"
+            maxParameterCount="1000"
+               >
+    <UpgradeProtocol className="org.apache.coyote.http2.Http2Protocol" />
+    <SSLHostConfig>
+        <Certificate certificateKeystoreFile="conf/localhost-rsa.jks"
+                         certificateKeystorePassword="tomcatpassword" type="RSA" />
+    </SSLHostConfig>
+</Connector>
+
+<Connector port="8080" protocol="HTTP/1.1"
+            connectionTimeout="20000"
+            redirectPort="8443">
+    <UpgradeProtocol className="org.apache.coyote.http2.Http2Protocol"/>
+</Connector>
+~~~
+**13. Update web.xml file to Redirect HTTP Traffic to HTTPS**
+
+~~~
+nano web.xml
+~~~
+
+Add the following configuration at the end of the file, just before the closing ```"</web-app>"``` tag:
+
+~~~xml
+<security-constraint>
+    <web-resource-collection>
+        <web-resource-name>Protected Context</web-resource-name>
+        <url-pattern>/*</url-pattern>
+    </web-resource-collection>
+    <user-data-constraint>
+        <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+    </user-data-constraint>
+</security-constraint>
+~~~
+
+
+## Apache HTTP HTTPS Certificate Installation
+### [back to Installation of Apache Tomcat and Apace HTTP Service](./1/Installing-ApacheTomcat_and_ApacheHTTP.md#06)
+<a id="06"></a>
+
+**14. Installing Apache HTTP Server**
 ~~~bash
 sudo apt install apache2 -y
 sudo systemctl status apache2
 ~~~
-**11. Check listening ports, firewall status and allow firewall**
-~~~bash
-netstat -tan
-sudo ufw status
-sudo ufw allow 'Apache Full'
-~~~
-**12. Make a directory for cert, preparing fqdn and generating cert**
+
+**15. Make a directory for cert, preparing fqdn and generating cert**
 ~~~bash
 sudo mkdir -p /etc/ssl/private
 hostname --fqdn
@@ -163,10 +227,25 @@ sudo nano /etc/apache2/sites-available/website_ssl.conf
     CustomLog ${APACHE_LOG_DIR}/access.log combined
 </VirtualHost>
 ~~~
-15. Apply configuration changes
+
+**15.  Apply configuration changes**
 ~~~bash
 sudo a2ensite website_ssl.conf
 sudo a2enmod ssl
-sudo systemctl restart apache2
-openssl s_client -connect 192.168.129.129:443 -showcerts
 ~~~
+
+**14. Configure virtual host for port 80**
+```sh
+nano /etc/apache2/sites-available/000-default.conf
+```
+
+```xml
+#ServerAdmin webmaster@localhost
+#DocumentRoot /var/www/html
+ServerAdmin support@secure-net.id
+Redirect permanent / https://192.168.129.129/
+```
+
+```
+sudo a2ensite 000-default.conf
+```

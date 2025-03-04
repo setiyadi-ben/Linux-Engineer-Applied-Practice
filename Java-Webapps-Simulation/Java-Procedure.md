@@ -4,7 +4,7 @@
 ### [**0. (**Mandatory!)** Read ```"Overview of How the Server Runs"``` first.** ](./0/Overview-HTTP.md)
 Once you read that, you are now knowing that in order to run a website indeed needed a running http service inside the linux server. After that, let's jump in into installation process.
 
-### [**1. Installing Apache Tomcat Server and Apache HTTP Server on Master Server** ](./1/Installing-ApacheTomcat_and_ApacheHTTP.md)
+### [**1. Installing Apache Tomcat Server and Apache HTTP Server on Master Server ✅** ](./1/Installing-ApacheTomcat_and_ApacheHTTP.md)
 
 - You might ask something like this, "I think using **Apache HTTP** server is enough to host my web page, why do I need **Apache Tomcat**?" [**This video will help you out.**](https://www.youtube.com/watch?v=XABDkzxA6hM)
 
@@ -19,7 +19,7 @@ Once you read that, you are now knowing that in order to run a website indeed ne
 
 ### [**3. Here are the package files in ```".jar" & ".war"``` for Simulation if you wanted to skip coding progress.**](/installer/)
 
-### [**4. Deploy webapps in Apache Tomcat and Reverse the Requests to Apache HTTP using ```mod_proxy.```**](/TBD)
+### [**4. Deploy webapps in Apache Tomcat and Reverse the Requests to Apache HTTP using ```mod_proxy.```**](/Java-Webapps-Simulation/4/deployWebapps_and_mod_proxy.md)
 
 ### [**5. Deploy webapps in Apache Tomcat and Broadcast It on Apache HTTP using ```mod_jk.```**]()
 
