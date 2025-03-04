@@ -133,6 +133,8 @@ sudo systemctl status tomcat
 
 ~~~sh
 sudo su
+~~~
+~~~sh
 cd /opt/tomcat/conf
 ls
 ~~~
@@ -164,14 +166,8 @@ nano server.xml
                          certificateKeystorePassword="tomcatpassword" type="RSA" />
     </SSLHostConfig>
 </Connector>
-
-<Connector port="8080" protocol="HTTP/1.1"
-            connectionTimeout="20000"
-            redirectPort="8443">
-    <UpgradeProtocol className="org.apache.coyote.http2.Http2Protocol"/>
-</Connector>
 ~~~
-**13. Update web.xml file to Redirect HTTP Traffic to HTTPS**
+<!-- **13. Update web.xml file to Redirect HTTP Traffic to HTTPS**
 
 ~~~
 nano web.xml
@@ -189,27 +185,27 @@ Add the following configuration at the end of the file, just before the closing 
         <transport-guarantee>CONFIDENTIAL</transport-guarantee>
     </user-data-constraint>
 </security-constraint>
-~~~
+~~~ -->
 
 
 ## Apache HTTP HTTPS Certificate Installation
 ### [back to Installation of Apache Tomcat and Apace HTTP Service](./1/Installing-ApacheTomcat_and_ApacheHTTP.md#06)
 <a id="06"></a>
 
-**14. Installing Apache HTTP Server**
+**13. Installing Apache HTTP Server**
 ~~~bash
 sudo apt install apache2 -y
 sudo systemctl status apache2
 ~~~
 
-**15. Make a directory for cert, preparing fqdn and generating cert**
+**14. Make a directory for cert, preparing fqdn and generating cert**
 ~~~bash
 sudo mkdir -p /etc/ssl/private
 hostname --fqdn
 sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/apache-selfsigned.key -out /etc/ssl/certs/apache-selfsigned.crt
 ~~~
 
-**14. Configure virtual host for port 443**
+**15. Configure virtual host for port 443**
 ~~~bash
 sudo nano /etc/apache2/sites-available/website_ssl.conf
 ~~~
@@ -228,13 +224,13 @@ sudo nano /etc/apache2/sites-available/website_ssl.conf
 </VirtualHost>
 ~~~
 
-**15.  Apply configuration changes**
+**16.  Apply configuration changes**
 ~~~bash
 sudo a2ensite website_ssl.conf
 sudo a2enmod ssl
 ~~~
 
-**14. Configure virtual host for port 80**
+**17. Configure virtual host for port 80**
 ```sh
 nano /etc/apache2/sites-available/000-default.conf
 ```
