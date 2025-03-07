@@ -23,7 +23,7 @@ With the advent of writing systems and the invention of paper, duplicating infor
 
 <p align="justify">
 Today, as nearly every form of information is transformed into digital data, the technique of duplication is employed in computer technology  commonly referred to as replication. This process ensures that the replicated data maintains the same quality and integrity as the original.
-</p>
+<a href="https://www.geeksforgeeks.org/strategies-of-database-replication-system-design/">Read more here</a> </p>
 
 ## In-Summary, what will we do?
 
@@ -37,7 +37,7 @@ This repository provides a detailed, step-by-step guide for simulating database 
 This project represents my initial work on the Linux-Engineer-Applied-Practice repository and serves as an introductory gateway to access other simulations within the repository. You may skip this guide if you have already set up the server independently.
 </p>
 
-## Database Replication Use Cases
+## Database replication use cases
 
 <p align="justify">
 <Database replication is a critical technique in the field of information technology, enabling the duplication of data from one database (the master) to another (the slave). This process offers numerous advantages for various applications and businesses, particularly in enhancing data performance and availability. The following are common use cases for database replication:>
@@ -106,7 +106,7 @@ This project represents my initial work on the Linux-Engineer-Applied-Practice r
 <p align="center"><img src="/image-files/creating-mysqltable-phpmyadmin-1.png"></p>
 <!-- ![Image creating mysqltable](/image-files/creating-mysqltable-phpmyadmin-1.png) -->
 
-## <b>B. Creating a Sample Database </b>
+## <b>B. Creating a sample database </b>
 
 <p align="justify">
 4. For an example in step 3 I'm creating the database with a name <b>"id-lcm-prd1"</b> and also database table named <b>"penjualan_ikan"</b>. Why am I choosing that idea? I was thinking that it was the easiest example for anyone to understand. To give more context, you can see where is it comes from.
@@ -184,7 +184,7 @@ database.
 <p align="center"><img src="/image-files/mysql-insert-py-2.png"></p>
 <!-- ![Image of MySQL Insert Query success inserting data](/image-files/mysql-insert-py-2.png) -->
 
-## <b>C. Setup Database Export (mysqldump) - For the use case of Scaling-up the current database infrastructure </b>
+## <b>C. Setup database export (mysqldump) - For the use case of scaling-up the current database infrastructure </b>
 
 <p align="justify">
 11.   Before get in into replication tasks, when the condition of the current databases has the data in it what you should do is to <b>dump the current data in your databases outside (export the data)</b> with supportable format such as: SQL, CSV, JSON, XML & etc.
@@ -236,7 +236,7 @@ Avoid dropping the database, because the mysql dump that just backed-up only wor
 
 [**MySQL: How to Configure MySQL Master Slave Replication in MySQL Database**](https://www.youtube.com/watch?v=6VfE3XKXpTs)
 
-## <b>D. Setup Database Replication for a Master Server </b>
+## <b>D. Setup database replication for a master server </b>
 
 <p align="justify">
 15.  I'm going to start with typing ifconfig to print the master server host ip and changing some parameters in mysqld.cnf. In this step I'm keeping the bind-address to 0.0.0.0 because this is a simulation, when you are in real work you might be binding the address to a private ip in order to limit networks that has access into database.
@@ -264,7 +264,7 @@ Avoid dropping the database, because the mysql dump that just backed-up only wor
 <p align="center"><img src="/image-files/mysql-replica_set-up-2.png"></p>
 <!-- ![Image of mysql master status](/image-files/mysql-replica_set-up-2.png) -->
 
-## <b>E. Setup Database Replication for a Slave Server </b>
+## <b>E. Setup database replication for a slave server </b>
 
 <p align="justify">
 18.  This step is similar to number 15, only change the server-id from 1 to 2.
@@ -287,7 +287,7 @@ Avoid dropping the database, because the mysql dump that just backed-up only wor
 <p align="center"><img src="/image-files/mysql-replica_set-up-8.png"></p>
 <!-- ![Image of check slave status](/image-files/mysql-replica_set-up-8.png) -->
 
-## <b>F. Restore Master Server Database Data to Test Replication on Slave Server</b>
+## <b>F. Restore master server database data to test replication on slave server</b>
 
 <p align="justify">
 21.  In step 12, I have stored the database data inside /home/admintelecom. Now I'm gonna restore the database data back by importing this file using SQL syntax below.
