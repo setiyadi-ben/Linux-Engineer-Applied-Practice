@@ -33,19 +33,7 @@ This repository provides a detailed, step-by-step guide for simulating database 
 
 <p align="center"><img src="/image-files/databaseReplicationIntro.png"></p>
 
-<b>A. Installation and database setup</b> which involves server setup to build the required environment.
-<br>
-<b>B. Simulation of sending MySQL query data using Python</b> which involves configuring the MySQL database as a master server.
-<br>
-<b>C. Exporting Database Data (mysqldump)</b> for backing up the server data.
-<br>
-<b>D. Setup Database Replication for a Master Server.</b>
-<br>
-<b>E. Setup Database Replication for a Slave Server.</b>
-<br>
-<b>F. Restoring Master Server Database Data</b> to Tests the synchronization of replication data between the master and slave servers.
-
-<p align="justify"><br>
+<p align="justify">
 This project represents my initial work on the Linux-Engineer-Applied-Practice repository and serves as an introductory gateway to access other simulations within the repository. You may skip this guide if you have already set up the server independently.
 </p>
 
@@ -87,29 +75,28 @@ This project represents my initial work on the Linux-Engineer-Applied-Practice r
 
 ## Simulation steps:
 
-## <b>A. Installation and database setup </b>
+## <b>A. Installation </b>
 <p align="justify">
-I have make freedom from selecting those tools and materials I have provided above. So, I'm will straight to the things that are important below and I'm assuming you have understand the basics setup like installation process.
 </p>
 <p align="justify">
 1. Make sure you have installed the Linux OS with database inside the virtualization software.
-<a href="https://github.com/setiyadi-ben/Linux-Engineer-Applied-Practice/blob/main/Database-Replication-Simulation/terminal-command.md#01"><b>Commands are putting up here. If not loaded please refresh the browser.</b></a>
 </p>
 <!-- USING HTML TAG TO CENTER IMAGE, BECAUSE IN MID 2024 GITHUB DISABLE ALIGNMENT FOR IMAGE -->
 <p align="center"><img src="/image-files/installation-done.png"></p>
 <!-- ![Image when installation is successful](/image-files/installation-done.png) -->
-<p align="center"><img src="/image-files/installation-mysql-done.png"></p>
-<!-- ![Image when mysql installation is successful](/image-files/installation-mysql-done.png) -->
 
 <p align="justify">
 2. Create new user and also grant the permissions.
 <a href="https://github.com/setiyadi-ben/Linux-Engineer-Applied-Practice/blob/main/Database-Replication-Simulation/terminal-command.md#02"><b>Commands are putting up here. If not loaded please refresh the browser.</b></a>
 </p>
+
+<p align="center"><img src="/image-files/installation-mysql-done.png"></p>
+<!-- ![Image when mysql installation is successful](/image-files/installation-mysql-done.png) -->
 <p align="center"><img src="/image-files/creating-auth-user-pass.png"></p>
 <!-- ![Image when mysql installation is successful](/image-files/creating-auth-user-pass.png) -->
 
 <p align="justify">
-3. Install phpMyAdmin <b>(Optional if you want to skip point B)</b> to get easy access creating a database table for a use of master database that you can use phpmyadmin for GUI based or you just write syntax below inside myql terminal.
+3. Install phpMyAdmin, it is used to manage the database with the common functionality for CREATE, SHOW and DROP via interactive GUI.
 <a href="https://github.com/setiyadi-ben/Linux-Engineer-Applied-Practice/blob/main/Database-Replication-Simulation/terminal-command.md#03"><b>Commands are putting up here. If not loaded please refresh the browser.</b></a>
 </p>
 <p align="center"><img src="/image-files/installation-phpmyadmin-done.png"></p>
@@ -118,6 +105,8 @@ I have make freedom from selecting those tools and materials I have provided abo
 <!-- ![image creating new mysqldb](/image-files/creating-mysqldb-phpmyadmin-1.png) -->
 <p align="center"><img src="/image-files/creating-mysqltable-phpmyadmin-1.png"></p>
 <!-- ![Image creating mysqltable](/image-files/creating-mysqltable-phpmyadmin-1.png) -->
+
+## <b>B. Creating a Sample Database </b>
 
 <p align="justify">
 4. For an example in step 3 I'm creating the database with a name <b>"id-lcm-prd1"</b> and also database table named <b>"penjualan_ikan"</b>. Why am I choosing that idea? I was thinking that it was the easiest example for anyone to understand. To give more context, you can see where is it comes from.
@@ -145,14 +134,15 @@ In preview button on the bottom left, you can use that syntax output if you want
 <!-- ![Image When Creating mysql table is done](/image-files/creating-mysqltable-phpmyadmin-3.png) -->
 
 <p align="justify">
-7. Some of you might be wanted to try creating database and database table using MySQL query language. So, here it is I'm also provided below the second database inside terminal commands.
+7. Some of you might be wanted to try creating database and the table using MySQL query language. So, here it is I'm also provided below the second database inside terminal commands.
 <a href="https://github.com/setiyadi-ben/Linux-Engineer-Applied-Practice/blob/main/Database-Replication-Simulation/terminal-command.md#07"><b>Commands are putting up here. If not loaded please refresh the browser.</b></a>
 </p>
 <p align="center"><img src="/image-files/creating-mysqldb-and_table-1.png"></p>
 <!-- ![Image of creating database table using MySQL query](/image-files/creating-mysqldb-and_table-1.png) -->
 
+## <b>C. Simulate sending MySQL query data using Python </b>
+
 <p align="justify">
-<b>B. Simulate sending MySQL query data using Python </b><br><br>
 8. In this particular simulation, I'm going to make scenario like this:
 <br>- The database and the table we setup earlier is the server.
 <br>- We will access the database from outside the server using the remote ip
@@ -194,8 +184,9 @@ database.
 <p align="center"><img src="/image-files/mysql-insert-py-2.png"></p>
 <!-- ![Image of MySQL Insert Query success inserting data](/image-files/mysql-insert-py-2.png) -->
 
+## <b>C. Setup Database Export (mysqldump) - For the use case of Scaling-up the current database infrastructure </b>
+
 <p align="justify">
-<b>C. Setup Database Replication (mysqldump) - For the use case of Scaling-up the current databases infrastructure </b></br><br>
 11.   Before get in into replication tasks, when the condition of the current databases has the data in it what you should do is to <b>dump the current data in your databases outside (export the data)</b> with supportable format such as: SQL, CSV, JSON, XML & etc.
 </p>
 
@@ -245,7 +236,7 @@ Avoid dropping the database, because the mysql dump that just backed-up only wor
 
 [**MySQL: How to Configure MySQL Master Slave Replication in MySQL Database**](https://www.youtube.com/watch?v=6VfE3XKXpTs)
 
-<b>D. Setup Database Replication for a Master Server </b>
+## <b>D. Setup Database Replication for a Master Server </b>
 
 <p align="justify">
 15.  I'm going to start with typing ifconfig to print the master server host ip and changing some parameters in mysqld.cnf. In this step I'm keeping the bind-address to 0.0.0.0 because this is a simulation, when you are in real work you might be binding the address to a private ip in order to limit networks that has access into database.
@@ -273,7 +264,7 @@ Avoid dropping the database, because the mysql dump that just backed-up only wor
 <p align="center"><img src="/image-files/mysql-replica_set-up-2.png"></p>
 <!-- ![Image of mysql master status](/image-files/mysql-replica_set-up-2.png) -->
 
-<b>E. Setup Database Replication for a Slave Server </b>
+## <b>E. Setup Database Replication for a Slave Server </b>
 
 <p align="justify">
 18.  This step is similar to number 15, only change the server-id from 1 to 2.
@@ -296,7 +287,7 @@ Avoid dropping the database, because the mysql dump that just backed-up only wor
 <p align="center"><img src="/image-files/mysql-replica_set-up-8.png"></p>
 <!-- ![Image of check slave status](/image-files/mysql-replica_set-up-8.png) -->
 
-<b>F. Restore Master Server Database Data to Test Replication on Slave Server</b>
+## <b>F. Restore Master Server Database Data to Test Replication on Slave Server</b>
 
 <p align="justify">
 21.  In step 12, I have stored the database data inside /home/admintelecom. Now I'm gonna restore the database data back by importing this file using SQL syntax below.
