@@ -5,11 +5,23 @@
 
 <p align="justify">
 Everything begins with duplication, a concept commonly known as replication. This reflects my personal perspective on the evolution of human efforts to ensure that a piece or collection of information can be duplicated while preserving the quality of the original.
-</p><p align="justify">
+</p>
+
+<p align="center"><img src="/image-files/anotherSource/rabah-al-shammary-UBLQ_TLy82U-unsplash.jpg"></p>
+
+<p align="justify">
 In prehistoric times, when humans were unable to write, they expressed their memories, experiences, and imaginative insights through cave paintings. These early artistic endeavors captured observations of the natural world and served as a primitive means of recording information.
-</p><p align="justify">
+</p>
+
+<p align="center"><img src="/image-files/anotherSource/javaneseWriting.png"></p>
+
+<p align="justify">
 With the advent of writing systems and the invention of paper, duplicating information became significantly easier, as it could simply be reproduced by rewriting.
-</p><p align="justify">
+</p>
+
+<p align="center"><img src="/image-files/anotherSource/databaseReplication.png"></p>
+
+<p align="justify">
 Today, as nearly every form of information is transformed into digital data, the technique of duplication is employed in computer technology  commonly referred to as replication. This process ensures that the replicated data maintains the same quality and integrity as the original.
 </p>
 
@@ -18,6 +30,9 @@ Today, as nearly every form of information is transformed into digital data, the
 <p align="justify">
 This repository provides a detailed, step-by-step guide for simulating database replication on Linux, with a particular focus on MySQL database. The guide explains how to configure both master and slave servers <b>starting with preparing the environment, establish connections, exporting the current database data and synchronize data as "replica" to ensure redundancy.</b> The key steps are as follows:
 </p>
+
+<p align="center"><img src="/image-files/databaseReplicationIntro.png"></p>
+
 <b>A. Installation and database setup</b> which involves server setup to build the required environment.
 <br>
 <b>B. Simulation of sending MySQL query data using Python</b> which involves configuring the MySQL database as a master server.
