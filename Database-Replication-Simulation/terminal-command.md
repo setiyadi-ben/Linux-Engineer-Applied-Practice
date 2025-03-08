@@ -4,15 +4,15 @@
 
 ### What it is used --> Commands
 
-### Installing ifconfig
+### Install net tools
 
 ~~~bash
 sudo apt-get install net-tools
 ~~~
 <a id="01"></a>
-### (1.) Installing and configure MySQL Server
+### (1.) Install and configure MySQL server
 
-[**back to Database Replication Simulation**](/Database-Replication-Simulation/readme.md)
+[**back to Database Replication Simulation**](/Database-Replication-Simulation/readme.md#1)
 
 [**click here for details**](https://ubuntu.com/server/docs/install-and-configure-a-mysql-server)
 
@@ -27,10 +27,10 @@ sudo apt install mysql-server
 ~~~bash
 sudo service mysql status
 ~~~
-### (2.) Create a New User and Grant Permissions in MySQL
+### (2.) Create a new user and grant permissions in MySQL
 <a id="02"></a>
 
-[**back to Database Replication Simulation**](/Database-Replication-Simulation/readme.md)
+[**back to Database Replication Simulation**](/Database-Replication-Simulation/readme.md#2)
 
 [**click here for details**](https://www.digitalocean.com/community/tutorials/how-to-create-a-new-user-and-grant-permissions-in-mysql)
 
@@ -51,7 +51,7 @@ GRANT ALL PRIVILEGES ON*.*TO 'staff1-engineer'@'%' WITH GRANT OPTION;
 ### (3.) Installing phpMyAdmin
 <a id="03"></a>
 
-[**back to Database Replication Simulation**](/Database-Replication-Simulation/readme.md)
+[**back to Database Replication Simulation**](/Database-Replication-Simulation/readme.md#3)
 
 [**click here for details**](https://www.hostinger.com/tutorials/how-to-install-and-setup-phpmyadmin-on-ubuntu)
 ~~~
@@ -60,6 +60,8 @@ sudo apt-get install phpmyadmin
 
 ### (7.) Creating Database and Database Table using MySQL Query Syntax
 <a id="07"></a>
+
+[**back to Database Replication Simulation**](/Database-Replication-Simulation/readme.md#7)
 
 **Creating database using MySQL Query**
 ~~~sql
@@ -85,7 +87,7 @@ pip install mysql-connector-python
 ~~~
 **Configure MySQL to Listen on All Interfaces**
 
-[**back to Database Replication Simulation**](/Database-Replication-Simulation/readme.md)
+[**back to Database Replication Simulation**](/Database-Replication-Simulation/readme.md#9)
 ~~~bash
 sudo nano /etc/mysql/mysql.conf.d/mysqld.cnf
 ~~~
@@ -96,14 +98,12 @@ bind-address = 0.0.0.0
 
 **Check hosts binding addresses**
 
-[**back to Database Replication Simulation**](/Database-Replication-Simulation/readme.md)
 ~~~bash
 netstat -tan
 ~~~
 
 **Test database connections from remote address**
 
-[**back to Database Replication Simulation**](/Database-Replication-Simulation/readme.md)
 
 **mysql-test-connections.py** - [Click here to view code](/Database-Replication-Simulation/mysql-test-connections.py)
 
@@ -117,10 +117,10 @@ python mysql-test-connections.py
 python mysql-insert_data.py
 ~~~
 
-[**back to Database Replication Simulation**](/Database-Replication-Simulation/readme.md)
-
 ### (12.) Database dump using SQL query syntax
 <a id="12"></a>
+
+[**back to Database Replication Simulation**](/Database-Replication-Simulation/readme.md#12)
 
 ~~~bash
 sudo mysqldump -u staff1-engineer -p id-lcm-prd1 > sql_dump-db_id-lcm-prd1.sql
@@ -145,11 +145,12 @@ drop table `penjualan_ikan`;
 ### (15 to 24.) Access mysqld.cnf to enable multiple parameters on master server
 <a id="15"></a>
 
+[**back to Database Replication Simulation**](/Database-Replication-Simulation/readme.md#15)
 ~~~
 sudo nano /etc/mysql/mysql.conf.d/mysqld.cnf
 ~~~
 
-- Master Server Configuration
+## - Master server configuration
 
 **Scroll to the bottom and un-tick the following in Master Server:**
 ~~~nano
@@ -179,7 +180,7 @@ SELECT HOST, USER FROM mysql.user;
 sudo mysql -h 192.168.129.129 -u replica-bot -p
 ~~~
 
-**Pinpoint the value of mysql master status**
+**Pinpoint the value of MySQL master status**
 ~~~
 SHOW MASTER STATUS \G
 ~~~
@@ -194,7 +195,10 @@ sudo nano /etc/mysql/mysql.conf.d/mysqld.cnf
 sudo systemctl restart mysql
 ~~~
 
-- Slave server configuration
+## - Slave server configuration
+<a id="18"></a>
+
+[**back to Database Replication Simulation**](/Database-Replication-Simulation/readme.md#18)
 
 **Scroll to the bottom and un-tick the following on Slave Server:**
 ~~~nano
@@ -212,7 +216,7 @@ sudo systemctl restart mysql
 sudo mysql -u root -p
 ~~~
 
-**Slave Server configuration in order to replicate data from Master Server**
+**Slave Server configuration in order to replicate data from master server**
 ~~~sql
 STOP SLAVE;
 ~~~
@@ -229,7 +233,10 @@ START SLAVE;
 SHOW SLAVE STATUS\G
 ~~~
 
-- Restoring Data form Master Server
+## - Restoring data from master server
+<a id="21"></a>
+
+[**back to Database Replication Simulation**](/Database-Replication-Simulation/readme.md#21)
 
 **Restore Master Server Database Data**
 ~~~bash
@@ -244,7 +251,7 @@ USE `id-lcm-prd1`;
 SHOW TABLES;
 ~~~
 
-- Check the Replication Data Delivery into the Slave Server
+## - Check the replication data delivery into the slave server
 ~~~sql
 SHOW REPLICA STATUS \G
 ~~~

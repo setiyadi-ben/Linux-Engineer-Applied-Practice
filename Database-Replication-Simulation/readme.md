@@ -76,6 +76,7 @@ This project represents my initial work on the Linux-Engineer-Applied-Practice r
 ## Simulation steps:
 
 ## <b>A. Installation </b>
+<a id="01"></a>
 <p align="justify">
 </p>
 <p align="justify">
@@ -86,6 +87,7 @@ This project represents my initial work on the Linux-Engineer-Applied-Practice r
 <!-- ![Image when installation is successful](/image-files/installation-done.png) -->
 
 <p align="justify">
+<a id="02"></a>
 2. Create new user and also grant the permissions.
 <a href="https://github.com/setiyadi-ben/Linux-Engineer-Applied-Practice/blob/main/Database-Replication-Simulation/terminal-command.md#02"><b>Commands are putting up here. If not loaded please refresh the browser.</b></a>
 </p>
@@ -96,6 +98,7 @@ This project represents my initial work on the Linux-Engineer-Applied-Practice r
 <!-- ![Image when mysql installation is successful](/image-files/creating-auth-user-pass.png) -->
 
 <p align="justify">
+<a id="03"></a>
 3. Install phpMyAdmin, it is used to manage the database with the common functionality for CREATE, SHOW and DROP via interactive GUI.
 <a href="https://github.com/setiyadi-ben/Linux-Engineer-Applied-Practice/blob/main/Database-Replication-Simulation/terminal-command.md#03"><b>Commands are putting up here. If not loaded please refresh the browser.</b></a>
 </p>
@@ -134,6 +137,7 @@ In preview button on the bottom left, you can use that syntax output if you want
 <!-- ![Image When Creating mysql table is done](/image-files/creating-mysqltable-phpmyadmin-3.png) -->
 
 <p align="justify">
+<a id="07"></a>
 7. Some of you might be wanted to try creating database and the table using MySQL query language. So, here it is I'm also provided below the second database inside terminal commands.
 <a href="https://github.com/setiyadi-ben/Linux-Engineer-Applied-Practice/blob/main/Database-Replication-Simulation/terminal-command.md#07"><b>Commands are putting up here. If not loaded please refresh the browser.</b></a>
 </p>
@@ -153,6 +157,7 @@ database.
 
 
 <p align="justify">
+<a id="09"></a>
 9. To be able to perform the simulation, you need to have python installed in PATH, install mysql-connector, allowing the firewall inside the database server and having the syntax to be able to perform MySQL query. Below here you can pay attention to make sure you will not mess up with a bunch of errors.
 <a href="https://github.com/setiyadi-ben/Linux-Engineer-Applied-Practice/blob/main/Database-Replication-Simulation/terminal-command.md#09"><b>Commands are putting up here. If not loaded please refresh the browser.</b></a>
 </p>
@@ -194,6 +199,7 @@ database.
 12.   To simulate SQL dump or you can say export database, I have provided 2 methods using phpMyAdmin via web GUI and using SQL query syntax using in bash shell.
 </p>
 <p align="center"><b>Using phpMyAdmin</b></p>
+<a id="12"></a>
 <p align="center"><img src="/image-files/mysql-dump-data-1_phpmyadmin.png"></p>
 <!-- ![Image of database dump using phpMyAdmin-1](/image-files/mysql-dump-data-1_phpmyadmin.png) -->
 <p align="center"><img src="/image-files/mysql-dump-data-2_phpmyadmin.png"></p>
@@ -239,6 +245,7 @@ Avoid dropping the database, because the mysql dump that just backed-up only wor
 ## <b>D. Setup database replication for a master server </b>
 
 <p align="justify">
+<a id="15"></a>
 15.  I'm going to start with typing ifconfig to print the master server host ip and changing some parameters in mysqld.cnf. In this step I'm keeping the bind-address to 0.0.0.0 because this is a simulation, when you are in real work you might be binding the address to a private ip in order to limit networks that has access into database.
 <a href="https://github.com/setiyadi-ben/Linux-Engineer-Applied-Practice/blob/main/Database-Replication-Simulation/terminal-command.md#15"><b>Commands are putting up here. If not loaded please refresh the browser.</b></a>
 </p>
@@ -267,6 +274,7 @@ Avoid dropping the database, because the mysql dump that just backed-up only wor
 ## <b>E. Setup database replication for a slave server </b>
 
 <p align="justify">
+<a id="18"></a>
 18.  This step is similar to number 15, only change the server-id from 1 to 2.
 </p>
 <p align="center"><img src="/image-files/mysql-replica_set-up-6.png"></p>
@@ -290,6 +298,7 @@ Avoid dropping the database, because the mysql dump that just backed-up only wor
 ## <b>F. Restore master server database data to test replication on slave server</b>
 
 <p align="justify">
+<a id="21"></a>
 21.  In step 12, I have stored the database data inside /home/admintelecom. Now I'm gonna restore the database data back by importing this file using SQL syntax below.
 </p>
 <p align="center"><img src="/image-files/mysql-replica_restore-data-1.png"></p>
