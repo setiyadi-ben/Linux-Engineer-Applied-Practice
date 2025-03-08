@@ -18,7 +18,7 @@ There are several fields that are included in [**Linux Engineering Roles**](/Lin
 
 Currently, **my learning path are starting from Database Administration** to understand the concept of how data are flowing and stored. **Next, learning about Software Development and Scripting,** focusing in **Web Application Development using Java** as main programming language. In order to make the software is accessible by the customer with a GUI (Graphical User Interface) form. Why using Java? Because you are Javanese person, so it's a must.
 ## Database Administration
-#### [**1. Database Replication Simulation (completed | waiting for revisions)**](/Database-Replication-Simulation/readme.md)
+#### [**1. Database Replication Simulation ✅**](/Database-Replication-Simulation/readme.md)
 
 ## Software Development and Scripting
 #### [**1. Java-Webapps-Simulation (in-progress, still learning | ~~REST API~~,)**](/Java-Webapps-Simulation/Java-Procedure.md)
