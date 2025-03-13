@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  webserver:
+    build: .
+    container_name: my-container
+    ports:
+      - "443:443"
+      - "8443:8443"
+    restart: always
+    volumes:
+      - ./website_ssl.conf:/etc/apache2/sites-available/website_ssl.conf
+      - ./index.html:/var/www/html/index.html
+      - ./deployedWebapps.html:/var/www/html/deployedWebapps.html
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+    command: ["/entrypoint.sh"]
