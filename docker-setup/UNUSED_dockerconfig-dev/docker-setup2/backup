@@ -1,0 +1,69 @@
+# Use Ubuntu as base image
+FROM ubuntu:latest
+
+# Set non-interactive mode to bypass prompts
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install required packages
+RUN apt update && apt install -y \
+    net-tools \
+    mysql-server \
+    default-jdk \
+    apache2 \
+    wget \
+    unzip \
+    openssl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Preconfigure phpMyAdmin
+RUN echo "phpmyadmin phpmyadmin/dbconfig-install boolean true" | debconf-set-selections && \
+    echo "phpmyadmin phpmyadmin/app-password-confirm password root" | debconf-set-selections && \
+    echo "phpmyadmin phpmyadmin/mysql/admin-pass password root" | debconf-set-selections && \
+    echo "phpmyadmin phpmyadmin/mysql/app-pass password root" | debconf-set-selections && \
+    echo "phpmyadmin phpmyadmin/reconfigure-webserver multiselect apache2" | debconf-set-selections
+
+# Install phpMyAdmin
+RUN apt update && apt install -y phpmyadmin
+
+# Enable Apache SSL
+RUN mkdir -p /etc/ssl/private \
+    && openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/apache-selfsigned.key -out /etc/ssl/certs/apache-selfsigned.crt \
+    && cp website_ssl.conf /etc/apache2/sites-available/website_ssl.conf \
+    && a2ensite website_ssl.conf && a2enmod ssl
+
+# Copy website monitoring pages
+COPY index.html /var/www/html/index.html
+COPY deployedWebapps.html /var/www/html/deployedWebapps.html
+
+# Copy MySQL and startup configurations
+COPY mysqld.cnf /etc/mysql/mysql.conf.d/mysqld.cnf
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
+
+# Install Apache Tomcat manually in /opt/tomcat
+RUN wget https://raw.githubusercontent.com/setiyadi-ben/Linux-Engineer-Applied-Practice/main/installer/apache-tomcat-10.1.34.tar.gz -O /tmp/tomcat.tar.gz \
+    && mkdir -p /opt/tomcat \
+    && tar -xvzf /tmp/tomcat.tar.gz -C /opt/tomcat --strip-components=1 \
+    && rm -rf /tmp/tomcat.tar.gz \
+    && useradd -m -d /opt/tomcat -U -s /bin/false tomcat \
+    && chown -R root:root /opt/tomcat \
+    && chmod +x /opt/tomcat/bin/*.sh
+
+# Generate SSL Certificate for Tomcat
+RUN keytool -genkey -alias tomcat -keyalg RSA \
+    -keystore /opt/tomcat/conf/localhost-rsa.jks \
+    -storepass tomcatpassword -validity 365 \
+    -dname "CN=ubuntux64server-master, OU=TELECOM ISP, O=SECURE-NET SEMARANG, L=KOTA SEMARANG, ST=JAWA TENGAH, C=ID"
+
+# Replace Tomcat configuration files | SSL PORT 8443
+COPY tomcat-users.xml /opt/tomcat/conf/tomcat-users.xml
+COPY context.xml /opt/tomcat/webapps/manager/META-INF/context.xml
+COPY context.xml /opt/tomcat/webapps/host-manager/META-INF/context.xml
+COPY server.xml /opt/tomcat/conf/server.xml
+
+# Expose necessary ports (443 for Apache, 8443 for Tomcat SSL)
+EXPOSE 443 8443
+
+# Default command to start services
+CMD ["/entrypoint.sh"]
