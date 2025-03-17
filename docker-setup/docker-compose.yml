@@ -1,3 +1,5 @@
+# Tips: When using docker desktop (windows use LF bottom right corner VsCode)
+#       Linux  uses CRLF
 version: '3.8'
 
 services:
