@@ -1,0 +1,63 @@
+# Tips: When using docker desktop (windows use LF bottom right corner VsCode)
+# Linux  uses CRLF
+services:
+  mysql:
+    ports:
+      - "3306:3306"
+    build: ./mysql
+    volumes:
+      - mysql:/var/lib/mysql
+    networks:
+      - backend
+
+  apache2:
+    build: ./apache2
+    ports:
+      - "443:443"
+    volumes:
+      - apache2_certs:/etc/ssl/certs
+      - apache2_keys:/etc/ssl/private
+    depends_on:
+      - mysql
+      - tomcat
+    networks:
+      - backend
+      - frontend
+
+  tomcat:
+    build: ./tomcat
+    ports:
+      - "8443:8443"
+    volumes:
+      - tomcat_certs:/opt/tomcat/conf
+      - tomcat_cached_webapps:/opt/tomcat/webapps
+
+    networks:
+      - backend
+      - frontend
+
+  phpmyadmin:
+    build: ./pma
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_ABSOLUTE_URI: https://localhost/phpmyadmin/
+    networks:
+      - frontend
+      - backend
+    depends_on:
+      - mysql
+
+volumes:
+  mysql:
+  apache2_certs:
+  apache2_keys:
+  apache2_web_files:
+  tomcat_certs:
+  tomcat_cached_webapps:
+
+networks:
+  frontend:
+    driver: bridge
+  backend:
+    driver: bridge
