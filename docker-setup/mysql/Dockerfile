@@ -10,7 +10,7 @@ FROM ubuntu/mysql:latest
 COPY init.sql /docker-entrypoint-initdb.d/
 
 # 4. Declare volumes to persist both the database data and the init.sql file
-VOLUME [ "/var/lib/mysql", "/docker-entrypoint-initdb.d" ]
+VOLUME [ "/var/lib/mysql"]
 
 # 5. Expose MySQL port
 EXPOSE 3306
