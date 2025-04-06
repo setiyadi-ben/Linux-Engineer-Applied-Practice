@@ -41,5 +41,8 @@ COPY context.xml /opt/tomcat/webapps/examples/META-INF/context.xml
 # 9. Home directory, in order to place the files into
 WORKDIR /opt/tomcat
 
+# 10. Caching /opt/tomcat/webapps in order to save time without redeploying webapps.
+VOLUME ["/opt/tomcat/webapps"]
+
 # 10. Notify the admin that apache2 running in https mode on port 8443
 EXPOSE 8443
