@@ -1,0 +1,90 @@
+<!-- Dont forget to type sudo chmod -R 777 /var/www
+for enabling write permission -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linux-Engineer-Applied-Practice Dashboard</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #1e1e1e;
+            color: white;
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        .typing-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .typing-line {
+            overflow: hidden;
+            white-space: nowrap;
+            margin: 5px auto;
+            letter-spacing: .15em;
+            display: inline-block;
+            opacity: 0;
+        }
+        .typing-line.done {
+            border-right: none;
+        }
+        @keyframes typing {
+            from { width: 0; opacity: 1; }
+            to { width: 100%; opacity: 1; }
+        }
+        .shortcuts {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        .shortcuts a {
+            text-decoration: none;
+            color: white;
+            background: #333;
+            padding: 15px 30px;
+            border-radius: 5px;
+            transition: transform 0.2s, background 0.3s;
+        }
+        .shortcuts a:hover {
+            transform: scale(1.1);
+            background: magenta;
+        }
+    </style>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const lines = document.querySelectorAll(".typing-line");
+            let delay = 0;
+            lines.forEach((line, index) => {
+                setTimeout(() => {
+                    line.style.animation = `typing ${2 + index}s steps(40, end) forwards`;
+                    line.style.opacity = "1";
+                    setTimeout(() => {
+                        line.classList.add("done");
+                    }, (2 + index) * 1000);
+                }, delay);
+                delay += (2 + index) * 1000;
+            });
+        });
+    </script>
+</head>
+<body>
+    <div class="typing-container">
+        <h1 class="typing-line">Hi! staff1-engineer.</h1>
+        <h3 class="typing-line">Welcome to ubuntux64server-master (dockerized).</h3>
+        <h3 class="typing-line"><b>This dashboard is compiled from</b></h3>
+        <h3 class="typing-line"><b>Linux-Engineer-Applied-Practice</b></h3>
+    </div>
+    <div class="shortcuts">
+        <a href="https://localhost/phpmyadmin/" target="_blank">phpMyAdmin</a>
+        <a href="https://localhost:8443/" target="_blank">Apache Tomcat</a>
+        <a href="https://localhost/deployedWebapps.html" target="_blank">Deployed WebApps</a>
+    </div>
+</body>
+</html>
