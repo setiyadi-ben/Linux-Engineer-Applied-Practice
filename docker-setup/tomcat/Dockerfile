@@ -28,7 +28,8 @@ ENTRYPOINT ["/entrypoint.sh"]
 CMD ["/opt/tomcat/bin/catalina.sh", "run"]
 
 # 7. Saving the generated free unsecure HTTPS SSL certificate into docker volume
-VOLUME ["/opt/tomcat/conf"]
+# Uncomment when only want to run without DOCKER COMPOSE
+# VOLUME ["/opt/tomcat/conf"]
 
 # 8. Replace Tomcat configuration files | To SSL PORT 8443 running
 COPY tomcat.service /etc/systemd/system/tomcat.service
@@ -42,7 +43,8 @@ COPY context.xml /opt/tomcat/webapps/examples/META-INF/context.xml
 WORKDIR /opt/tomcat
 
 # 10. Caching /opt/tomcat/webapps in order to save time without redeploying webapps.
-VOLUME ["/opt/tomcat/webapps"]
+# Uncomment when only want to run without DOCKER COMPOSE
+# VOLUME ["/opt/tomcat/webapps"]
 
 # 10. Notify the admin that apache2 running in https mode on port 8443
 EXPOSE 8443
