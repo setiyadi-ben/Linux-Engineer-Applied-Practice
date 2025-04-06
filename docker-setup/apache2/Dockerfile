@@ -24,7 +24,11 @@ ENTRYPOINT ["/entrypoint.sh"]
 CMD ["apache2ctl", "-D", "FOREGROUND"]
 
 # 8. Saving the generated free unsecure HTTPS SSL certificate into docker volume
-VOLUME ["/etc/ssl/certs", "/etc/ssl/private"]
+# Uncomment when only want to run without DOCKER COMPOSE
+# VOLUME ["/etc/ssl/certs", "/etc/ssl/private"]
 
-# 9. Notify the admin that apache2 running in https mode on port 443
+# 9. Replace the main apache html files with l-e-a-p progress homepage
+COPY ./web_files /var/www/html
+
+# 10. Notify the admin that apache2 running in https mode on port 443
 EXPOSE 443
