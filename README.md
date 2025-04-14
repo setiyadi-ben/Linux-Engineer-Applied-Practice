@@ -30,7 +30,7 @@ Software as a Service (SaaS) is traditionally considered a cloud-based software 
 #### [**1. Database Replication Simulation ✅**](/Database-Replication-Simulation/readme.md)
 
 ### System Administration
-#### [**1. Java-Webapps-Deployment (in-progress)**](/Java-Webapps-Deployment/procedures.md)
+#### [**1. Java-Webapps-Deployment (in-progress)**](/Java-Webapps-Deployment/procedure.md)
 
 #### **2. Java-Webapps-Monitoring (not started yet)**
 
