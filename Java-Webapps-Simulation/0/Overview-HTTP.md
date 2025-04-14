@@ -1,6 +1,6 @@
 # Java Web Application Deployment using Apache HTTP and Apache Tomcat
 ## [**back to Linux-Engineer-Applied-Practice**](/README.md)
-### [**back to Java Procedure**](/Java-Webapps-Simulation/Java-Procedure.md)
+### [**back to Java Procedure**](/Java-Webapps-Simulation/procedure.md)
 ## Overview
 
 This guide explains the setup for deploying Java web applications using Apache Tomcat and Apache HTTP server. The architecture ensures efficient handling of customer requests, security, and scalability.
