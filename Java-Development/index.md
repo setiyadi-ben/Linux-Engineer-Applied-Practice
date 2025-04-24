@@ -16,8 +16,10 @@ Before starting to develop apps or web apps, here is a step-by-step guide that I
 
 #### 1. Java theories can be found in <a href="/Additional-Notes/Table-of-Contents.md">/Additional-Notes/Table-of-Contents.md</a>
 
-#### 2. Installing Java JDK in windows can be found in <a href="/Java-Development/java-jdk-maven-installation.md">/Java-Development/java-jdk-maven-installation.md</a>
+#### 2. Installing Java JDK in windows can be found in <a href="/Java-Development/java-jdk-maven_installation.md">/Java-Development/java-jdk-maven-installation.md</a>
 
-#### 3. IDE setup can be found in <a href="/Java-Development/IDE-setup">/Java-Development/IDE-setup</a>
+#### 3. IDE setup can be found in <a href="/Java-Development/IDE_setup.md">/Java-Development/IDE_setup</a>
 
-#### 5. Results? you can build and run these lists of apps below: (not started yet)
+#### 4. Wanted to buy PZN courses? <a href="https://www.udemy.com/user/eko-kurniawan/">Check this out!</a> The audio is using Indonesian.
+
+#### 5. Results? You can build and run these lists of apps below: (not started yet)

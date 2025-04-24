@@ -40,5 +40,5 @@ Software as a Service (SaaS) is traditionally considered a cloud-based software 
 ## 2. Containerization System (Docker)
 - Running all services from monolithic systems using doker-compose.yml
 
-## - Development Cycle using Java
+## - Development using Java
 - [On the go learning Java programming](/Java-Development/index.md)

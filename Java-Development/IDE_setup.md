@@ -1,6 +1,6 @@
 # Choosing Code Editor and Skeleton Project for Java
 ## [**back to Linux-Engineer-Applied-Practice**](/README.md)
-### [**back to Java Procedure**](/Java-Webapps-Simulation/Java-Procedure.md)
+### [**back to Java-Development**](/Java-Development/index.md)
 
 ## Skeleton Project 
 In summary, a skeleton project, especially in the context of Spring Boot and Maven Archetypes, is a ready-to-use project template that helps you kickstart your application development with a predefined structure and configuration, ensuring consistency and saving time in the setup phase.
@@ -47,10 +47,10 @@ From what I have been researching various tutorials on YouTube, I'm deciding to 
 3. **Generate and Download the Project**
    - Click "Generate" and download the ZIP file.
 
-## Development Process
+## My learning progressions:
 
-### 1. Spring Tools 4 - Eclipse IDE [(click here)](../Dev-Project/SpringTools4_Eclipse/springTools.md)
+### 1. Spring Tools 4 - Cameron McKenzie Tutorial [(click here)](/Java-Development/Dev-Project/SpringTools4_Eclipse/springTools.md)
 
-### 2. Spring Tools Initializr Extension & Web - VSCode [(click here)](../Dev-Project/SpringInitializr_Vscode/springInit.md)
+### 2. Visual Studio Code - PZN Tutorial [(click here)](/Java-Development/Dev-Project/VisualStudioCode/java-vscode_readme.md)
 
-### 3. Maven Archetype - IntelliJ Community [(click here)](../Dev-Project/MavenArchetype_IntellijCommunity/mavenArch.md)
+### ~~3. Maven Archetype - IntelliJ Community (deprecated)~~
