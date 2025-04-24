@@ -3,5 +3,6 @@
         "Database-Replication-Simulation"
     ],
     "python.testing.unittestEnabled": false,
-    "python.testing.pytestEnabled": true
+    "python.testing.pytestEnabled": true,
+    "java.compile.nullAnalysis.mode": "automatic"
 }
