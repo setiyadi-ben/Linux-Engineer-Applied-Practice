@@ -16,7 +16,7 @@ public class HelloWorld {
  
  dir
  
- javac HelloWorld.java
+ java HelloWorld.java
  
  C:/github/Linux-Engineer-Applied-Practice/image-files/java/HelloWorld.png
  
