@@ -1,13 +1,15 @@
-# Installing Java SDK or OpenJDK and Apache Maven on Windows.
+# Installing Java SDK OpenJDK and Apache Maven.
 ## [**back to Linux-Engineer-Applied-Practice**](/README.md)
-### [**back to Java Procedure**](/Java-Webapps-Simulation/Java-Procedure.md)
+### [**back to Java-Development**](/Java-Development/index.md)
 
-**Note:** If you have another OS besides Windows, search for an alternative that matches your system.
+**Note:** If you have another OS besides Windows or Ubuntu Linux, search for an alternative that matches your system.
+
+# On Windows
 
 ## Install OpenJDK
 
 <left>
-1. Open any search engine and put keyword "openjdk or java sdk". If you version has a newer version, then you can click on the red mark to proceed into download page.
+1. Open any search engine and put keyword "openjdk or java sdk". If you version has a newer version, then you can click on the red mark to proceed into download page. Or you can directly visit https://jdk.java.net
 <center> 
 
 ![Download OpenJDK](/image-files/jdk-win-install-1.png)
@@ -63,3 +65,18 @@
 
 ![maven verify](/image-files/maven-install-4.png)
 </center></left>
+
+# On Ubuntu Linux
+
+1. Download the JDK with the same step as Windows does.
+
+2. Download the tarball file for linux
+<p align="center"><img src="/image-files/java-jdk-tarball.png"></p>
+
+3. Place the ```openjdk-*_linux-x64_bin.tar.gz``` in the same directory as ```install_jdk_linux.sh```. And then give permission and execute this command below.
+<p align="center"><img src="/image-files/java-jdk-ubuntulinux-install.png"></p>
+
+```
+sudo chmod +x install_jdk_linux.sh
+./install_jdk_linux.sh
+```
