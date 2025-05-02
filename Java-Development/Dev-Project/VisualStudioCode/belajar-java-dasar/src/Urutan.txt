@@ -1,0 +1,10 @@
+Konten Kursus.
+
+Bagian 1: Java Dasar
+1. HelloWorld.java
+2. TipeDataNumber.java
+3. KonversiNumber.java
+4. TipeDataChar.java
+5. TipeDataBoolean.java
+6. Tipe DataString.java
+
