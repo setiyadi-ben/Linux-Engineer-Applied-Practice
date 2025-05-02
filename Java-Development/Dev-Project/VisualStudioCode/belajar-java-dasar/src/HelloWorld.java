@@ -1,4 +1,5 @@
-
+// Penamaan class dan 01_HelloWorld tidak dapat diaplikasikan
+// karena aturan penamaan class mengikuti standar spesifikasi seperti ini: https://www.oracle.com/java/technologies/javase/codeconventions-namingconventions.html
 public class HelloWorld {
 	public static void main(String[] args) {
 		// CODE PROGRAM
