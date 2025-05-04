@@ -46,8 +46,11 @@ public class Variable {
         System.out.println(lastName);
         System.out.println(id);
 
-        // 4. CARA KE EMPAT 
-
+        // 4. CARA KEEMPAT MENGGUNAKAN FINAL UNTUK MENYIMPAN DATA PERMANEN
+        // DI bahasa pemrogramman lain ini disebut dengan konstan atau const
+        // Contoh penerapan
+        final String namae = "Setiyadi_Ben";
+        System.out.println(namae);
 
     }
 
