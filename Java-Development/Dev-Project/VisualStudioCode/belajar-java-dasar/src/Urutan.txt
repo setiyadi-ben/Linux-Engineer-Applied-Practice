@@ -7,4 +7,5 @@ Bagian 1: Java Dasar
 4. TipeDataChar.java
 5. TipeDataBoolean.java
 6. Tipe DataString.java
-
+7. Variable.java (Tipe data primitif)
+8. TipeDataBukanPrimitif.java
