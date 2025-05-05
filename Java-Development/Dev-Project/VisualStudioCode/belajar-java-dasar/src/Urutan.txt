@@ -9,3 +9,4 @@ Bagian 1: Java Dasar
 6. Tipe DataString.java
 7. Variable.java (Tipe data primitif)
 8. TipeDataBukanPrimitif.java
+9. Array.java
