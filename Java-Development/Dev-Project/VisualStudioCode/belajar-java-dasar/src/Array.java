@@ -5,7 +5,7 @@ public static void main(String[] args) {
     // Jumlah data di Array tidak bisa berubah setelah pertama kali dibuat
 
     // CARA KERJA ARRAY
-    // misalkan ingin membuat baris array sebanyak 10, maka csrs untuk mengaksesnya
+    // misalkan ingin membuat baris array sebanyak 10, maka cara untuk mengaksesnya
     // ialah dengan mengurangi 1 dari index yang ingin dicari
     // misalnya untuk mengakses 10 maka gunakan [9] 
     
@@ -28,11 +28,23 @@ public static void main(String[] args) {
     // Di java tidak ada cara untuk menghapus array
     // yang bisa dilakukan ialah mengubah nilai array menjadi 0 atau null
 
+    
+    // OPERASI DI ARRAY
+    /*
+    array[index] ---> Mengambil data di array
+    array[index] = value ---> Mengubah data di array
+    array.length ---> mengambil panjang array
+    */
+
     // format 2 - memasukkan kumpulan data array secara langsung (array initializer)
     String[] namaLengkap = {
         "Eko","Kurniawan","Khannedy"
     };
-    //System.out.println(namaLengkap[0]);
+    System.out.println(namaLengkap[0]);
+    // Implementasi penghapusan data array | data array tidak bisa dihapus tetapi bisa
+    // dikosongkan dengan menggunakan value: 0, null, dan false. 
+    namaLengkap [0]= null;
+    System.out.println(namaLengkap[0]);
 
 
     int[] arrayInt = new int[]{
@@ -44,14 +56,21 @@ public static void main(String[] args) {
         10L,20L,30L
     };
     System.out.println(arrayLong.length);
+    // Implementasi penghapusan data array | data array tidak bisa dihapus tetapi bisa
+    // dikosongkan dengan menggunakan value: 0, null, dan false.
+    arrayLong [0]=0;
+    System.out.println(arrayLong);
+
+    // format 3 - memasukkan array dalam array
+    String[][] members ={
+        {"Eko", "Kurniawan", "Khannedy"},
+        {"Benny", "Hartanto", "Setiyadi"},
+        {}
+    };
 
 
-    // OPERASI DI ARRAY
-    /*
-    array[index] ---> Mengambil data di array
-    array[index] = value ---> Mengubah data di array
-    array.length ---> mengambil panjang array
-    */
+
+ 
 
 
 }
