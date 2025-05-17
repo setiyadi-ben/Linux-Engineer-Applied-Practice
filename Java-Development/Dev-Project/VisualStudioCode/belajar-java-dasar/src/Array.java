@@ -65,13 +65,45 @@ public static void main(String[] args) {
     String[][] members ={
         {"Eko", "Kurniawan", "Khannedy"},
         {"Benny", "Hartanto", "Setiyadi"},
-        {}
+        {"Faris"},
+        {"Farid"},
+        {"Faris", "Franky", "Fluffy", "Kirk"}
     };
+    System.out.println(members[0][1]);
+    System.out.println(members[1][0]);
+    System.out.println(members[2][0]);
+    // Bisa akses dengan variasi dibawah ini
+    System.out.println(members[3][0]);
+    System.out.println(members[4][3]);
+    // Contoh tidak bisa akses
+   //System.out.println(members[2][2]);
 
 
-
- 
-
-
+    // format 4 - menggunakan format 3d dalam array, thanks to @~~Movlution~~~/Mainra
+    String[][][] anggota ={ // first 2d layer
+    {
+        {"Miqdad", "Dad", "Rughby"},
+        {"Walles", "Benr", "Sphinx"},
+        {"Waldo", "Rocky", "Freyz"},
+    },
+    {// 2nd 2d layer
+        {"Tire", "Sparkplug", "Oil"},
+        {"Bumper", "Brakes", "Atang"},
+        {"Flank", "Fryd", "Furry"}
+    }
+};
+// Accessing and printing elements
+for (int i = 0; i < anggota.length; i++) {
+    System.out.println("Layer " + i + ":");
+    for (int j = 0; j < anggota[i].length; j++) {
+        for (int k = 0; k < anggota[i][j].length; k++) {
+            System.out.print(anggota[i][j][k] + " ");
+        }
+        System.out.println(); // New line after each row
+    }
+    System.out.println(); // New line between layers
 }
 }
+}
+
+//System.out.println();
