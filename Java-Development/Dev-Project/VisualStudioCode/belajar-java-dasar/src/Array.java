@@ -79,6 +79,9 @@ public static void main(String[] args) {
    //System.out.println(members[2][2]);
 
 
+   // TO UNDERSTAND THESE BELOW READ Urutan.txt
+   // At line 10, 11 and 12
+
     // format 4 - menggunakan format 3d dalam array, thanks to @~~Movlution~~~/Mainra
     String[][][] anggota ={ // first 2d layer
     {
