@@ -33,5 +33,32 @@ public class EkspresiStatementBlock {
         // Object creation statement
         // Date date = new Date();
 
+        /*
+         - Block merupakan kumpulan statement yang terdiri dari 0 atau lebih statement\
+         - Block diawali dengan kurung kurawal {}
+         */
+        // Contoh block
+        {
+            System.out.println("Hello world 1");
+            System.out.println("Hello world 2");
+            System.out.println("Hello world 3");
+
+            // Contoh block didalam block
+            {
+                System.out.println("Hello world 4");
+                System.out.println("Hello world 5");
+                System.out.println("Hello world 6");
+
+                {
+                    {
+                        {
+                            // bisa dilanjut terus sampai delama palung mariana;
+                            // Fungsi dasar dari block ini adalah untuk meng-group beberpa statement agar lebih terorganisir
+                        }
+                    }
+                }
+            } 
+        }
+
     }
 }
