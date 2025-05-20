@@ -18,3 +18,4 @@ Bagian 1: Java Dasar
 15. SwitchStatement.java
 16. TernaryOperator.java
 17. ForLoop.java
+18. WhileLoop.java
