@@ -21,3 +21,4 @@ Bagian 1: Java Dasar
 18. WhileLoop.java
 19. DoWhileLoop.java
 20. BreakandContinue.java
+21. ForEach.java
