@@ -24,3 +24,4 @@ Bagian 1: Java Dasar
 21. ForEach.java
 22. Method.java
 23. MethodParameter.java
+24. MethodReturnValue.java
