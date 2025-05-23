@@ -26,6 +26,6 @@ Bagian 1: Java Dasar
 23. MethodParameter.java
 24. MethodReturnValue.java
 25. MethodVariableArgument.java
-26. MethodOverloading.java (nulis dulu, evaluasi besok)
+26. MethodOverloading.java
 27. RecursiveMethod.java (nulis dulu, evaluasi besok)
 28. 
