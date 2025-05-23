@@ -28,4 +28,5 @@ Bagian 1: Java Dasar
 25. MethodVariableArgument.java
 26. MethodOverloading.java
 27. RecursiveMethod.java
-28. 
+28. Scope.java
+29.
