@@ -18,7 +18,7 @@ Before starting to develop apps or web apps, here is a step-by-step guide that I
 
 #### 2. Installing Java JDK in windows can be found in <a href="/Java-Development/java-jdk-maven_installation.md">/Java-Development/java-jdk-maven-installation.md</a>
 
-#### 3. IDE setup can be found in <a href="/Java-Development/IDE_setup.md">/Java-Development/IDE_setup</a>
+#### 3. View my actual learning materials here <a href="/Java-Development/IDE_setup.md">/Java-Development/IDE_setup</a>
 
 #### 4. Wanted to buy PZN courses? <a href="https://www.udemy.com/user/eko-kurniawan/">Check this out!</a> The audio is using Indonesian.
 
