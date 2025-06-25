@@ -51,6 +51,6 @@ From what I have been researching various tutorials on YouTube, I'm deciding to 
 
 ### 1. Spring Tools 4 - Cameron McKenzie Tutorial [(click here)](/Java-Development/Dev-Project/SpringTools4_Eclipse/springTools.md)
 
-### 2. Visual Studio Code - PZN Tutorial [(click here)](/Java-Development/Dev-Project/VisualStudioCode/java-vscode_readme.md)
+### 2. Visual Studio Code - PZN Tutorial [(click here)](/Java-Development/Dev-Project/VisualStudioCode/)
 
 ### ~~3. Maven Archetype - IntelliJ Community (deprecated)~~
