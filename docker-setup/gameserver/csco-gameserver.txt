@@ -76,4 +76,5 @@ steamcmd +login <username> <password>
 quit
 sudo apt install screen -y
 screen -S csco_server
+ulimit -c unlimited
 LD_LIBRARY_PATH=./bin:./csco/csgo/bin ./srcds_linux -game csco/csgo -console -usercon +game_type 0 +game_mode 1 +map de_dust2 +exec server.cfg 	+sv_setsteamaccount 0D9020649F0FC58CEBFFA2CD63693DA6
