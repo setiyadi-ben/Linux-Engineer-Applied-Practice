@@ -1,0 +1,36 @@
+https://developer.valvesoftware.com/wiki/Counter-Strike_2/Dedicated_Servers
+https://developer.valvesoftware.com/wiki/SteamCMD
+# CS Dedicated server
+sudo useradd -m steam
+sudo passwd steam
+sudo apt update; sudo apt install software-properties-common; sudo apt-add-repository non-free; sudo dpkg --add-architecture i386; sudo apt update
+sudo apt install steamcmd
+sudo apt-get install lib32gcc-s1 -y
+cd /home/steam
+su - steam
+mkdir ~/Steam && cd ~/Steam
+curl -sqL "https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz" | tar zxvf -
+steamcmd
+login anonymous
+exit
+
+# place csco file inside C:\Users\BENNYJRX and copy to /home/steam/Steam/steamapps/
+sudo mv /mnt/c/Users/BENNYJRX/Classic\ Offensive.zip /home/steam/Steam/steamapps/
+
+cd Steam/steamapps
+sudo apt update && sudo apt install unzip
+sudo unzip Classic\ Offensive.zip
+sudo chmod -R 755 "/home/steam/Steam/steamapps/Classic Offensive"
+cd Classic\ Offensive
+sudo chmod +x srcds_linux
+
+# place the additional files to enable standard 5v5 competitive mode
+sudo cp /mnt/c/Users/BENNYJRX/server.cfg /home/steam/Steam/steamapps/Classic\ Offensive/csco/csgo/cfg
+sudo cp /mnt/c/Users/BENNYJRX/autoexec.cfg /home/steam/Steam/steamapps/Classic\ Offensive/csco/csgo/cfg
+sudo cp /mnt/c/Users/BENNYJRX/motd.txt /home/steam/Steam/steamapps/Classic\ Offensive/csco/csgo/cfg
+
+sudo apt install screen -y
+screen -S csco_server
+./srcds_linux -game csco -console -usercon +game_type 0 +game_mode 1 +map de_dust2 +exec server.cfg
+
+
