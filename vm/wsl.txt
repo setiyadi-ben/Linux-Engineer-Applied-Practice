@@ -1,0 +1,8 @@
+#Check Installed WSL Distros
+wsl --list --verbose
+
+#Unregister (Uninstall)
+wsl --unregister Debian
+
+sudo apt-get install openssh-server -y
+sudo apt-get install curl -y
