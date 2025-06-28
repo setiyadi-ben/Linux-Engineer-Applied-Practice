@@ -1,0 +1,2 @@
+# check region
+nano /etc/apt/sources.list.d/ubuntu.sources
