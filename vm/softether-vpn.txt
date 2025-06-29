@@ -1,0 +1,67 @@
+# Softether VPN
+# https://www.softether.org/4-docs/1-manual/7/7.3
+sudo apt update && sudo apt install -y \
+    build-essential \
+    libssl-dev \
+    zlib1g-dev \
+    libncurses5-dev \
+    libedit-dev \
+    libreadline-dev
+cd /opt
+wget https://github.com/SoftEtherVPN/SoftEtherVPN_Stable/releases/download/v4.44-9807-rtm/softether-vpnserver-v4.44-9807-rtm-2025.04.16-linux-x64-64bit.tar.gz
+tar xzvf softether-vpnserver-v4.44-9807-rtm-2025.04.16-linux-x64-64bit.tar.gz
+cd ./vpnserver
+make 
+./.install.sh
+cd .. && mv vpnserver /usr/local && ls -l /usr/local/vpnserver/
+cd /usr/local/vpnserver/ && chmod 600 * && chmod 700 vpncmd && chmod 700 vpnserver && ls -l
+./vpncmd
+3
+check
+exit
+
+nano /opt/vpnserver.sh
+
+#!/bin/sh
+# chkconfig: 2345 99 01
+# description: SoftEther VPN Server
+DAEMON=/usr/local/vpnserver/vpnserver
+LOCK=/var/lock/subsys/vpnserver
+test -x $DAEMON || exit 0
+case "$1" in
+start)
+$DAEMON start
+touch $LOCK
+;;
+stop)
+$DAEMON stop
+rm $LOCK
+;;
+restart)
+$DAEMON stop
+sleep 3
+$DAEMON start
+;;
+*)
+echo "Usage: $0 {start|stop|restart}"
+exit 1
+esac
+exit 0
+chmod 755 /opt/vpnserver.sh
+
+nano /etc/systemd/system/vpnserver.service
+
+[Unit]
+Description = vpnserver daemon
+
+[Service]
+ExecStart = /opt/vpnserver.sh start
+ExecStop = /opt/vpnserver.sh stop
+ExecReload = /opt/vpnserver.sh restart
+Restart = always
+Type = forking
+
+[Install]
+WantedBy = multi-user.target
+
+systemctl enable vpnserver && systemctl start vpnserver && systemctl status vpnserver 
