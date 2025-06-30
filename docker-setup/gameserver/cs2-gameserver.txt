@@ -12,20 +12,24 @@ sudo apt-get install lib32gcc-s1 -y
 
 cd /home/steam
 sudo apt-get install curl -y
+sudo apt install screen -y
+screen -S cs2_background_download
+
 su - steam
 mkdir ~/Steam && cd ~/Steam
 curl -sqL "https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz" | tar zxvf -
-sudo apt install screen -y
-screen -S cs2_background_download
+
 steamcmd +login anonymous
 app_update 730 +validate +quit
+app_update 730 +workshop_download_item 730 3437809122 +validate +quit
 
 cd /home/steam/.local/share/Steam/steamapps/common/Counter-Strike\ Global\ Offensive/game/bin/linuxsteamrt64
 sudo cp /mnt/server.cfg /home/steam/.local/share/Steam/steamapps/common/Counter-Strike\ Global\ Offensive/game/csgo/cfg
+
 nano cs2_dedicated-server_start.sh
-#
-./cs2 -dedicated +map de_dust2 +host_workshop_map 3437809122  -console -usercon +game_type 0 +game_mode 1 +exec server.cfg +sv_setsteamaccount 0D9020649F0FC58CEBFFA2CD63693DA6
+./cs2 -dedicated +map de_dust2 +host_workshop_map 3437809122 -console -usercon +game_type 0 +game_mode 1 +exec server.cfg +sv_setsteamaccount 0D9020649F0FC58CEBFFA2CD63693DA6
 chmod +x cs2_dedicated-server_start.sh
+
 mkdir /home/steam/.steam/sdk64/
 ln -s /home/steam/.local/share/Steam/steamcmd/linux64/steamclient.so /home/steam/.steam/sdk64/
 steamcmd +login username password +workshop_download_item 730 3437809122 +validate +quit
