@@ -21,7 +21,8 @@ curl -sqL "https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.g
 
 steamcmd +login anonymous
 app_update 730 +validate +quit
-app_update 730 +workshop_download_item 730 3437809122 +validate +quit
+steamcmd +login anonymous +app_update 730 +workshop_download_item 730 3437809122 +validate +quit
+steamcmd +login anonymous +workshop_download_item 730 3437809122
 
 cd /home/steam/.local/share/Steam/steamapps/common/Counter-Strike\ Global\ Offensive/game/bin/linuxsteamrt64
 sudo cp /mnt/server.cfg /home/steam/.local/share/Steam/steamapps/common/Counter-Strike\ Global\ Offensive/game/csgo/cfg
@@ -35,13 +36,5 @@ ln -s /home/steam/.local/share/Steam/steamcmd/linux64/steamclient.so /home/steam
 steamcmd +login username password +workshop_download_item 730 3437809122 +validate +quit
 
 su - steam
+cd /home/steam/.local/share/Steam/steamapps/common/Counter-Strike\ Global\ Offensive/game/bin/linuxsteamrt64
 ./cs2_dedicated-server_start.sh
-
-mkdir -p /home/steam/.local/share/Steam/steamapps/common/Counter-Strike\ Global\ Offensive/game/csgo/maps/workshop/
-ln -s /home/steam/.local/share/Steam/steamapps/workshop/content/730/3437809122 \
-/home/steam/.local/share/Steam/steamapps/common/Counter-Strike\ Global\ Offensive/game/csgo/maps/workshop/3437809122
-
-Unknown command 'sv_allowdownload'!
-Unknown command 'sv_allowupload'!
-Unknown command 'mp_maxplayers'!
-host_workshop_map 3437809122

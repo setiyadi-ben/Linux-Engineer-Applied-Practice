@@ -20,8 +20,8 @@ sudo mv /mnt/c/Users/BENNYJRX/Classic\ Offensive.zip /home/steam/Steam/steamapps
 cd Steam/steamapps
 sudo apt update && sudo apt install unzip
 sudo unzip Classic\ Offensive.zip
-sudo chmod -R 755 "/home/steam/Steam/steamapps/Classic Offensive"
-cd Classic\ Offensive
+rm Classic\ Offensive.zip && sudo chmod -R 755 "/home/steam/.local/share/Steam/steamapps/common/Classic Offensive" && cd Classic\ Offensive
+
 sudo chmod +x srcds_linux
 
 # place the additional files to enable standard 5v5 competitive mode
@@ -75,6 +75,13 @@ steamcmd
 steamcmd +login <username> <password>
 quit
 sudo apt install screen -y
+
+nano cs2_dedicated-server_start.sh
+LD_LIBRARY_PATH=./bin:./csco/csgo/bin ./srcds_linux -game csco/csgo -dedicated -console -usercon +game_type 0 +game_mode 1 +map de_dust2 +exec server.cfg 	+sv_setsteamaccount 0D9020649F0FC58CEBFFA2CD63693DA6
+chmod +x cs2_dedicated-server_start.sh
+
+mkdir /home/steam/.steam/sdk64/
+ln -s /home/steam/.local/share/Steam/steamcmd/linux64/steamclient.so /home/steam/.steam/sdk64/
 screen -S csco_server
-ulimit -c unlimited
-LD_LIBRARY_PATH=./bin:./csco/csgo/bin ./srcds_linux -game csco/csgo -console -usercon +game_type 0 +game_mode 1 +map de_dust2 +exec server.cfg 	+sv_setsteamaccount 0D9020649F0FC58CEBFFA2CD63693DA6
+
+screen -r csco_server
