@@ -4265,3 +4265,165 @@ else
         esac
     done
 fi
+
+#unanswered
+yes it shows the lists but the scan of link kinda meh look at the results. oh ya i changed the head to 10
+SoftEther VPN Server Installation Manager
+===========================================
+
+SoftEther VPN Server is not installed.
+
+Select an option:
+1) Install SoftEther VPN Server
+2) Exit
+Enter choice [1-2]: 1
+
+Fetching latest RTM versions...
+
+Select a version:
+1) v4.44-9807-rtm-2025.04.16-tree<
+2) v4.44-9807-rtm-2025.04.16-tree
+3) v4.43-9799-beta-2023.08.31-tree<
+4) v4.43-9799-beta-2023.08.31-tree
+5) v4.42-9798-rtm-2023.06.30-tree<
+6) v4.42-9798-rtm-2023.06.30-tree
+7) v4.41-9787-rtm-2023.03.14-tree<
+8) v4.41-9787-rtm-2023.03.14-tree
+9) v4.41-9782-beta-2022.11.17-tree<
+10) v4.41-9782-beta-2022.11.17-tree
+4) Enter custom version
+Enter choice [1-4]: 1
+(why there is "<" in the filename and beta are included?)
+Selected version: 4.44-9807-rtm-2025.04.16-tree<
+
+Select architecture:
+1) 32-bit (x86)
+2) 64-bit (x64)
+3) ARM 32-bit
+4) ARM 64-bit
+Enter choice [1-4]: 2
+
+Selected architecture: x64-64bit
+Filename pattern: softether-vpnserver-v4.41-9782-beta-2022.11.17-tree-linux-x64-64bit.tar.gz
+
+i'm starting to getting lost, why 2022? the above result are from this line of code
+    
+# Build filename pattern
+    filename_pattern="softether-vpnserver-${clean_version}-linux-${arch}.tar.gz"
+    echo -e "\nSelected architecture: \033[1;33m$arch\033[0m"
+    echo -e "Filename pattern: \033[1;33m$filename_pattern\033[0m"
+
+which is i pick from this Select a version:
+1) v4.44-9807-rtm-2025.04.16-tree<
+when i inspect element on https://www.softether-download.com/files/softether/ the results should grab this line <A HREF="/files/softether/v4.44-9807-rtm-2025.04.16-tree/">v4.44-9807-rtm-2025.04.16-tree</A><br>2013/02/14    23:53          208 <A HREF="/files/softether/web.config">web.config</A><br></pre><hr></body></html>
+so it should pick v4.44-9807-rtm-2025.04.16-tree not softether-vpnserver-v4.41-9782-beta-2022.11.17-tree-linux-x64-64bit.tar.gz
+the 2022 version is grabbed from <A HREF="/files/softether/v4.41-9782-beta-2022.11.17-tree/">v4.41-9782-beta-2022.11.17-tree</A><br>2023/03/14 which is is not make sense.
+
+before answering the code i wanted to ask you, can you read the html like humans do? because the problem is the line order from the web view and inspect element is different.
+
+this is the line from web view
+2013/05/04     8:43        <dir> v1.00-9022-rc2-2013.03.07-tree
+2013/05/04     8:44        <dir> v1.00-9023-rc2-2013.03.08-tree
+2013/05/04     8:44        <dir> v1.00-9024-rc2-2013.03.09-tree
+2013/05/04     8:45        <dir> v1.00-9026-rc2-2013.03.10-tree
+2013/05/04     8:45        <dir> v1.00-9027-rc2-2013.03.12-tree
+2013/05/04     8:45        <dir> v1.00-9029-rc2-2013.03.16-tree
+2013/05/04     8:46        <dir> v1.00-9030-rc2-2013.03.21-tree
+2013/05/04     8:46        <dir> v1.00-9031-rc2-2013.03.22-tree
+2013/05/04     8:47        <dir> v1.00-9033-rc2-2013.03.22-tree
+2013/05/04     8:47        <dir> v1.00-9035-rc2-2013.03.25-tree
+2013/05/04     8:48        <dir> v1.00-9037-rc2-2013.03.28-tree
+2013/05/04     8:48        <dir> v1.00-9038-rc2-2013.03.28-tree
+2013/05/04     8:48        <dir> v1.00-9043-rc2-2013.04.01-tree
+2013/05/04     8:49        <dir> v1.00-9045-rc2-2013.04.02-tree
+2013/05/04     8:49        <dir> v1.00-9051-rc2-2013.04.05-tree
+2013/05/04     8:50        <dir> v1.00-9053-rc2-2013.04.08-tree
+2013/05/04     8:50        <dir> v1.00-9069-rc2-2013.04.17-tree
+2013/05/04     8:51        <dir> v1.00-9070-rc2-2013.04.18-tree
+2013/05/04     8:51        <dir> v1.00-9071-rc2-2013.04.20-tree
+2013/05/04     8:51        <dir> v1.00-9072-rc2-2013.04.20-tree
+2013/05/04     8:52        <dir> v1.00-9074-rc2-2013.04.24-tree
+2013/05/04     8:52        <dir> v1.00-9078-rc2-2013.04.28-tree
+2013/05/05    22:07        <dir> v1.00-9079-rc2-2013.05.05-tree
+2013/05/19    14:48        <dir> v1.00-9091-rc3-2013.05.19-tree
+2013/07/21     3:02        <dir> v1.00-9367-rc4-2013.07.20-tree
+2013/07/25     2:46        <dir> v1.00-9371-rtm-2013.07.25-tree
+2013/08/03     3:39        <dir> v1.00-9376-rtm-2013.08.02-tree
+2013/08/03    18:51        <dir> v1.00-9377-rtm-2013.08.03-tree
+2013/08/18    19:20        <dir> v1.01-9379-rtm-2013.08.18-tree
+2013/09/16    15:00        <dir> v2.00-9387-rtm-2013.09.16-tree
+2014/01/04    21:57        <dir> v4.03-9408-rtm-2014.01.04-tree
+2014/01/07     5:40        <dir> v4.03-9411-rtm-2014.01.07-tree
+2014/01/15    18:54        <dir> v4.04-9412-rtm-2014.01.15-tree
+2014/02/06     1:28        <dir> v4.05-9416-beta-2014.02.06-tree
+2014/02/06    13:18        <dir> v4.05-9418-beta-2014.02.06-tree
+2014/02/17     3:04        <dir> v4.05-9422-beta-2014.02.17-tree
+2014/02/18    20:06        <dir> v4.05-9423-beta-2014.02.18-tree
+2014/03/21    14:07        <dir> v4.06-9433-beta-2014.03.21-tree
+2014/03/26    12:36        <dir> v4.06-9435-beta-2014.03.26-tree
+2014/04/09     9:36        <dir> v4.06-9436-beta-2014.04.09-tree
+2014/04/09    11:30        <dir> v4.06-9437-beta-2014.04.09-tree
+2014/06/06     6:51        <dir> v4.07-9448-rtm-2014.06.06-tree
+2014/06/08    16:28        <dir> v4.08-9449-rtm-2014.06.08-tree
+2014/06/09    11:58        <dir> v4.09-9451-beta-2014.06.09-tree
+2014/07/12     2:59        <dir> v4.10-9473-beta-2014.07.12-tree
+2014/10/04     0:06        <dir> v4.10-9505-beta-2014.10.03-tree
+2014/10/23     0:59        <dir> v4.11-9506-beta-2014.10.22-tree
+2014/11/18    12:06        <dir> v4.12-9514-beta-2014.11.17-tree
+2015/01/30    22:30        <dir> v4.13-9522-beta-2015.01.30-tree
+2015/01/31     3:25        <dir> v4.13-9524-beta-2015.01.31-tree
+2015/02/02    12:31        <dir> v4.13-9525-beta-2015.02.02-tree
+2015/02/02    18:52        <dir> v4.14-9529-beta-2015.02.02-tree
+2015/03/26    17:59        <dir> v4.15-9537-beta-2015.03.26-tree
+2015/03/27    20:51        <dir> v4.15-9538-beta-2015.03.27-tree
+2015/04/04     5:58        <dir> v4.15-9539-beta-2015.04.04-tree
+2015/04/05     3:39        <dir> v4.15-9546-beta-2015.04.05-tree
+2015/05/31    19:02        <dir> v4.17-9562-beta-2015.05.30-tree
+2015/07/17     0:31        <dir> v4.17-9566-beta-2015.07.16-tree
+2015/07/26    19:39        <dir> v4.18-9570-rtm-2015.07.26-tree
+2015/09/15    14:22        <dir> v4.19-9577-beta-2015.09.15-tree
+2015/09/15    16:20        <dir> v4.19-9578-beta-2015.09.15-tree
+2015/10/06    20:18        <dir> v4.19-9582-beta-2015.10.06-tree
+2015/10/19    21:31        <dir> v4.19-9599-beta-2015.10.19-tree
+2016/03/06    22:27        <dir> v4.19-9605-beta-2016.03.06-tree
+2016/04/18     1:52        <dir> v4.20-9608-rtm-2016.04.17-tree
+2016/04/24    23:49        <dir> v4.21-9613-beta-2016.04.24-tree
+2016/11/27    17:19        <dir> v4.22-9634-beta-2016.11.27-tree
+2017/10/18    18:18        <dir> v4.23-9647-beta-2017.10.18-tree
+2017/10/23     2:45        <dir> v4.24-9651-beta-2017.10.23-tree
+2017/12/21    22:38        <dir> v4.24-9652-beta-2017.12.21-tree
+2018/01/15    11:07        <dir> v4.25-9656-rtm-2018.01.15-tree
+2018/04/20    22:20        <dir> v4.27-9664-beta-2018.04.20-tree
+2018/04/21    11:23        <dir> v4.27-9665-beta-2018.04.21-tree
+2018/04/21    16:22        <dir> v4.27-9666-beta-2018.04.21-tree
+2018/05/26    12:04        <dir> v4.27-9667-beta-2018.05.26-tree
+2018/05/30     0:49        <dir> v4.27-9668-beta-2018.05.29-tree
+2018/09/11    16:31        <dir> v4.28-9669-beta-2018.09.11-tree
+2019/02/28    14:33        <dir> v4.29-9678-rtm-2019.02.28-tree
+2019/02/28    20:12        <dir> v4.29-9680-rtm-2019.02.28-tree
+2019/07/07    21:21        <dir> v4.30-9695-beta-2019.07.07-tree
+2019/07/08    15:18        <dir> v4.30-9696-beta-2019.07.08-tree
+2019/07/14    11:14        <dir> v4.30-9700-beta-2019.07.13-tree
+2019/11/18    12:26        <dir> v4.31-9727-beta-2019.11.18-tree
+2020/01/01    20:15        <dir> v4.32-9731-beta-2020.01.01-tree
+2020/03/21    10:35        <dir> v4.34-9744-beta-2020.03.20-tree
+2020/06/24    23:48        <dir> v4.34-9745-beta-2020.04.05-tree
+2020/06/24    23:47        <dir> v4.34-9745-rtm-2020.04.05-tree
+2021/06/07    22:17        <dir> v4.36-9754-beta-2021.06.07-tree
+2021/08/16     1:12        <dir> v4.37-9758-beta-2021.08.16-tree
+2021/08/17    22:54        <dir> v4.38-9760-rtm-2021.08.17-tree
+2022/04/26    19:40        <dir> v4.39-9772-beta-2022.04.26-trees
+2022/11/17    17:46        <dir> v4.41-9782-beta-2022.11.17-tree
+2023/03/14    20:52        <dir> v4.41-9787-rtm-2023.03.14-tree
+2023/06/30    12:14        <dir> v4.42-9798-rtm-2023.06.30-tree
+2023/08/31    12:13        <dir> v4.43-9799-beta-2023.08.31-tree
+2025/04/16    15:09        <dir> v4.44-9807-rtm-2025.04.16-tree
+2013/02/14    23:53          208 web.config
+
+this is from the inspect element:
+
+<html><head><title>www.softether-download.com - /files/softether/</title></head><body><H1>www.softether-download.com - /files/softether/</H1><hr>
+
+<pre><A HREF="/files/">[To Parent Directory]</A><br><br>2013/05/04     8:43        &lt;dir&gt; <A HREF="/files/softether/v1.00-9022-rc2-2013.03.07-tree/">v1.00-9022-rc2-2013.03.07-tree</A><br>2013/05/04     8:44        &lt;dir&gt; <A HREF="/files/softether/v1.00-9023-rc2-2013.03.08-tree/">v1.00-9023-rc2-2013.03.08-tree</A><br>2013/05/04     8:44        &lt;dir&gt; <A HREF="/files/softether/v1.00-9024-rc2-2013.03.09-tree/">v1.00-9024-rc2-2013.03.09-tree</A><br>2013/05/04     8:45        &lt;dir&gt; <A HREF="/files/softether/v1.00-9026-rc2-2013.03.10-tree/">v1.00-9026-rc2-2013.03.10-tree</A><br>2013/05/04     8:45        &lt;dir&gt; <A HREF="/files/softether/v1.00-9027-rc2-2013.03.12-tree/">v1.00-9027-rc2-2013.03.12-tree</A><br>2013/05/04     8:45        &lt;dir&gt; <A HREF="/files/softether/v1.00-9029-rc2-2013.03.16-tree/">v1.00-9029-rc2-2013.03.16-tree</A><br>2013/05/04     8:46        &lt;dir&gt; <A HREF="/files/softether/v1.00-9030-rc2-2013.03.21-tree/">v1.00-9030-rc2-2013.03.21-tree</A><br>2013/05/04     8:46        &lt;dir&gt; <A HREF="/files/softether/v1.00-9031-rc2-2013.03.22-tree/">v1.00-9031-rc2-2013.03.22-tree</A><br>2013/05/04     8:47        &lt;dir&gt; <A HREF="/files/softether/v1.00-9033-rc2-2013.03.22-tree/">v1.00-9033-rc2-2013.03.22-tree</A><br>2013/05/04     8:47        &lt;dir&gt; <A HREF="/files/softether/v1.00-9035-rc2-2013.03.25-tree/">v1.00-9035-rc2-2013.03.25-tree</A><br>2013/05/04     8:48        &lt;dir&gt; <A HREF="/files/softether/v1.00-9037-rc2-2013.03.28-tree/">v1.00-9037-rc2-2013.03.28-tree</A><br>2013/05/04     8:48        &lt;dir&gt; <A HREF="/files/softether/v1.00-9038-rc2-2013.03.28-tree/">v1.00-9038-rc2-2013.03.28-tree</A><br>2013/05/04     8:48        &lt;dir&gt; <A HREF="/files/softether/v1.00-9043-rc2-2013.04.01-tree/">v1.00-9043-rc2-2013.04.01-tree</A><br>2013/05/04     8:49        &lt;dir&gt; <A HREF="/files/softether/v1.00-9045-rc2-2013.04.02-tree/">v1.00-9045-rc2-2013.04.02-tree</A><br>2013/05/04     8:49        &lt;dir&gt; <A HREF="/files/softether/v1.00-9051-rc2-2013.04.05-tree/">v1.00-9051-rc2-2013.04.05-tree</A><br>2013/05/04     8:50        &lt;dir&gt; <A HREF="/files/softether/v1.00-9053-rc2-2013.04.08-tree/">v1.00-9053-rc2-2013.04.08-tree</A><br>2013/05/04     8:50        &lt;dir&gt; <A HREF="/files/softether/v1.00-9069-rc2-2013.04.17-tree/">v1.00-9069-rc2-2013.04.17-tree</A><br>2013/05/04     8:51        &lt;dir&gt; <A HREF="/files/softether/v1.00-9070-rc2-2013.04.18-tree/">v1.00-9070-rc2-2013.04.18-tree</A><br>2013/05/04     8:51        &lt;dir&gt; <A HREF="/files/softether/v1.00-9071-rc2-2013.04.20-tree/">v1.00-9071-rc2-2013.04.20-tree</A><br>2013/05/04     8:51        &lt;dir&gt; <A HREF="/files/softether/v1.00-9072-rc2-2013.04.20-tree/">v1.00-9072-rc2-2013.04.20-tree</A><br>2013/05/04     8:52        &lt;dir&gt; <A HREF="/files/softether/v1.00-9074-rc2-2013.04.24-tree/">v1.00-9074-rc2-2013.04.24-tree</A><br>2013/05/04     8:52        &lt;dir&gt; <A HREF="/files/softether/v1.00-9078-rc2-2013.04.28-tree/">v1.00-9078-rc2-2013.04.28-tree</A><br>2013/05/05    22:07        &lt;dir&gt; <A HREF="/files/softether/v1.00-9079-rc2-2013.05.05-tree/">v1.00-9079-rc2-2013.05.05-tree</A><br>2013/05/19    14:48        &lt;dir&gt; <A HREF="/files/softether/v1.00-9091-rc3-2013.05.19-tree/">v1.00-9091-rc3-2013.05.19-tree</A><br>2013/07/21     3:02        &lt;dir&gt; <A HREF="/files/softether/v1.00-9367-rc4-2013.07.20-tree/">v1.00-9367-rc4-2013.07.20-tree</A><br>2013/07/25     2:46        &lt;dir&gt; <A HREF="/files/softether/v1.00-9371-rtm-2013.07.25-tree/">v1.00-9371-rtm-2013.07.25-tree</A><br>2013/08/03     3:39        &lt;dir&gt; <A HREF="/files/softether/v1.00-9376-rtm-2013.08.02-tree/">v1.00-9376-rtm-2013.08.02-tree</A><br>2013/08/03    18:51        &lt;dir&gt; <A HREF="/files/softether/v1.00-9377-rtm-2013.08.03-tree/">v1.00-9377-rtm-2013.08.03-tree</A><br>2013/08/18    19:20        &lt;dir&gt; <A HREF="/files/softether/v1.01-9379-rtm-2013.08.18-tree/">v1.01-9379-rtm-2013.08.18-tree</A><br>2013/09/16    15:00        &lt;dir&gt; <A HREF="/files/softether/v2.00-9387-rtm-2013.09.16-tree/">v2.00-9387-rtm-2013.09.16-tree</A><br>2014/01/04    21:57        &lt;dir&gt; <A HREF="/files/softether/v4.03-9408-rtm-2014.01.04-tree/">v4.03-9408-rtm-2014.01.04-tree</A><br>2014/01/07     5:40        &lt;dir&gt; <A HREF="/files/softether/v4.03-9411-rtm-2014.01.07-tree/">v4.03-9411-rtm-2014.01.07-tree</A><br>2014/01/15    18:54        &lt;dir&gt; <A HREF="/files/softether/v4.04-9412-rtm-2014.01.15-tree/">v4.04-9412-rtm-2014.01.15-tree</A><br>2014/02/06     1:28        &lt;dir&gt; <A HREF="/files/softether/v4.05-9416-beta-2014.02.06-tree/">v4.05-9416-beta-2014.02.06-tree</A><br>2014/02/06    13:18        &lt;dir&gt; <A HREF="/files/softether/v4.05-9418-beta-2014.02.06-tree/">v4.05-9418-beta-2014.02.06-tree</A><br>2014/02/17     3:04        &lt;dir&gt; <A HREF="/files/softether/v4.05-9422-beta-2014.02.17-tree/">v4.05-9422-beta-2014.02.17-tree</A><br>2014/02/18    20:06        &lt;dir&gt; <A HREF="/files/softether/v4.05-9423-beta-2014.02.18-tree/">v4.05-9423-beta-2014.02.18-tree</A><br>2014/03/21    14:07        &lt;dir&gt; <A HREF="/files/softether/v4.06-9433-beta-2014.03.21-tree/">v4.06-9433-beta-2014.03.21-tree</A><br>2014/03/26    12:36        &lt;dir&gt; <A HREF="/files/softether/v4.06-9435-beta-2014.03.26-tree/">v4.06-9435-beta-2014.03.26-tree</A><br>2014/04/09     9:36        &lt;dir&gt; <A HREF="/files/softether/v4.06-9436-beta-2014.04.09-tree/">v4.06-9436-beta-2014.04.09-tree</A><br>2014/04/09    11:30        &lt;dir&gt; <A HREF="/files/softether/v4.06-9437-beta-2014.04.09-tree/">v4.06-9437-beta-2014.04.09-tree</A><br>2014/06/06     6:51        &lt;dir&gt; <A HREF="/files/softether/v4.07-9448-rtm-2014.06.06-tree/">v4.07-9448-rtm-2014.06.06-tree</A><br>2014/06/08    16:28        &lt;dir&gt; <A HREF="/files/softether/v4.08-9449-rtm-2014.06.08-tree/">v4.08-9449-rtm-2014.06.08-tree</A><br>2014/06/09    11:58        &lt;dir&gt; <A HREF="/files/softether/v4.09-9451-beta-2014.06.09-tree/">v4.09-9451-beta-2014.06.09-tree</A><br>2014/07/12     2:59        &lt;dir&gt; <A HREF="/files/softether/v4.10-9473-beta-2014.07.12-tree/">v4.10-9473-beta-2014.07.12-tree</A><br>2014/10/04     0:06        &lt;dir&gt; <A HREF="/files/softether/v4.10-9505-beta-2014.10.03-tree/">v4.10-9505-beta-2014.10.03-tree</A><br>2014/10/23     0:59        &lt;dir&gt; <A HREF="/files/softether/v4.11-9506-beta-2014.10.22-tree/">v4.11-9506-beta-2014.10.22-tree</A><br>2014/11/18    12:06        &lt;dir&gt; <A HREF="/files/softether/v4.12-9514-beta-2014.11.17-tree/">v4.12-9514-beta-2014.11.17-tree</A><br>2015/01/30    22:30        &lt;dir&gt; <A HREF="/files/softether/v4.13-9522-beta-2015.01.30-tree/">v4.13-9522-beta-2015.01.30-tree</A><br>2015/01/31     3:25        &lt;dir&gt; <A HREF="/files/softether/v4.13-9524-beta-2015.01.31-tree/">v4.13-9524-beta-2015.01.31-tree</A><br>2015/02/02    12:31        &lt;dir&gt; <A HREF="/files/softether/v4.13-9525-beta-2015.02.02-tree/">v4.13-9525-beta-2015.02.02-tree</A><br>2015/02/02    18:52        &lt;dir&gt; <A HREF="/files/softether/v4.14-9529-beta-2015.02.02-tree/">v4.14-9529-beta-2015.02.02-tree</A><br>2015/03/26    17:59        &lt;dir&gt; <A HREF="/files/softether/v4.15-9537-beta-2015.03.26-tree/">v4.15-9537-beta-2015.03.26-tree</A><br>2015/03/27    20:51        &lt;dir&gt; <A HREF="/files/softether/v4.15-9538-beta-2015.03.27-tree/">v4.15-9538-beta-2015.03.27-tree</A><br>2015/04/04     5:58        &lt;dir&gt; <A HREF="/files/softether/v4.15-9539-beta-2015.04.04-tree/">v4.15-9539-beta-2015.04.04-tree</A><br>2015/04/05     3:39        &lt;dir&gt; <A HREF="/files/softether/v4.15-9546-beta-2015.04.05-tree/">v4.15-9546-beta-2015.04.05-tree</A><br>2015/05/31    19:02        &lt;dir&gt; <A HREF="/files/softether/v4.17-9562-beta-2015.05.30-tree/">v4.17-9562-beta-2015.05.30-tree</A><br>2015/07/17     0:31        &lt;dir&gt; <A HREF="/files/softether/v4.17-9566-beta-2015.07.16-tree/">v4.17-9566-beta-2015.07.16-tree</A><br>2015/07/26    19:39        &lt;dir&gt; <A HREF="/files/softether/v4.18-9570-rtm-2015.07.26-tree/">v4.18-9570-rtm-2015.07.26-tree</A><br>2015/09/15    14:22        &lt;dir&gt; <A HREF="/files/softether/v4.19-9577-beta-2015.09.15-tree/">v4.19-9577-beta-2015.09.15-tree</A><br>2015/09/15    16:20        &lt;dir&gt; <A HREF="/files/softether/v4.19-9578-beta-2015.09.15-tree/">v4.19-9578-beta-2015.09.15-tree</A><br>2015/10/06    20:18        &lt;dir&gt; <A HREF="/files/softether/v4.19-9582-beta-2015.10.06-tree/">v4.19-9582-beta-2015.10.06-tree</A><br>2015/10/19    21:31        &lt;dir&gt; <A HREF="/files/softether/v4.19-9599-beta-2015.10.19-tree/">v4.19-9599-beta-2015.10.19-tree</A><br>2016/03/06    22:27        &lt;dir&gt; <A HREF="/files/softether/v4.19-9605-beta-2016.03.06-tree/">v4.19-9605-beta-2016.03.06-tree</A><br>2016/04/18     1:52        &lt;dir&gt; <A HREF="/files/softether/v4.20-9608-rtm-2016.04.17-tree/">v4.20-9608-rtm-2016.04.17-tree</A><br>2016/04/24    23:49        &lt;dir&gt; <A HREF="/files/softether/v4.21-9613-beta-2016.04.24-tree/">v4.21-9613-beta-2016.04.24-tree</A><br>2016/11/27    17:19        &lt;dir&gt; <A HREF="/files/softether/v4.22-9634-beta-2016.11.27-tree/">v4.22-9634-beta-2016.11.27-tree</A><br>2017/10/18    18:18        &lt;dir&gt; <A HREF="/files/softether/v4.23-9647-beta-2017.10.18-tree/">v4.23-9647-beta-2017.10.18-tree</A><br>2017/10/23     2:45        &lt;dir&gt; <A HREF="/files/softether/v4.24-9651-beta-2017.10.23-tree/">v4.24-9651-beta-2017.10.23-tree</A><br>2017/12/21    22:38        &lt;dir&gt; <A HREF="/files/softether/v4.24-9652-beta-2017.12.21-tree/">v4.24-9652-beta-2017.12.21-tree</A><br>2018/01/15    11:07        &lt;dir&gt; <A HREF="/files/softether/v4.25-9656-rtm-2018.01.15-tree/">v4.25-9656-rtm-2018.01.15-tree</A><br>2018/04/20    22:20        &lt;dir&gt; <A HREF="/files/softether/v4.27-9664-beta-2018.04.20-tree/">v4.27-9664-beta-2018.04.20-tree</A><br>2018/04/21    11:23        &lt;dir&gt; <A HREF="/files/softether/v4.27-9665-beta-2018.04.21-tree/">v4.27-9665-beta-2018.04.21-tree</A><br>2018/04/21    16:22        &lt;dir&gt; <A HREF="/files/softether/v4.27-9666-beta-2018.04.21-tree/">v4.27-9666-beta-2018.04.21-tree</A><br>2018/05/26    12:04        &lt;dir&gt; <A HREF="/files/softether/v4.27-9667-beta-2018.05.26-tree/">v4.27-9667-beta-2018.05.26-tree</A><br>2018/05/30     0:49        &lt;dir&gt; <A HREF="/files/softether/v4.27-9668-beta-2018.05.29-tree/">v4.27-9668-beta-2018.05.29-tree</A><br>2018/09/11    16:31        &lt;dir&gt; <A HREF="/files/softether/v4.28-9669-beta-2018.09.11-tree/">v4.28-9669-beta-2018.09.11-tree</A><br>2019/02/28    14:33        &lt;dir&gt; <A HREF="/files/softether/v4.29-9678-rtm-2019.02.28-tree/">v4.29-9678-rtm-2019.02.28-tree</A><br>2019/02/28    20:12        &lt;dir&gt; <A HREF="/files/softether/v4.29-9680-rtm-2019.02.28-tree/">v4.29-9680-rtm-2019.02.28-tree</A><br>2019/07/07    21:21        &lt;dir&gt; <A HREF="/files/softether/v4.30-9695-beta-2019.07.07-tree/">v4.30-9695-beta-2019.07.07-tree</A><br>2019/07/08    15:18        &lt;dir&gt; <A HREF="/files/softether/v4.30-9696-beta-2019.07.08-tree/">v4.30-9696-beta-2019.07.08-tree</A><br>2019/07/14    11:14        &lt;dir&gt; <A HREF="/files/softether/v4.30-9700-beta-2019.07.13-tree/">v4.30-9700-beta-2019.07.13-tree</A><br>2019/11/18    12:26        &lt;dir&gt; <A HREF="/files/softether/v4.31-9727-beta-2019.11.18-tree/">v4.31-9727-beta-2019.11.18-tree</A><br>2020/01/01    20:15        &lt;dir&gt; <A HREF="/files/softether/v4.32-9731-beta-2020.01.01-tree/">v4.32-9731-beta-2020.01.01-tree</A><br>2020/03/21    10:35        &lt;dir&gt; <A HREF="/files/softether/v4.34-9744-beta-2020.03.20-tree/">v4.34-9744-beta-2020.03.20-tree</A><br>2020/06/24    23:48        &lt;dir&gt; <A HREF="/files/softether/v4.34-9745-beta-2020.04.05-tree/">v4.34-9745-beta-2020.04.05-tree</A><br>2020/06/24    23:47        &lt;dir&gt; <A HREF="/files/softether/v4.34-9745-rtm-2020.04.05-tree/">v4.34-9745-rtm-2020.04.05-tree</A><br>2021/06/07    22:17        &lt;dir&gt; <A HREF="/files/softether/v4.36-9754-beta-2021.06.07-tree/">v4.36-9754-beta-2021.06.07-tree</A><br>2021/08/16     1:12        &lt;dir&gt; <A HREF="/files/softether/v4.37-9758-beta-2021.08.16-tree/">v4.37-9758-beta-2021.08.16-tree</A><br>2021/08/17    22:54        &lt;dir&gt; <A HREF="/files/softether/v4.38-9760-rtm-2021.08.17-tree/">v4.38-9760-rtm-2021.08.17-tree</A><br>2022/04/26    19:40        &lt;dir&gt; <A HREF="/files/softether/v4.39-9772-beta-2022.04.26-tree/">v4.39-9772-beta-2022.04.26-tree</A><br>2022/11/17    17:46        &lt;dir&gt; <A HREF="/files/softether/v4.41-9782-beta-2022.11.17-tree/">v4.41-9782-beta-2022.11.17-tree</A><br>2023/03/14    20:52        &lt;dir&gt; <A HREF="/files/softether/v4.41-9787-rtm-2023.03.14-tree/">v4.41-9787-rtm-2023.03.14-tree</A><br>2023/06/30    12:14        &lt;dir&gt; <A HREF="/files/softether/v4.42-9798-rtm-2023.06.30-tree/">v4.42-9798-rtm-2023.06.30-tree</A><br>2023/08/31    12:13        &lt;dir&gt; <A HREF="/files/softether/v4.43-9799-beta-2023.08.31-tree/">v4.43-9799-beta-2023.08.31-tree</A><br>2025/04/16    15:09        &lt;dir&gt; <A HREF="/files/softether/v4.44-9807-rtm-2025.04.16-tree/">v4.44-9807-rtm-2025.04.16-tree</A><br>2013/02/14    23:53          208 <A HREF="/files/softether/web.config">web.config</A><br></pre><hr></body></html>
+
+so what we think we sort the right order might be false all the time because the line order that we want are not in the suitable format
