@@ -1,5 +1,6 @@
 Urutan Studi Kasus Kasus Java Dasar, Aplikasi TodoList
 steps 41 s/d 55
-1. Step 41 s/d 46 dipahami dan dirangkum dalam 02-Rangkuman_Java-Dasar_Aplikasi-TodoList
+1. Step 34 s/d 42 | dipahami dan dirangkum dalam 02-Rangkuman_Java-Dasar_Aplikasi-TodoList
 save > commit > push
-2. 
+2. Step 42 s/d 44 | save > commit > push
+3.
