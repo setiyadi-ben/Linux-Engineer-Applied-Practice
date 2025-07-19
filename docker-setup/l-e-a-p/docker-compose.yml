@@ -2,10 +2,9 @@
 # Linux  uses CRLF
 services:
   mysql:
-    image: mysql:8.4
     container_name: l-e-a-p_mysql
+    image: mysql:8.4
     environment:
-      MYSQL_USER: root
       MYSQL_ROOT_PASSWORD: root
     volumes:
       - ./app/mysql:/var/lib/mysql
@@ -20,8 +19,8 @@ services:
       timeout: 5s
       retries: 5
   phpmyadmin:
-    image: phpmyadmin
     container_name: l-e-a-p_pma
+    image: phpmyadmin
     environment:
       PMA_HOST: l-e-a-p_mysql # follow container_name & harus ada network:backend
       PMA_PORT: 3306
@@ -40,10 +39,11 @@ services:
     expose:
       - "8080"
       - "8443"
+      - "22"
     ports:
       - "8000:8443" # Port forwarding untuk probe, karena probe.war tidak dapat dimodifikasi
     volumes:
-      - ./app:/opt/tomcat/webapps
+      - ./app/webapps:/opt/tomcat/webapps/
       - ./webserver/tomcat-cert:/opt/tomcat/conf/ssl/ # Save sertifikat ssl
     networks:
       - backend # backend bertujuan untuk menghubungkan individual container karena network masing2 terisolasi
