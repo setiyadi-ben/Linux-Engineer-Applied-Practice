@@ -1,0 +1,4 @@
+# Ignoring compiled java web app
+/probe
+/sample
+/mysql
