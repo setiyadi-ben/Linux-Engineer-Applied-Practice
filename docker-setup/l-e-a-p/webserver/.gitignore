@@ -1,0 +1,4 @@
+# Ignoring generated https ssl certificates
+*.crt
+*.key
+*.jks
