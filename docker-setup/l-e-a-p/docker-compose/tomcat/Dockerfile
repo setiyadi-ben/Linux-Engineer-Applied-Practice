@@ -5,12 +5,12 @@ WORKDIR /opt/tomcat
 # 2. Install nano to CRUD the necessary configs
 RUN apt-get update && apt-get install -y nano
 # 3. Install openssl to perform free unsecure HTTPS SSL certificate
-RUN apt-get update && apt-get install -y openssl
+RUN apt-get update && apt-get install -y openssl 
 
 # 4. Install standard OpenJDK version 21
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     wget \
-    openjdk-21-jdk-headless \
+    openjdk-21-jre-headless \
     && rm -rf /var/lib/apt/lists/
 
 # 5. Install tomcat via l-e-a-p repository
