@@ -94,7 +94,7 @@
                maxParameterCount="1000"
                >
         <UpgradeProtocol className="org.apache.coyote.http2.Http2Protocol" />
-        <SSLHostConfig>
+        <SSLHostConfig protocols="TLSv1.2,TLSv1.3"> <!--Add flexibility for SSL Handshake-->
             <Certificate certificateKeystoreFile="conf/ssl/tomcat-selfsigned-rsa.jks"
                          certificateKeystorePassword="tomcatpassword" type="RSA" />
         </SSLHostConfig>
