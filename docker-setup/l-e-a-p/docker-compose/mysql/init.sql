@@ -2,7 +2,7 @@
 CREATE USER IF NOT EXISTS 'staff1-engineer'@'%' IDENTIFIED BY 'password';
 GRANT ALL PRIVILEGES ON *.* TO 'staff1-engineer'@'%' WITH GRANT OPTION;
 
-CREATE USER IF NOT EXISTS 'replica-bot'@'%' IDENTIFIED WITH mysql_native_password BY 'password';
+CREATE USER IF NOT EXISTS 'replica-bot'@'%' IDENTIFIED BY 'password';
 GRANT REPLICATION SLAVE ON *.* TO 'replica-bot'@'%' WITH GRANT OPTION;
 
 -- Create database and table

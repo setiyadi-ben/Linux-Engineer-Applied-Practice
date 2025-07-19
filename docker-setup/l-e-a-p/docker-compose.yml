@@ -2,21 +2,58 @@
 # Linux  uses CRLF
 services:
   mysql:
+    image: mysql:8.4
+    container_name: l-e-a-p_mysql
+    environment:
+      MYSQL_USER: root
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - ./app/mysql:/var/lib/mysql
+      - ./docker-compose/mysql:/docker-entrypoint-initdb.d/ # this runs init.sql on first start
     ports:
       - "3306:3306"
-    build: ./mysql
-    volumes:
-      - mysql:/var/lib/mysql
     networks:
-      - backend
-
+      - backend # backend bertujuan untuk menghubungkan individual container karena network masing2 terisolasi
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -p$$MYSQL_ROOT_PASSWORD"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  phpmyadmin:
+    image: phpmyadmin
+    container_name: l-e-a-p_pma
+    environment:
+      PMA_HOST: l-e-a-p_mysql # follow container_name & harus ada network:backend
+      PMA_PORT: 3306
+      PMA_ABSOLUTE_URI: http://localhost/phpmyadmin/
+    expose:
+      - "80"
+    ports:
+      - "8888:80"
+    networks:
+      - backend # backend bertujuan untuk menghubungkan individual container karena network masing2 terisolasi
+    depends_on:
+      - mysql
+  tomcat:
+    build: ./docker-compose/tomcat
+    container_name: l-e-a-p_tomcat
+    expose:
+      - "8080"
+      - "8443"
+    ports:
+      - "8000:8443" # Port forwarding untuk probe, karena probe.war tidak dapat dimodifikasi
+    volumes:
+      - ./app:/opt/tomcat/webapps
+      - ./webserver/tomcat-cert:/opt/tomcat/conf/ssl/ # Save sertifikat ssl
+    networks:
+      - backend # backend bertujuan untuk menghubungkan individual container karena network masing2 terisolasi
   apache2:
-    build: ./apache2
+    build: ./docker-compose/apache2
+    container_name: l-e-a-p_apache2
     ports:
       - "443:443"
     volumes:
-      - apache2_certs:/etc/ssl/certs
-      - apache2_keys:/etc/ssl/private
+      - ./webserver/apache2-cert:/etc/apache2/ssl/ # Save sertifikat ssl
     depends_on:
       - mysql
       - tomcat
@@ -24,40 +61,8 @@ services:
       - backend
       - frontend
 
-  tomcat:
-    build: ./tomcat
-    ports:
-      - "8443:8443"
-    volumes:
-      - tomcat_certs:/opt/tomcat/conf
-      - tomcat_cached_webapps:/opt/tomcat/webapps
-
-    networks:
-      - backend
-      - frontend
-
-  phpmyadmin:
-    build: ./pma
-    environment:
-      PMA_HOST: mysql
-      PMA_PORT: 3306
-      PMA_ABSOLUTE_URI: https://localhost/phpmyadmin/
-    networks:
-      - frontend
-      - backend
-    depends_on:
-      - mysql
-
-volumes:
-  mysql:
-  apache2_certs:
-  apache2_keys:
-  apache2_web_files:
-  tomcat_certs:
-  tomcat_cached_webapps:
-
 networks:
   frontend:
-    driver: bridge
+    driver: bridge # bridge sebagai jembatan (apache2->tomcat) atau (apache2->pma->mysql)
   backend:
     driver: bridge
