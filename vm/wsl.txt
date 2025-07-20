@@ -4,5 +4,20 @@ wsl --list --verbose
 #Unregister (Uninstall)
 wsl --unregister Debian
 
-sudo apt-get install openssh-server -y
+# list available os
+wsl -l -o
+#list installed os
+wsl -l
+# install os
+wsl --install Debian
+
+sudo apt-get update && apt-get install net-tools ssh -y
 sudo apt-get install curl -y
+
+htop
+df -h
+ifstat
+iftop
+
+# ganti user dari root ke steam
+sudo chown -R steam:steam "/path/to/folder"
