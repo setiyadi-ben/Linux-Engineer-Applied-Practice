@@ -69,3 +69,6 @@ sudo chown -R steam:steam "/home/steam/.local/share/Steam/steamapps/common/Count
 sudo chmod -R 755 "/home/steam/.local/share/Steam/steamapps/common/Counter-Strike Global Offensive Beta - Dedicated Server/csgo/addons"
 
 ./srcds_run -game csgo -console -usercon +map de_mirage +sv_setsteamaccount ADB345D8F3C8D8018EFCB07BCF43A277
+
+# cek installed plugin
+sm plugins list
