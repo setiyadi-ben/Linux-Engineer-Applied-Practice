@@ -1,5 +1,6 @@
 #!/bin/bash
 # file ini "entrypoint.sh" wajib menggunakan LF
+# jika di windows masih entrypoint.sh error, lakukan docker compose down dan delete image tomcat & apache lalu docker compose up lagi
 # Generate keystore if missing
 if [ ! -f /opt/tomcat/localhost-rsa.jks ]; then
     keytool -genkeypair -alias tomcat -keyalg RSA \

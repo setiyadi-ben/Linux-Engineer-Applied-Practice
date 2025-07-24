@@ -1,6 +1,7 @@
 #!/bin/bash
 # file ini "entrypoint.sh" wajib menggunakan LF
 # di vscode cek kanan bawah dan ganti atau menggunakan dos2unix entrypoint.sh
+# jika di windows masih entrypoint.sh error, lakukan docker compose down dan delete image tomcat & apache lalu docker compose up lagi
 set -e
 
 # Generate SSL certificate if missing
