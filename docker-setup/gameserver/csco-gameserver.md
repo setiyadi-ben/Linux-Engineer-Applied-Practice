@@ -44,7 +44,7 @@ cd Classic\ Offensive
 nano csco_dedicated-server_start.sh
 ```
 ```
-./srcds_run -game cscomod\csgo -console -dedicated -tickrate 128 -usercon +game_type 0 +game_mode 1 +map de_mirage_csco +exec server.cfg -port 27015 +sv_setsteamaccount ADXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX +sv_pure 0
+./srcds_run -game csco\csgo -console -dedicated -tickrate 128 -usercon +game_type 0 +game_mode 1 +map de_mirage_csco +exec server.cfg -port 27015 +sv_setsteamaccount ADXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX +sv_pure 0
 ```
 ```
 chmod +x csco_dedicated-server_start.sh
