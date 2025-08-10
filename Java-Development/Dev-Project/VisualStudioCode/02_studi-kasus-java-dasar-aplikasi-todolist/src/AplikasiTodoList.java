@@ -30,11 +30,6 @@ public class AplikasiTodoList {
          *    - Tampilkan nomor urut (index + 1)
          *    - Tampilkan teks todo
          * 3. Item null diabaikan (tidak ditampilkan)
-         * 
-         * CONTOH OUTPUT:
-         * 1. Belajar Java
-         * 2. Makan Siang
-         * 3. Tidur Siang
          */
         for (var i = 0; i < model.length; i++) {
             String todo = model[i];  // Ambil nilai di index saat ini
@@ -85,16 +80,17 @@ public class AplikasiTodoList {
         // Step 1: Cek kapasitas
         var isFull = true;
         for (int i = 0; i < model.length; i++) {
-            if (model[i] == null) {
-                isFull = false; // Ditemukan slot kosong
+            if (model[i] == null) { // Cek apakah ada slot kosong
+                // Jika ada slot kosong, berarti array belum penuh
+                isFull = false; // Set isFull ke false
                 break;
             }
         }
         
-        // Step 2: Handle array penuh
+        // Step 2: Resize jika penuh
         if (isFull) {
             var temp = model; // Simpan referensi array lama
-            model = new String[model.length * 2]; // Allokasi memori baru
+            model = new String[model.length * 2]; // Buat array baru dengan kapasitas 2x
             
             // Salin data dari array lama ke baru
             for (int i = 0; i < temp.length; i++) {
@@ -102,7 +98,7 @@ public class AplikasiTodoList {
             }
         }
         
-        // Step 3-4: Cari slot kosong dan isi
+        // Step 3-4: Cari slot kosong dan isi dengan todo baru
         for (var i = 0; i < model.length; i++) {
             if (model[i] == null) {
                 model[i] = todo; // Isi slot kosong
@@ -124,6 +120,7 @@ public class AplikasiTodoList {
          *    - Auto-resize otomatis terjadi
          *    - Data tetap utuh setelah resize
          */
+        // Isi 2 data awal
         model[0] = "Belajar Java Dasar";
         model[1] = "Studi Kasus Java Dasar : Aplikasi TodoList";
         
