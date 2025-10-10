@@ -23,8 +23,11 @@ Software as a Service (SaaS) is traditionally considered a cloud-based software 
 
 # The Architectures
 
-## 1. Monolithic Systems (Full Ubuntu Linux Server OS)
+## 1. Monolithic System, Linux Server
 
+<p>The monolithic system means, 1 single linux vm reposible for running multiple services in the same host machine. Most of the time installation is done manually, easy for newcomers, simple and maintainable for small companies.</p>
+
+<p>This below are the common jobs that has been done by system administrators and any other similar positions in this relevant fields.</p>
 
 ### Database Administration
 #### [**1. Database Replication Simulation ✅**](/Database-Replication-Simulation/readme.md)
@@ -37,12 +40,12 @@ Software as a Service (SaaS) is traditionally considered a cloud-based software 
 #### **3. Java-Webapps-Troubleshooting (not started yet)**
 
 
-## 2. Containerization System (Docker)
-### Overview of current infrastructure development
+## 2. Containerization System Overview (Docker)
 
 <p align="center"><img src="/image-files/prod/infra/l-e-a-p infra overview.png"></p>
-<p>The priority itself is inside the purple circle, but I would like to explore more.<p>
-- Running all services from monolithic systems using docker-compose.yml
+
+<p>The priority itself is inside the purple circle, but I would like to explore more. The aim is being able to run all services from monolithic systems using docker-compose.yml</p>
 
 ## - Development using Java
 - [On the go learning Java programming](/Java-Development/index.md)
+<p>To be honest, it's been a while I have passsively not continuing to learn Java. The thing that I can give to you is this, "Java is great and understandable code, but then I realized that learning only doesn't solve my problem. So, with that, what I need was to redo learning mysql for the bottom of the concept.   "</p>
