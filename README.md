@@ -33,11 +33,16 @@ Software as a Service (SaaS) is traditionally considered a cloud-based software 
 #### [**1. Database Replication Simulation ✅**](/Database-Replication-Simulation/readme.md)
 
 ### System Administration
+#### Current Post-Install Scripts
+<br>Beware! The repository owner doesn't responsible for any damage that occur afterwards. <br>
+
 #### [**1. Java-Webapps-Deployment (in-progress)**](/Java-Webapps-Deployment/procedure.md)
 
 #### **2. Java-Webapps-Monitoring (not started yet)**
 
 #### **3. Java-Webapps-Troubleshooting (not started yet)**
+
+#### 4. Patching Security Vulnerabilities
 
 
 ## 2. Containerization System Overview (Docker)
