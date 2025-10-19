@@ -33,16 +33,18 @@ Software as a Service (SaaS) is traditionally considered a cloud-based software 
 #### [**1. Database Replication Simulation ✅**](/Database-Replication-Simulation/readme.md)
 
 ### System Administration
-#### Current Post-Install Scripts
-<br>Beware! The repository owner doesn't responsible for any damage that occur afterwards. <br>
+Current Post-Install Scripts
+<br>Beware! The repository owner doesn't responsible for any damage that occur afterwards. </br>
 
-#### [**1. Java-Webapps-Deployment (in-progress)**](/Java-Webapps-Deployment/procedure.md)
+#### [**1. Java Webapps Deployment (in-progress)**](/Java-Webapps-Deployment/procedure.md)
 
-#### **2. Java-Webapps-Monitoring (not started yet)**
+#### **2. Java Webapps Monitoring (not started yet)**
 
-#### **3. Java-Webapps-Troubleshooting (not started yet)**
+#### **3. Java Webapps Troubleshooting (not started yet)**
 
-#### 4. Patching Security Vulnerabilities
+#### [**4. Patching Security Vulnerabilities (in-progress)**](/Patching-Security-Vulnerabilities/howToPatch.md)
+
+#### [**5. Automations | Restore Previous Config (in-progress)**](/Automations/automation.md)
 
 
 ## 2. Containerization System Overview (Docker)
@@ -53,4 +55,4 @@ Software as a Service (SaaS) is traditionally considered a cloud-based software 
 
 ## - Development using Java
 - [On the go learning Java programming](/Java-Development/index.md)
-<p>To be honest, it's been a while I have passsively not continuing to learn Java. The thing that I can give to you is this, "Java is great and understandable code, but then I realized that learning only doesn't solve my problem. So, with that, what I need was to redo learning mysql for the bottom of the concept.   "</p>
+<p>To be honest, it's been a while I have passsively not continuing to learn Java. The thing that I can give to you is this, "Java is great and understandable code, but then I realized that learning only doesn't solve my problem. So, with that, what I need was to redo learning database to understand the main concept of transactions of data."</p>
