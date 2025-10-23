@@ -19,10 +19,10 @@
 
 ```sh
 # Restore Previous Config
-curl -fSSL https://github.com/blablabla.sh | sudo bash
+curl -fSSL https://raw.githubusercontent.com/setiyadi-ben/Linux-Engineer-Applied-Practice/refs/heads/main/Automations/automation/restore.sh | sudo bash
 ```
 
-```sh
+<!-- ```sh
 #!/bin/bash
 set -euo pipefail
 trap 'echo "[ERROR] Script exited unexpectedly on line $LINENO."' ERR
@@ -116,4 +116,4 @@ fi
 
 echo "[DONE] All restoration steps completed."
 
-```
+``` -->
