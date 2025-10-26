@@ -14,6 +14,10 @@
     ├── sshd_config
     ├── (put your public ssh keys here ".pub"")
 ```
+#### What will be installed?
+- security: fail2ban,
+- utilities: htop, fastfetch
+
 #### Whats working?
 ```
 --> Fail2ban

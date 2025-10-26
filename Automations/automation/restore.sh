@@ -59,17 +59,20 @@ echo
 
 
 echo "This script will do the followings:"
-echo "1. (Planned) Purging bloatware app if exists from systemd.
-        ie: samba, etc."
+echo "1. Install utility apps:
+        htop, fastfetch, ..(soon)"
 echo "2. Restore: 
         a. fail2ban config (3 max fails, 10 years ban),
         b. sshd_config (publickey access + add staff users & etc),
-        c. casaos (gui version for docker deployment)" 
+        c. casaos (gui version for docker deployment)
+        d. (optional for advanced sysadmin) softether vpn server"
 echo
 
 # Step 1 (planned, skipped)
-echo "[SKIP] Purging bloatware apps — not executed (planned only)."
+echo "[INSTALL] Install basic utility apps."
 echo
+sudo apt-get update && sudo apt-get install -y htop fastfetch
+echo "[OK] Utility apps installed."
 
 # Step 2a — Restore fail2ban (with flexible ignore IP prompt)
 sudo apt update && apt install -y fail2ban
@@ -141,3 +144,27 @@ fi
 echo
 
 echo "[DONE] All restoration steps completed."
+
+# Step 2d — Optional: SoftEther VPN Server auto-install
+echo
+read -rp "For advanced sysadmins: do you want to install SoftEther VPN Server now? [y/N]: " softether_confirm
+if [[ "$softether_confirm" =~ ^[Yy]$ ]]; then
+    if [ ! -f ./configs/autoinstall_softether-server.sh ]; then
+        echo "[INFO] SoftEther installer not found locally."
+        read -rp "Download it from GitHub now? [y/N]: " dl_softether
+        if [[ "$dl_softether" =~ ^[Yy]$ ]]; then
+            curl -fsSL "https://raw.githubusercontent.com/setiyadi-ben/Linux-Engineer-Applied-Practice/refs/heads/main/Automations/automation/configs/autoinstall_softether-server.sh" \
+                -o ./configs/autoinstall_softether-server.sh && chmod +x ./configs/autoinstall_softether-server.sh
+            echo "[OK] SoftEther installer downloaded successfully."
+        else
+            echo "[SKIP] Installer not downloaded. You can run it manually later from ./configs."
+            exit 0
+        fi
+    fi
+
+    echo "[RUNNING] Executing SoftEther VPN Server installer..."
+    sudo bash ./configs/autoinstall_softether-server.sh
+else
+    echo "[SKIP] SoftEther VPN Server installation skipped."
+fi
+
