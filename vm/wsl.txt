@@ -21,3 +21,23 @@ iftop
 
 # ganti user dari root ke steam
 sudo chown -R steam:steam "/path/to/folder"
+
+# opening root access inside wsl
+sudo su
+sudo passwd root
+#sudo grep root /etc/shadow
+
+# install openssh-server
+apt-get update && apt-get install ssh -y
+# modify ssh to allow root login
+nano etc/ssh/sshd_config
+# change the following
+```
+PermitRootLogin yes
+PasswordAuthentication yes
+UsePAM yes
+```
+#check the ssh service
+systemctl restart sshd
+systemctl status sshd
+
