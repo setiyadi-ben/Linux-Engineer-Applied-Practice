@@ -64,4 +64,17 @@ Type = forking
 [Install]
 WantedBy = multi-user.target
 
-systemctl enable vpnserver && systemctl start vpnserver && systemctl status vpnserver 
+systemctl enable vpnserver && systemctl start vpnserver && systemctl status vpnserver
+
+# Softether VPN Client
+sudo apt update && sudo apt install -y \
+    build-essential \
+    libssl-dev \
+    zlib1g-dev \
+    libncurses5-dev \
+    libedit-dev \
+    libreadline-dev
+cd /opt
+# send file through sftp
+tar xzvf softether-vpnclient-v4.44-9807-rtm-2025.04.16-linux-x64-64bit.tar.gz
+cd ./vpnclient
