@@ -28,12 +28,13 @@ sudo passwd root
 #sudo grep root /etc/shadow
 
 # install openssh-server
-apt-get update && apt-get install ssh -y
+apt-get update && apt install net-tools ssh curl wget -y
 # modify ssh to allow root login
-nano etc/ssh/sshd_config
+nano /etc/ssh/sshd_config
 # change the following
 ```
 PermitRootLogin yes
+PubkeyAuthentication yes
 PasswordAuthentication yes
 UsePAM yes
 ```
