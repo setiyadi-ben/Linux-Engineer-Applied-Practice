@@ -1,0 +1,53 @@
+# Create user steam
+# Install ssh
+sudo apt-get update && sudo apt install net-tools ssh curl wget -y
+# Login with user steam
+
+# Script will begin
+cd /home/steam && sudo dpkg --add-architecture i386 && \
+sudo apt update && \
+sudo DEBIAN_FRONTEND=noninteractive apt install -y \
+  libc6:i386 libstdc++6:i386 lib32gcc-s1 libgcc-s1:i386 \
+  libcurl4:i386 libtinfo6:i386 libncurses6:i386 libbz2-1.0:i386 libssl3:i386 \
+  wget screen unzip ca-certificates && \
+sudo apt autoremove -y && \
+sudo apt clean && \
+wget -q https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz -O steamcmd_linux.tar.gz && \
+tar -xzf steamcmd_linux.tar.gz && \
+rm steamcmd_linux.tar.gz && \
+chmod +x steamcmd.sh && \
+./steamcmd.sh +login anonymous +validate +quit
+# Paste your "Classic Offensive.zip" into /home/steam/Steam/steamapps
+cd /home/steam/Steam/steamapps && \
+sudo unzip -o "Classic Offensive.zip" && \
+sudo chmod -R 755 "/home/steam/Steam/steamapps/Classic Offensive" && \
+cd "/home/steam/Steam/steamapps/Classic Offensive"
+# Write running script to start server
+cat <<'EOF' | sudo tee csco_dedicated-server_start.sh > /dev/null
+#!/bin/bash
+cd "$(dirname "$0")"
+./srcds_run -game csco\csgo -console -dedicated -tickrate 128 -usercon \
++game_type 0 +game_mode 1 +map de_mirage_csco +exec server.cfg -port 27015 \
++sv_setsteamaccount ADXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX +sv_pure 0
+EOF
+
+cat <<'EOF' | sudo tee csco_dedicated-server_start.sh > /dev/null
+#!/bin/bash
+unset LD_PRELOAD
+export LD_LIBRARY_PATH=$HOME/sdk32:$HOME/sdk64:$LD_LIBRARY_PATH
+cd "$(dirname "$0")"
+./srcds_run -game csco\csgo -console -dedicated -tickrate 128 -usercon \
++game_type 0 +game_mode 1 +map de_mirage_csco +exec server.cfg -port 27015 \
++sv_setsteamaccount 042389764DA0594DFF2536C60A1A3E1A +sv_pure 0
+EOF
+
+# Set executable
+sudo chmod +x csco_dedicated-server_start.sh
+# Set symlink
+mkdir -p /home/steam/sdk32 /home/steam/sdk64 && \
+rm -f /home/steam/sdk32/steamclient.so /home/steam/sdk64/steamclient.so && \
+ln -s /home/steam/linux32/steamclient.so /home/steam/sdk32/steamclient.so && \
+ln -s /home/steam/linux64/steamclient.so /home/steam/sdk64/steamclient.so && \
+ls -l /home/steam/sdk32 /home/steam/sdk64
+# Start server
+./csco_dedicated-server_start.sh
