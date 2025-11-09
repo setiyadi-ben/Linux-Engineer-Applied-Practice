@@ -77,6 +77,5 @@ echo "[5/5] Checking SSH status..."
 echo "All done! You can now SSH into root using password authentication."
 '
 
-
 # Using WSL as Daily Driver Desktop
 apt-get install tasksel xrdp -y && tasksel
