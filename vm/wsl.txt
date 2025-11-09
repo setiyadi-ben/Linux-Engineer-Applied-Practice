@@ -42,3 +42,41 @@ UsePAM yes
 systemctl restart sshd
 systemctl status sshd
 
+# Single line scripts
+sudo su -c '
+set -e
+echo "[1/5] Setting root password..."
+passwd root
+
+echo "[2/5] Installing OpenSSH & tools..."
+apt-get update -y && apt-get install -y net-tools ssh curl wget
+
+echo "[3/5] Updating SSH configuration..."
+CONFIG=/etc/ssh/sshd_config
+cp -n $CONFIG ${CONFIG}.bak
+sed -i "s/^#*PermitRootLogin.*/PermitRootLogin yes/" $CONFIG
+sed -i "s/^#*PubkeyAuthentication.*/PubkeyAuthentication yes/" $CONFIG
+sed -i "s/^#*PasswordAuthentication.*/PasswordAuthentication yes/" $CONFIG
+sed -i "s/^#*UsePAM.*/UsePAM yes/" $CONFIG
+grep -q "^PermitRootLogin" $CONFIG || echo "PermitRootLogin yes" >> $CONFIG
+grep -q "^PubkeyAuthentication" $CONFIG || echo "PubkeyAuthentication yes" >> $CONFIG
+grep -q "^PasswordAuthentication" $CONFIG || echo "PasswordAuthentication yes" >> $CONFIG
+grep -q "^UsePAM" $CONFIG || echo "UsePAM yes" >> $CONFIG
+
+echo "[4/5] Restarting SSH service..."
+if command -v systemctl >/dev/null 2>&1; then
+    systemctl restart ssh || true
+    systemctl restart sshd || true
+else
+    service ssh restart || service sshd restart || true
+fi
+
+echo "[5/5] Checking SSH status..."
+(ps -ef | grep ssh[d] && echo "[OK] SSH daemon running.") || echo "[WARN] SSH not running."
+
+echo "All done! You can now SSH into root using password authentication."
+'
+
+
+# Using WSL as Daily Driver Desktop
+apt-get install tasksel xrdp -y
