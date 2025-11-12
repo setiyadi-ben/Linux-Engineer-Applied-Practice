@@ -99,10 +99,10 @@ sudo bash -c 'cd / && apt-get update -y && apt-get install tasksel -y && tasksel
 2. Xfce     | Work but audio not working and have to deactivate WSLg ===> set  [wsl2]
                                                                                guiApplications=false in ===>  C:\Users\BENNYJRX for example
                                                                                
-3. GNOME Flashback | Not yet tested
+3. GNOME Flashback | Broken
 4. KDE Plasma      | Worked guiApplications=true in ===>  C:\Users\BENNYJRX for example
 4. Cinnamon        | Worked guiApplications=true in ===>  C:\Users\BENNYJRX for example
-5. MATE            | Not yet tested
+5. MATE            | Broken
 6. LXDE            | Not yet tested
 7. lxqt            | Broken
 
