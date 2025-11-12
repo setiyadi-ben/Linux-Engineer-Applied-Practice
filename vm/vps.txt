@@ -1,2 +1,63 @@
 # check region
-nano /etc/apt/sources.list.d/ubuntu.sources
+nano /etc/apt/sources.list
+
+# Simple user management
+read -rp "Enter new username: " NEWUSER; if id "$NEWUSER" &>/dev/null; then echo "[INFO] User '$NEWUSER' already exists."; else adduser --gecos "" "$NEWUSER"; fi; usermod -aG sudo,adm,root "$NEWUSER"; echo "$NEWUSER ALL=(ALL:ALL) NOPASSWD:ALL" | tee /etc/sudoers.d/$NEWUSER >/dev/null; chmod 440 /etc/sudoers.d/$NEWUSER; echo; echo "✅ User '$NEWUSER' created successfully."; echo "📂 Groups:"; groups "$NEWUSER"; echo; echo "===== USER LIST ====="; mapfile -t USERS < <(awk -F: '$3 >= 1000 && $1 != "nobody" {print $1}' /etc/passwd); i=1; for U in "${USERS[@]}"; do if [[ "$U" != "root" ]]; then printf "%2d) %s\n" "$i" "$U"; ((i++)); fi; done; echo "====================="; read -rp "Enter the number of user to delete (or press Enter to skip): " CHOICE; if [[ -n "$CHOICE" && "$CHOICE" =~ ^[0-9]+$ ]]; then TARGET=$(awk -F: '$3 >= 1000 && $1 != "nobody" && $1 != "root" {print $1}' /etc/passwd | sed -n "${CHOICE}p"); if [[ -n "$TARGET" ]]; then read -rp "Are you sure you want to delete user '$TARGET'? [y/N]: " CONFIRM; if [[ "$CONFIRM" =~ ^[Yy]$ ]]; then userdel -r "$TARGET" && rm -f /etc/sudoers.d/$TARGET && echo "🗑️ User '$TARGET' deleted."; else echo "❎ Deletion cancelled."; fi; else echo "⚠️ Invalid number."; fi; else echo "👍 No deletion performed."; fi
+
+# Change repo if needed
+sudo cp /etc/apt/sources.list /etc/apt/sources.list.backup && \
+sudo tee /etc/apt/sources.list <<'EOF'
+deb http://mirror.sg.gs/debian/ trixie main contrib non-free non-free-firmware
+deb http://mirror.sg.gs/debian-security trixie-security main contrib non-free non-free-firmware
+deb http://mirror.sg.gs/debian/ trixie-updates main contrib non-free non-free-firmware
+# Optional (paket versi baru)
+deb http://mirror.sg.gs/debian/ trixie-backports main contrib non-free non-free-firmware
+EOF
+sudo apt update
+
+
+#=== "Tasksel Linux" Desktop Environment Selection=============================================================================================================================================================================================
+sudo bash -c 'cd / && apt-get update -y && apt-get install tasksel -y && tasksel'
+
+#===Debian Desktop Environment Summary | per 21:35/12-11-2025 ======================================================================================================================================================
+1. GNOME    | Broken on WSL since not full instalation
+2. Xfce     | Work but audio not working and have to deactivate WSLg ===> set  [wsl2]
+                                                                               guiApplications=false in ===>  C:\Users\BENNYJRX for example
+                                                                               
+3. GNOME Flashback | Not yet tested
+4. KDE Plasma      | Worked guiApplications=true in ===>  C:\Users\BENNYJRX for example
+4. Cinnamon        | Worked guiApplications=true in ===>  C:\Users\BENNYJRX for example
+5. MATE            | Not yet tested
+6. LXDE            | Not yet tested
+7. lxqt            | Broken
+
+#=== Install xRDP===============================================================================================================================================================================================
+sudo apt install -y lsb-release && \
+curl -fsSL https://raw.githubusercontent.com/setiyadi-ben/Linux-Engineer-Applied-Practice/refs/heads/main/vm/xrdp-installer-1.5.5.sh | bash && \
+echo "Menjalankan reboot..." && sudo reboot
+
+#=== If audio not getting passthrough (Xfce problem)=============================================================================================================================================================
+sudo apt install -y pipewire pipewire-pulse wireplumber && \
+systemctl --user --now enable pipewire pipewire-pulse wireplumber && \
+systemctl --user mask pulseaudio.socket pulseaudio.service && sudo reboot
+
+# If the Desktop Environment Broken, or Audio PipeWire Audio Error==============================================================================================================================================
+sudo bash -c 'DIR=$(pwd); [[ $DIR == /home/* ]] && rm -rf "$DIR"/* "$DIR"/.[!.]* "$DIR"/..?* && systemctl reboot'
+
+# List Desktop Environment
+ls /usr/share/xsessions/
+# Select Desktop Environment
+sudo update-alternatives --config x-session-manager
+
+# Delete Desktop Environment
+sudo apt purge \
+  lxqt* mate* openbox* plasma* lightdm* kde* gnome* xfce4* cinnamon* budgie* \
+  sugar* unity* enlightenment* lxde* tasksel xrdp pipewire-module-xrdp \
+  pipewire pipewire-pulse pulseaudio wireplumber libcanberra* \
+  xdg-desktop-portal* -y && \
+sudo apt autoremove --purge -y && \
+sudo apt autoclean && \
+sudo rm -rf /usr/share/xsessions/*.desktop \
+  /etc/xrdp /usr/lib/xrdp /usr/share/xrdp \
+  /usr/share/wayland-sessions /usr/share/sddm/* /usr/share/gdm/*
+#================================================================================================================================================================================================================

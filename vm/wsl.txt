@@ -1,4 +1,4 @@
-#Check Installed WSL Distros
+#=== Check Installed WSL Distros================================================================================================================================================================================
 wsl --list --verbose
 
 #Unregister (Uninstall)
@@ -8,11 +8,24 @@ wsl --unregister Debian
 wsl -l -o
 #list installed os
 wsl -l
-# install os
+
+#=== install os==================================================================================================================================================================================================
 wsl --install Debian
 
+# Change repo if needed
+sudo cp /etc/apt/sources.list /etc/apt/sources.list.backup && \
+sudo tee /etc/apt/sources.list <<'EOF'
+deb http://mirror.sg.gs/debian/ trixie main contrib non-free non-free-firmware
+deb http://mirror.sg.gs/debian-security trixie-security main contrib non-free non-free-firmware
+deb http://mirror.sg.gs/debian/ trixie-updates main contrib non-free non-free-firmware
+# Optional (paket versi baru)
+deb http://mirror.sg.gs/debian/ trixie-backports main contrib non-free non-free-firmware
+EOF
+sudo apt update
+
+
 sudo apt-get update && apt-get install net-tools ssh -y
-sudo apt-get install curl -y
+sudo apt-get install curl wget -y
 
 htop
 df -h
@@ -27,7 +40,7 @@ sudo su
 sudo passwd root
 #sudo grep root /etc/shadow
 
-# install openssh-server
+#=== install openssh-server======================================================================================================================================================================================
 apt-get update && apt install net-tools ssh curl wget -y
 # modify ssh to allow root login
 nano /etc/ssh/sshd_config
@@ -42,7 +55,7 @@ UsePAM yes
 systemctl restart sshd
 systemctl status sshd
 
-# Single line scripts
+# === Single line scripts (install openssh server)===============================================================================================================================================================
 sudo su -c '
 set -e
 echo "[1/5] Setting root password..."
@@ -76,6 +89,51 @@ echo "[5/5] Checking SSH status..."
 
 echo "All done! You can now SSH into root using password authentication."
 '
+#================================================================================================================================================================================================================
 
-# Using WSL as Daily Driver Desktop
-apt-get install tasksel xrdp -y && tasksel
+#=== "Tasksel Linux" Desktop Environment Selection=============================================================================================================================================================================================
+sudo bash -c 'cd / && apt-get update -y && apt-get install tasksel -y && tasksel'
+
+#===Debian Desktop Environment Summary | per 21:35/12-11-2025 ======================================================================================================================================================
+1. GNOME    | Broken on WSL since not full instalation
+2. Xfce     | Work but audio not working and have to deactivate WSLg ===> set  [wsl2]
+                                                                               guiApplications=false in ===>  C:\Users\BENNYJRX for example
+                                                                               
+3. GNOME Flashback | Not yet tested
+4. KDE Plasma      | Worked guiApplications=true in ===>  C:\Users\BENNYJRX for example
+4. Cinnamon        | Worked guiApplications=true in ===>  C:\Users\BENNYJRX for example
+5. MATE            | Not yet tested
+6. LXDE            | Not yet tested
+7. lxqt            | Broken
+
+#=== Install xRDP===============================================================================================================================================================================================
+sudo apt install -y lsb-release && \
+curl -fsSL https://raw.githubusercontent.com/setiyadi-ben/Linux-Engineer-Applied-Practice/refs/heads/main/vm/xrdp-installer-1.5.5.sh | bash && \
+echo "Menjalankan reboot..." && sudo reboot
+
+#=== If audio not getting passthrough (Xfce problem)=============================================================================================================================================================
+sudo apt install -y pipewire pipewire-pulse wireplumber && \
+systemctl --user --now enable pipewire pipewire-pulse wireplumber && \
+systemctl --user mask pulseaudio.socket pulseaudio.service && sudo reboot
+
+# If the Desktop Environment Broken, or Audio PipeWire Audio Error==============================================================================================================================================
+sudo bash -c 'DIR=$(pwd); [[ $DIR == /home/* ]] && rm -rf "$DIR"/* "$DIR"/.[!.]* "$DIR"/..?* && systemctl reboot'
+
+# List Desktop Environment
+ls /usr/share/xsessions/
+# Select Desktop Environment
+sudo update-alternatives --config x-session-manager
+
+# Delete Desktop Environment
+sudo apt purge \
+  lxqt* mate* openbox* plasma* lightdm* kde* gnome* xfce4* cinnamon* budgie* \
+  sugar* unity* enlightenment* lxde* tasksel xrdp pipewire-module-xrdp \
+  pipewire pipewire-pulse pulseaudio wireplumber libcanberra* \
+  xdg-desktop-portal* -y && \
+sudo apt autoremove --purge -y && \
+sudo apt autoclean && \
+sudo rm -rf /usr/share/xsessions/*.desktop \
+  /etc/xrdp /usr/lib/xrdp /usr/share/xrdp \
+  /usr/share/wayland-sessions /usr/share/sddm/* /usr/share/gdm/*
+#================================================================================================================================================================================================================
+
