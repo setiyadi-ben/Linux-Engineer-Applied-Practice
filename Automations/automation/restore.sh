@@ -136,13 +136,41 @@ echo
 
 # Step 2c — Install CasaOS
 echo "[INSTALL] CasaOS — GUI for Docker deployment"
+
 if curl -fsSL https://get.casaos.io | sudo bash; then
     echo "[OK] CasaOS installed successfully."
 else
     echo "[ERROR] CasaOS installation failed."
-fi
-echo
 
+    # Ask to install Docker
+    read -rp "CasaOS installation failed. Would you like to install Docker first? [y/N]: " install_docker
+
+    if [[ "$install_docker" =~ ^[Yy]$ ]]; then
+        echo "[INSTALL] Installing Docker..."
+        if curl -fsSL https://get.docker.com | sh; then
+            echo "[OK] Docker installed successfully."
+
+            # Ask to retry CasaOS installation
+            read -rp "Would you like to retry installing CasaOS now? [y/N]: " retry_casa
+            if [[ "$retry_casa" =~ ^[Yy]$ ]]; then
+                echo "[RETRY] Retrying CasaOS installation..."
+                if curl -fsSL https://get.casaos.io | sudo bash; then
+                    echo "[OK] CasaOS installed successfully after Docker installation."
+                else
+                    echo "[ERROR] CasaOS installation failed again even after Docker installation."
+                fi
+            else
+                echo "[SKIP] CasaOS installation skipped."
+            fi
+        else
+            echo "[ERROR] Docker installation failed. Cannot proceed with CasaOS installation."
+        fi
+    else
+        echo "[SKIP] Docker installation skipped. CasaOS will not be installed."
+    fi
+fi
+
+echo
 echo "[DONE] All restoration steps completed."
 
 # Step 2d — Optional: SoftEther VPN Server auto-install
