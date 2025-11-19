@@ -40,6 +40,7 @@ For advanced sysadmins:
 
 ```sh
 # Restore Previous Config *for root superuser
+cd /opt && \
 curl -fSSL -o restore.sh https://raw.githubusercontent.com/setiyadi-ben/Linux-Engineer-Applied-Practice/refs/heads/main/Automations/automation/restore.sh && \
 chmod +x restore.sh && \
 sudo ./restore.sh
