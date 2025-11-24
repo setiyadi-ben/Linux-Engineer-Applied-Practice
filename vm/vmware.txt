@@ -1,0 +1,4 @@
+#=== Install xRDP===============================================================================================================================================================================================
+sudo apt install -y curl lsb-release && \
+curl -fsSL https://raw.githubusercontent.com/setiyadi-ben/Linux-Engineer-Applied-Practice/refs/heads/main/vm/xrdp-installer-1.5.5.sh | bash && \
+echo "Menjalankan reboot..." && sudo reboot
