@@ -1,3 +1,8 @@
+#=== Before Install=============================================================================================================================================================================================
+Disable side channel mitigations for Hyper-V enabled hosts
+Go to Options in the top left find Advanced in the last list then  you will find int the last last checkbox
+
+#=== After Install=============================================================================================================================================================================================
 #=== Install xRDP===============================================================================================================================================================================================
 sudo apt install -y curl lsb-release && \
 curl -fsSL https://raw.githubusercontent.com/setiyadi-ben/Linux-Engineer-Applied-Practice/refs/heads/main/vm/xrdp-installer-1.5.5.sh | bash && \
