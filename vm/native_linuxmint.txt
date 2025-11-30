@@ -1,0 +1,17 @@
+### Agar bisa commit
+git config --global user.name "John Doe"
+git config --global user.email "youremail@example.com"
+
+### Install Softether VPN CLient + Import config
+#  Find  Repo LEAP/vm
+ls
+sudo chmod +x autoinstall_softether-vpnclient.sh
+sudo ./autoinstall_softether-vpnclient.sh
+cp vpnclient_modular.sh /opt
+sudo chmod +x /opt/vpnclient_modular.sh
+# Put ".vpn" config file inside /opt
+sudo ./vpnclient_modular.sh
+ifconfig
+ping 10.20.0.1
+ping 10.20.15.250
+ping 10.20.15.251
