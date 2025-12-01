@@ -1,3 +1,44 @@
+# Audit | Priorty Agenda
+
+### December 2025 todolist:
+- fetch is different, so not everyone support. fastfetch for debian, ubuntu linux mint uses neofetch or neowofetch dll. Must add flexible variable soon
+- Implement compability support for casaos issues page
+- Add softether vpn client implementation to restore.sh
+- Fix the messy scripts, kinda
+
+### For later
+- Begin to visualize the most straight to the point .restore.sh (ie: Grouping the command)
+- Fix restore.sh from compatibility and ease of use 2026 (numbering selector concept)
+- Add template function so no need to type so much
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### This below is suspended for a long time
+
 # Java Spring Boot Web Application Development Flow
 
 1. **Multiparadigm Programming**  
