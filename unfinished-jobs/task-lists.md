@@ -6,6 +6,10 @@
 - Add softether vpn client implementation to restore.sh
 - Fix the messy scripts, kinda
 
+### Foggy idea
+- Research about distribution, I mean distrubution that feel like template repositories. That can be self hosted as part of the portofolio
+- Make sure that it has low effort with styling the web and has required features availabe.
+
 ### For later
 - Begin to visualize the most straight to the point .restore.sh (ie: Grouping the command)
 - Fix restore.sh from compatibility and ease of use 2026 (numbering selector concept)
