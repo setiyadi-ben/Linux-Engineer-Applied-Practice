@@ -52,7 +52,7 @@ sudo mkdir -p /opt/configs && \
 sudo chown -R $(whoami):sudo /opt/configs && \
 sudo chmod -R 2775 /opt/configs && \
 cd /opt && \
-curl -fSSL -o restore.sh https://raw.githubusercontent.com/setiyadi-ben/Linux-Engineer-Applied-Practice/refs/heads/main/Automations/automation/restore.sh && \
-chmod +x restore.sh && \
+sudo curl -fSSL -o restore.sh https://raw.githubusercontent.com/setiyadi-ben/Linux-Engineer-Applied-Practice/refs/heads/main/Automations/automation/restore.sh && \
+sudo chmod +x restore.sh && \
 sudo ./restore.sh
 ```
