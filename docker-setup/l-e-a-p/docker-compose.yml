@@ -41,8 +41,8 @@ services:
       - "8443"
     ports:
       - "0.0.0.0:8080:8080" # Port forwarding untuk akses manager tomcat tanpa apache2
-      # iptables -I DOCKER-USER -p tcp --dport 8080 ! -i tun0 -j DROP
-      # iptables -I DOCKER-USER -p tcp --dport 8080 -i tun0 -j ACCEPT
+      # iptables -I DOCKER-USER -p tcp --dport 8080 ! -s 10.20.0.0/21 -j DROP
+      # iptables -I DOCKER-USER -p tcp --dport 8080 -s 10.20.0.0/21 -j ACCEPT
       
     volumes:
       - ./app/webapps:/opt/tomcat/webapps/
