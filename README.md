@@ -49,7 +49,7 @@ Current Post-Install Scripts
 
 ## 2. Containerization System Overview (Docker)
 
-<p align="center"><img src="/image-files/prod/infra/l-e-a-p infra overview.png"></p>
+<p align="center"><img src="/image-files/prod/infra/l-e-a-p infra overview rev-2.png"></p>
 
 <p>The priority itself is inside the purple circle, but I would like to explore more. The aim is being able to run all services from monolithic systems using docker-compose.yml</p>
 
