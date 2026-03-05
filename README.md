@@ -33,16 +33,13 @@ Live Application Endpoint:
 
 The system runs on a single VPS and includes:
 
-- Hardened Linux host
-- Docker runtime
-- Reverse proxy (HTTPS)
-- Java web application container
-- Database container (not publicly exposed)
-- VPN access layer
-- Monitoring service
-- Scheduled backup automation
-
-The objective is to maintain a clean, reproducible application hosting environment.
+- Linux host with SSH access and fail2ban protection
+- VPN tunnel access via SoftEther
+- Docker runtime for containerized application services
+- Reverse proxy for HTTPS access
+- Database with persistent storage (internal network only)
+- Monitoring service accessible through the internal network
+- Backup and recovery procedures
 
 ---
 
@@ -65,25 +62,28 @@ The network structure follows structured IP planning principles:
 Protocol selection (TCP/UDP) is determined by service characteristics and transport requirements.
 
 ---
-
 ## 4. Infrastructure Layout
 
-### Host Layer
-- SSH key-based authentication
-- Firewall configuration
+### Compute Environment
+- VPS (8GB RAM)
+- Linux operating system
+- System hardening
+- SSH administrative access
 - fail2ban protection
-- Service management via systemd
 
-### Container Runtime Layer
-- Docker with docker-compose
-- Internal service network
-- Defined restart policies
+### Network Access Layer
+- Public HTTPS access
+- SSH administrative access
+- VPN tunnel via SoftEther for internal access
 
-### Reverse Proxy Layer
-- TLS termination
-- Controlled exposure to application container
+### Application Runtime Layer
+- Docker runtime
+- Containerized application services
+- Reverse proxy for TLS termination
 
----
+### Data Layer
+- Database service
+- Persistent storage via Docker volumes
 
 ## 5. Application Stack
 
@@ -116,7 +116,7 @@ The system is designed to be reproducible from a clean host.
 
 ## 7. Monitoring & Observability
 
-Monitoring includes:
+Monitoring covers:
 
 - CPU usage
 - Memory usage
@@ -124,23 +124,22 @@ Monitoring includes:
 - Container status
 - Service availability
 
-Zabbix is used for host-level and service-level monitoring.
-Monitoring dashboards are restricted to internal access.
+Monitoring is performed using Zabbix for host and service metrics.
 
-The goal is to detect resource pressure and service interruptions before they affect availability.
+Monitoring dashboards are restricted to the internal network and accessed through the VPN layer.
 
 ---
 
 ## 8. Backup & Recovery
 
-Backup strategy includes:
+Backup procedures include:
 
 - Scheduled database dumps
-- Volume backup
+- Docker volume backup
 - Restore procedure documentation
 - Recovery validation testing
 
-The restore process is tested to confirm service recovery capability.
+Restore procedures are periodically tested to ensure service recovery in case of system failure.
 
 ---
 
