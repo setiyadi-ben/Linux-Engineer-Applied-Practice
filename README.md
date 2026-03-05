@@ -26,6 +26,26 @@ The earlier version documents broader experimentation before the scope was refin
 
 ## 2. System Overview
 
+```
+                Internet
+                   │
+                   ▼
+           Reverse Proxy (HTTPS)
+                   │
+                   ▼
+              Docker Network
+          ┌────────┴─────────┐
+          │                  │
+      Java Web App       Database
+          │
+          ▼
+      Monitoring
+
+Admin Access
+   ├─ SSH
+   └─ VPN
+```
+
 Live Application Endpoint:
 
 - https://l-e-a-p.softether.net  
