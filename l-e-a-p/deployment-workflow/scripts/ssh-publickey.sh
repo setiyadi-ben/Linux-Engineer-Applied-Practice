@@ -35,39 +35,6 @@ set_sshd_directive() {
     fi
 }
 
-# ============================================================
-# Helper: scan ALL files in sshd_config.d/* for a directive
-# and override with the desired value if conflicting
-# Usage: enforce_conf_dir <key> <desired_value>
-# ============================================================
-enforce_conf_dir() {
-    local key="$1"
-    local desired="$2"
-    local fixed=0
-
-    shopt -s nullglob
-    local conf_files=("$SSHD_CONF_DIR"/*)
-    shopt -u nullglob
-
-    for conf_file in "${conf_files[@]}"; do
-        [[ -f "$conf_file" ]] || continue
-        if grep -qE "^${key}" "$conf_file"; then
-            current_val=$(grep -E "^${key}" "$conf_file" | awk '{print $2}' | tail -1)
-            if [[ "$current_val" != "$desired" ]]; then
-                sed -i "s|^${key}.*|${key} ${desired}|" "$conf_file"
-                echo "[CONFLICT FIXED] $(basename "$conf_file"): ${key} ${current_val} → ${desired}"
-                ((fixed++)) || true
-            else
-                echo "[OK] $(basename "$conf_file"): ${key} already set to ${desired}."
-            fi
-        fi
-    done
-
-    if [[ $fixed -eq 0 && ${#conf_files[@]} -gt 0 ]]; then
-        echo "[OK] No conflicting ${key} overrides found in $SSHD_CONF_DIR/*"
-    fi
-}
-
 # === Step 1: Ensure ./configs/ exists ===
 if [[ ! -d "$CONFIGS_DIR" ]]; then
     mkdir -p "$CONFIGS_DIR"
@@ -180,12 +147,25 @@ case "$auth_choice" in
         set_sshd_directive "PasswordAuthentication" "no" "$SSHD_CONFIG"
         echo "[OK] PasswordAuthentication set to: no in $SSHD_CONFIG"
 
-        # Enforce across ALL files in sshd_config.d/*
+        # Remove ALL files in sshd_config.d/ to prevent any override
         echo
-        echo " Scanning $SSHD_CONF_DIR/* for conflicting overrides..."
-        enforce_conf_dir "PasswordAuthentication" "no"
+        echo " Clearing $SSHD_CONF_DIR/* to prevent provider overrides..."
+        shopt -s nullglob
+        override_files=("$SSHD_CONF_DIR"/*)
+        shopt -u nullglob
+
+        if [[ ${#override_files[@]} -eq 0 ]]; then
+            echo "[OK] $SSHD_CONF_DIR is already empty — nothing to remove."
+        else
+            for f in "${override_files[@]}"; do
+                [[ -f "$f" ]] || continue
+                rm -f "$f"
+                echo "[OK] Removed $(basename "$f")"
+            done
+            echo "[OK] All override files cleared from $SSHD_CONF_DIR."
+        fi
         echo
-        echo "[OK] Key-only login enforced across all SSH config files."
+        echo "[OK] Key-only login enforced — no override files remain."
         ;;
     2)
         set_sshd_directive "PasswordAuthentication" "yes" "$SSHD_CONFIG"
