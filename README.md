@@ -117,7 +117,7 @@ The application is packaged and deployed in a production-style environment rathe
 
 ---
 
-## 6. Deployment Workflow
+## [6. Deployment Workflow](./l-e-a-p/deployment-workflow/)
 
 Deployment sequence:
 
