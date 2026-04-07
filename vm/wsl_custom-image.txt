@@ -1,0 +1,88 @@
+# Visualization
+[1] ubuntu-server-16.04-i386.iso
+       ↓  (mount di Windows)
+[2] filesystem.squashfs
+       ↓  (pindah ke WSL lama)
+[3] unsquashfs → extracted/
+       ↓
+[4] tar cf rootfs.tar
+       ↓
+[5] wsl --import ubuntu16 C:\WSL\ubuntu16 rootfs.tar
+       ↓
+[6] wsl -d ubuntu16  →  masuk ke sistem 32-bit hasil ISO
+## 🧩 1. Perbedaan sistem boot ISO vs WSL
+
+### 💿 ISO
+
+File `.iso` itu seperti salinan seluruh CD/DVD instalasi Linux, berisi:
+
+- **Kernel Linux** (`vmlinuz`, `initrd.gz`)
+- **Installer** (misalnya *Debian Installer* atau *Subiquity* di Ubuntu)
+- **File sistem root** (`filesystem.squashfs`) yang isinya seluruh `/bin`, `/etc`, `/usr`, dll.
+
+ISO dirancang untuk **boot lewat BIOS/UEFI**, jadi dia butuh:
+
+- Bootloader (`isolinux` / `grub`)
+- Kernel
+- Initrd
+- Proses instalasi interaktif (menyalin ke disk)
+
+---
+
+### 🧱 WSL
+
+**WSL (Windows Subsystem for Linux)** tidak bisa boot seperti CD/DVD, karena:
+
+- Tidak punya BIOS/UEFI emulator  
+- Tidak butuh kernel dari ISO — kernel disediakan oleh **Windows sendiri** (`wslkernel.sys`)  
+- Langsung butuh **root filesystem** (semua folder `/`) dalam bentuk **tarball** (`rootfs.tar`)
+
+Jadi, WSL langsung *menjalankan* Linux dari isi filesystem **tanpa proses instalasi**.  
+Makanya, kalau kamu kasih file `.iso`, WSL bingung — dia tidak tahu bagian mana yang isinya *root filesystem*.
+
+# Sample diagram mekanisme (bentuk ascii art) pada ubuntu16 32-bit support
+
++-------------------------------+
+|    ISO Image (ubuntu-16.04)   |
+|-------------------------------|
+| vmlinuz  | initrd.gz          |
+| installer files               |
+| filesystem.squashfs  ← 🎯     |
++-------------------------------+
+                │
+                │ (copy ke Windows)
+                ▼
++--------------------------------+
+|  Existing WSL (Ubuntu/Debian)  |
+|--------------------------------|
+| unsquashfs filesystem.squashfs |
+| └── extracted/                 |
+|     ├── bin/                   |
+|     ├── etc/                   |
+|     ├── usr/                   |
+|     └── var/                   |
+| tar cf rootfs.tar              |
++--------------------------------+
+                │
+                │ (import via PowerShell)
+                ▼
++--------------------------------+
+|       WSL New Distro           |
+|--------------------------------|
+| ubuntu16 (instance name)       |
+| C:\WSL\ubuntu16\               |
+| rootfs extracted here          |
+| kernel from Windows (wsl.sys)  |
++--------------------------------+
+
+# Command
+# Di WSL lama
+sudo apt install squashfs-tools -y
+cd /mnt/c/temp/ubuntu16
+sudo unsquashfs -f -d extracted filesystem.squashfs
+cd extracted
+sudo tar --numeric-owner -cf ../rootfs.tar .
+
+# Di Windows PowerShell
+mkdir D:\WSL\ubuntu16
+wsl --import ubuntu16 D:\WSL\ubuntu16 C:\temp\ubuntu16\rootfs.tar --version 2

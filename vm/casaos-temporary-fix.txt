@@ -1,0 +1,27 @@
+#=== 1. Clean Existing Docker Installation ================================================
+sudo systemctl stop docker || true && \
+sudo systemctl stop containerd || true && \
+sudo systemctl stop docker.socket || true && \
+sudo apt remove -y docker-ce docker-ce-cli containerd.io docker-compose-plugin && \
+sudo apt autoremove -y && \
+sudo rm -rf /var/lib/docker /var/lib/containerd && \
+
+#=== 2. Reinstall Docker Normally ===========================================================
+sudo apt update && \
+sudo apt install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin && \
+
+#=== 3. Override Docker's minimum API version ===============================================
+sudo mkdir -p /etc/systemd/system/docker.service.d && \
+echo -e "[Service]\nEnvironment=DOCKER_MIN_API_VERSION=1.24" | sudo tee /etc/systemd/system/docker.service.d/override.conf > /dev/null && \
+
+#=== 4. Reload and restart services =========================================================
+sudo systemctl daemon-reload && \
+sudo systemctl restart docker && \
+sudo systemctl restart casaos-app-management && \
+sudo systemctl restart casaos && \
+
+#=== 5. Test ========================================================================
+docker --version && \
+sudo docker run --rm hello-world
+
+
