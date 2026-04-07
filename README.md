@@ -117,15 +117,20 @@ The application is packaged and deployed in a production-style environment rathe
 
 ---
 
-## [6. Deployment Workflow](./l-e-a-p/deployment-workflow/)
+## 6. Deployment Workflow
+
+There is 2 separate infra as follows:
+
+[1. l-e-a-p_self signed ssl (simple template for demo)](/l-e-a-p_self%20signed%20ssl/deployment-workflow/deployment-workflow.md)<br>
+[2. l-e-a-p_let's encrypt ssl (require valid domain)]()
 
 Deployment sequence:
 
 1. Provision VPS
 2. Apply base system hardening
 3. Install Docker and dependencies
-4. Deploy services via docker-compose
-5. Configure reverse proxy and TLS
+4. Configure reverse proxy and TLS
+5. Deploy services via docker-compose
 6. Enable monitoring
 7. Test application health
 8. Validate backup and restore procedure
