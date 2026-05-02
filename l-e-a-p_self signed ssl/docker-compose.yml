@@ -1,38 +1,29 @@
 # Tips: When using docker desktop (windows use LF bottom right corner VsCode)
 # Linux  uses CRLF
 services:
-  mysql:
+# Use root/example as user/password credentials
+  database:
     container_name: l-e-a-p_mysql
-    image: mysql:8.4
+    image: mariadb:lts
+    restart: always
     environment:
       MYSQL_ROOT_PASSWORD: root
-    volumes:
-      - ./app/mysql:/var/lib/mysql
-      - ./docker-compose/mysql:/docker-entrypoint-initdb.d/ # this runs init.sql on first start
-    ports:
-      - "3306:3306"
     networks:
-      - backend # backend bertujuan untuk menghubungkan individual container karena network masing2 terisolasi
-    healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -p$$MYSQL_ROOT_PASSWORD"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      - backend
+
   phpmyadmin:
     container_name: l-e-a-p_pma
     image: phpmyadmin
+    restart: always
     environment:
-      PMA_HOST: l-e-a-p_mysql # follow container_name & harus ada network:backend
-      PMA_PORT: 3306
-      PMA_ABSOLUTE_URI: http://localhost/phpmyadmin/
-    expose:
-      - "80"
-    ports:
-      - "8888:80"
-    networks:
-      - backend # backend bertujuan untuk menghubungkan individual container karena network masing2 terisolasi
+      # - PMA_ARBITRARY=1 # Option server connection, enable if you want to connect to other mysql server outside docker network
+      - PMA_HOST=database
+      - PMA_ABSOLUTE_URI=http://localhost/phpmyadmin
     depends_on:
-      - mysql
+      - database
+    networks:
+      - backend
+
   tomcat:
     build: ./docker-compose/tomcat
     container_name: l-e-a-p_tomcat
@@ -55,9 +46,8 @@ services:
     ports:
       - "443:443"
     volumes:
-      - ./webserver/apache2-cert:/etc/apache2/ssl/ # Save sertifikat ssl
+      - ./webserver/apache2-cert:/usr/local/apache2/ssl # ← PATH CHANGED
     depends_on:
-      - mysql
       - tomcat
     networks:
       - backend
