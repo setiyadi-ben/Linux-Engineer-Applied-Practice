@@ -25,19 +25,16 @@ services:
       - backend
 
   tomcat:
-    build: ./docker-compose/tomcat
     container_name: l-e-a-p_tomcat
+    build: ./docker-compose/tomcat
     expose:
-      - "8080"
       - "8443"
     ports:
-      - "0.0.0.0:8080:8080" # Port forwarding untuk akses manager tomcat tanpa apache2
-      # iptables -I DOCKER-USER -p tcp --dport 8080 ! -s 10.20.0.0/21 -j DROP
-      # iptables -I DOCKER-USER -p tcp --dport 8080 -s 10.20.0.0/21 -j ACCEPT
+      - "10.20.0.2:8443:8443" # Port forwarding untuk akses manager tomcat tanpa apache2
       
     volumes:
-      - ./app/webapps:/opt/tomcat/webapps/
-      - ./webserver/tomcat-cert:/opt/tomcat/conf/ssl/ # Save sertifikat ssl
+      - ./app/webapps:/usr/local/tomcat/webapps # Save aplikasi web
+      - ./webserver/tomcat-cert:/usr/local/tomcat/conf/ssl/ # Save sertifikat ssl
     networks:
       - backend # backend bertujuan untuk menghubungkan individual container karena network masing2 terisolasi
   apache2:
