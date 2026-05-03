@@ -12,6 +12,7 @@ RUN sed -i \
     -e 's/^#\(LoadModule proxy_module .*\)/\1/' \
     -e 's/^#\(LoadModule proxy_http_module .*\)/\1/' \
     -e 's/^#\(LoadModule proxy_connect_module .*\)/\1/' \
+    -e 's/^#\(LoadModule proxy_fcgi_module .*\)/\1/' \
     -e 's/^#\(LoadModule headers_module .*\)/\1/' \
     -e 's/^#\(LoadModule rewrite_module .*\)/\1/' \
     /usr/local/apache2/conf/httpd.conf
@@ -19,7 +20,8 @@ RUN sed -i \
 # Add Listen 443 manually (jangan uncomment httpd-ssl.conf)
 RUN echo 'Listen 443' >> /usr/local/apache2/conf/httpd.conf
 
-# Global config
+# Global config - applies to all VirtualHosts
+# Penjelasan Global config: ./ssl_session_cache.md
 RUN echo 'ServerName leap_apache2-httpd' >> /usr/local/apache2/conf/httpd.conf && \
     echo 'SSLSessionCache shmcb:/usr/local/apache2/logs/ssl_scache(512000)' >> /usr/local/apache2/conf/httpd.conf
 
