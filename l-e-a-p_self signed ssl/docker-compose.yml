@@ -9,7 +9,7 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: root
     healthcheck:
-      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/127.0.0.1/3306'"]
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/l-e-a-p_mysql/3306'"]
       interval: 60s
       timeout: 5s
       retries: 5
@@ -23,11 +23,13 @@ services:
     environment:
       # - PMA_ARBITRARY=1 # Option server connection, enable if you want to connect to other mysql server outside docker network
       - PMA_HOST=database
-      - PMA_ABSOLUTE_URI=http://localhost/phpmyadmin
+      - PMA_ABSOLUTE_URI=https://10.20.0.2/phpmyadmin
     depends_on:
       - database
+    volumes:
+      - pma:/var/www/html/phpmyadmin  # Share phpMyAdmin files via named volume
     healthcheck:
-      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/127.0.0.1/80'"]
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/l-e-a-p_pma/9000'"]  # FPM listen di port 9000
       interval: 60s
       timeout: 5s
       retries: 5
@@ -47,12 +49,13 @@ services:
       - ./app/webapps:/usr/local/tomcat/webapps # Save aplikasi web
       - ./webserver/tomcat-cert:/usr/local/tomcat/conf/ssl/ # Save sertifikat ssl
     healthcheck:
-      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/127.0.0.1/8443'"]
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/l-e-a-p_tomcat/8443'"]
       interval: 60s
       timeout: 5s
       retries: 5
     networks:
       - backend # backend bertujuan untuk menghubungkan individual container karena network masing2 terisolasi
+
   apache2:
     build: ./docker-compose/apache2
     container_name: l-e-a-p_apache2
@@ -60,17 +63,33 @@ services:
     ports:
       - "443:443"
     volumes:
-      - ./webserver/apache2-cert:/usr/local/apache2/ssl # ← PATH CHANGED
+      - ./webserver/apache2-cert:/usr/local/apache2/ssl
+      - pma:/var/www/html/phpmyadmin:ro  # Mount phpMyAdmin files (read-only)
     depends_on:
       - tomcat
+      - phpmyadmin  # Tambah dependency ke phpMyAdmin
     healthcheck:
-      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/127.0.0.1/443'"]
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/l-e-a-p_apache2/443'"]
       interval: 60s
       timeout: 5s
       retries: 5
     networks:
       - backend
       - frontend
+
+volumes:
+  pma: # Named volume untuk menyimpan data phpMyAdmin, bisa digunakan untuk share data antara container apache2 dan phpmyadmin
+# Browser (https://10.20.0.2/phpmyadmin/index.php)
+#     ↓
+# Apache2 Container
+#     ├── Static files (.css, .js, .png) → Serve dari /var/www/html/phpmyadmin
+#     └── *.php files → FastCGI proxy ke fcgi://l-e-a-p_pma:9000
+#                           ↓
+#                 phpMyAdmin FPM Container
+#                 (execute PHP, return HTML)
+#                           ↓
+#                      Named Volume
+#                   (shared files: pma)
 
 networks:
   frontend:
