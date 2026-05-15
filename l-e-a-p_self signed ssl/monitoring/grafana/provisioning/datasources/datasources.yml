@@ -1,0 +1,79 @@
+# =============================================================================
+# GRAFANA DATASOURCE PROVISIONING
+# =============================================================================
+# Purpose: Auto-configure Prometheus sebagai datasource di Grafana startup
+# Location: /etc/grafana/provisioning/datasources/datasource.yml (inside container)
+#
+# Why Provisioning?
+# - No manual datasource setup via UI
+# - Infrastructure as Code (declarative config)
+# - Consistent across environments (dev, staging, prod)
+# - Automatic reconnection jika Prometheus address changes
+#
+# Reference: https://grafana.com/docs/grafana/latest/administration/provisioning/#datasources
+# =============================================================================
+
+apiVersion: 1  # Provisioning config version (always use 1)
+
+# Datasources list - dapat define multiple datasources (Prometheus, Loki, etc)
+datasources:
+  # ---------------------------------------------------------------------------
+  # PROMETHEUS DATASOURCE
+  # ---------------------------------------------------------------------------
+  - name: Prometheus              # Display name di Grafana UI
+    type: prometheus              # Datasource plugin type
+    access: proxy                 # Access mode:
+                                  # - proxy: Grafana server queries Prometheus (recommended)
+                                  # - direct: Browser queries Prometheus directly (CORS issues)
+    
+    url: http://prometheus:9090   # Prometheus API endpoint
+                                  # Uses Docker DNS: 'prometheus' resolves to container IP
+                                  # Internal network communication (monitoring network)
+    
+    isDefault: true               # Set as default datasource untuk new dashboards
+                                  # Jika false, user harus select datasource manually
+    
+    editable: true                # Allow users to edit datasource via UI
+                                  # Set false untuk production (prevent manual changes)
+    
+    # Optional settings (commented out = use defaults):
+    # jsonData:
+    #   timeInterval: "15s"       # Minimum step size untuk queries (match scrape_interval)
+    #   httpMethod: "POST"        # Query method (POST recommended untuk large queries)
+    #   
+    # secureJsonData:             # Encrypted secrets (jika Prometheus require auth)
+    #   httpHeaderValue1: "Bearer token123"
+    
+    # basicAuth: false            # Enable basic authentication
+    # basicAuthUser: "admin"
+    # secureJsonData:
+    #   basicAuthPassword: "password"
+    
+    # withCredentials: false      # Send credentials dengan cross-site requests
+    # tlsAuth: false              # Enable TLS client authentication
+    # tlsAuthWithCACert: false    # Verify server certificate dengan CA
+
+# =============================================================================
+# USAGE NOTES
+# =============================================================================
+# 1. After starting Grafana, datasource immediately available
+# 2. Test connection: Configuration → Data Sources → Prometheus → Save & Test
+# 3. Expected result: "Data source is working" green checkmark
+#
+# 4. Troubleshooting connection issues:
+#    - Check Prometheus container running: docker ps | grep prometheus
+#    - Check network connectivity: docker exec l-e-a-p_grafana ping prometheus
+#    - Check Prometheus health: curl http://prometheus:9090/-/healthy
+#    - View Grafana logs: docker logs l-e-a-p_grafana
+#
+# 5. Multiple datasources example:
+#    datasources:
+#      - name: Prometheus
+#        type: prometheus
+#        url: http://prometheus:9090
+#        isDefault: true
+#      - name: Loki
+#        type: loki
+#        url: http://loki:3100
+#        isDefault: false
+# =============================================================================
