@@ -1,13 +1,97 @@
+# =============================================================================
+# L-E-A-P Stack - Linux Engineer Applied Practice
+# =============================================================================
+# Main application stack: MariaDB + phpMyAdmin + Tomcat + Apache2
+#
+# DIRECTORY STRUCTURE:
+# l-e-a-p/
+# ├── docker-compose.yml              # This file - main stack
+# ├── docker-compose.monitoring.yml   # Optional monitoring stack (Prometheus/Grafana)
+# ├── docker-compose/
+# │   ├── apache2/                   # Apache2 Dockerfile & config
+# │   └── tomcat/                    # Tomcat Dockerfile & config
+# ├── app/
+# │   └── webapps/                   # Tomcat deployed applications (.war files)
+# ├── https/
+# │   ├── apache2-cert/              # Apache SSL certificates
+# │   └── tomcat-cert/               # Tomcat SSL certificates (JKS keystore)
+# └── monitoring/                    # Monitoring stack configs (if enabled)
+#     ├── prometheus/
+#     │   ├── prometheus.yml         # Scrape configs & targets
+#     │   └── data/                  # Prometheus TSDB (persistent)
+#     └── grafana/
+#         ├── provisioning/
+#         │   └── datasources/
+#         │       └── datasource.yml # Auto-configure Prometheus datasource
+#         └── data/                  # Grafana dashboards & config (persistent)
+#
+# NETWORK ARCHITECTURE:
+# ┌─────────────────────────────────────────────────────────────────┐
+# │                    l-e-a-p_frontend Network                     │
+# │                     (external access layer)                     │
+# │                                                                 │
+# │                        ┌──────────────┐                         │
+# │                        │   Apache2    │ :443 (HTTPS)            │
+# │                        │   (httpd)    │                         │
+# │                        └──────┬───────┘                         │
+# └───────────────────────────────┼─────────────────────────────────┘
+#                                 │
+#                                 │ (bridge to backend)
+#                                 │
+# ┌───────────────────────────────▼─────────────────────────────────┐
+# │                    l-e-a-p_backend Network                      │
+# │                    (internal services layer)                    │
+# │                                                                 │
+# │  ┌─────────────┐      ┌──────────────┐      ┌──────────────┐  │
+# │  │   MariaDB   │◄─────┤  phpMyAdmin  │      │   Tomcat     │  │
+# │  │   :3306     │      │  :9000 (FPM) │      │   :8443 SSL  │  │
+# │  └─────────────┘      └──────────────┘      └──────────────┘  │
+# │                              ▲                       ▲          │
+# │                              │                       │          │
+# │                        ┌─────┴───────────────────────┘          │
+# │                        │                                        │
+# │                   Apache2 (FastCGI proxy)                       │
+# │                                                                 │
+# │  * Monitoring stack (Prometheus/cAdvisor) juga connect kesini  │
+# │    untuk scrape container metrics                              │
+# └─────────────────────────────────────────────────────────────────┘
+#
+# TRAFFIC FLOW:
+# 1. Browser → https://10.20.0.2/phpmyadmin
+#    └─> Apache2 :443 (HTTPS, frontend network)
+#        ├─> Static files (.css/.js) → served dari volume mount
+#        └─> *.php → FastCGI proxy → phpMyAdmin FPM :9000 (backend)
+#                                    └─> MariaDB :3306 (backend)
+#
+# 2. Browser → https://10.20.0.2/app
+#    └─> Apache2 :443 (HTTPS, frontend network)
+#        └─> Reverse proxy → Tomcat :8443 (backend)
+#
 # Tips: When using docker desktop (windows use LF bottom right corner VsCode)
-# Linux  uses CRLF
+# Linux uses CRLF
+#
 services:
+  # ===========================================================================
+  # DATABASE SERVICE - MariaDB LTS
+  # ===========================================================================
+  # Purpose: Primary database untuk aplikasi web yang di-deploy di Tomcat
+  # Network: backend only (tidak perlu exposed ke frontend)
+  # Port: 3306 (internal docker network, tidak di-expose ke host)
+  # Data Persistence: Using Docker managed volume (auto-created)
+  #
+  # Security Notes:
+  # - Root password di environment variable (development only!)
+  # - Production: gunakan Docker secrets atau external secret management
+  # - Tidak ada port binding ke host = tidak bisa diakses dari luar container
+  # - Akses database hanya via phpMyAdmin atau aplikasi di network backend
+  #
 # Use root/example as user/password credentials
   database:
     container_name: l-e-a-p_mysql
     image: mariadb:lts
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}  # Loaded from .env file
     healthcheck:
       test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/l-e-a-p_mysql/3306'"]
       interval: 60s
@@ -15,7 +99,28 @@ services:
       retries: 5
     networks:
       - backend
-
+      
+  # ===========================================================================
+  # PHPMYADMIN SERVICE - Database Management Interface (FPM mode)
+  # ===========================================================================
+  # Purpose: Web-based database management tool untuk MariaDB
+  # Mode: PHP-FPM (FastCGI Process Manager) - bukan standalone web server
+  # Network: backend only (Apache2 yang handle external access)
+  # Port: 9000 (FPM socket, internal communication dengan Apache2)
+  #
+  # Architecture Pattern:
+  # Browser → Apache2 :443 → FastCGI proxy → phpMyAdmin FPM :9000
+  #                                          └─> MariaDB :3306
+  #
+  # Volume Sharing:
+  # - Named volume 'pma' shared dengan Apache2 untuk serve static files
+  # - Apache2: mount read-only (serve .css/.js/.png)
+  # - phpMyAdmin: mount read-write (source files)
+  #
+  # Environment Variables:
+  # - PMA_HOST: Point to 'database' service via Docker DNS
+  # - PMA_ABSOLUTE_URI: Base URL untuk redirect & cookie path (HTTPS aware)
+  #
   phpmyadmin:
     container_name: l-e-a-p_pma
     image: phpmyadmin/phpmyadmin:fpm-alpine
@@ -23,7 +128,7 @@ services:
     environment:
       # - PMA_ARBITRARY=1 # Option server connection, enable if you want to connect to other mysql server outside docker network
       - PMA_HOST=database
-      - PMA_ABSOLUTE_URI=https://10.20.0.2/phpmyadmin
+      - PMA_ABSOLUTE_URI=${PMA_ABSOLUTE_URI}  # Loaded from .env: https://${VPN_IP}/phpmyadmin
     depends_on:
       - database
     volumes:
@@ -35,7 +140,26 @@ services:
       retries: 5
     networks:
       - backend
-
+      
+  # ===========================================================================
+  # TOMCAT SERVICE - Java Application Server
+  # ===========================================================================
+  # Purpose: Deploy dan run Java web applications (.war files)
+  # Network: backend (internal), port 8443 also exposed to VPN IP 10.20.0.2
+  # Port: 8443 (HTTPS via self-signed SSL certificate in JKS keystore)
+  #
+  # SSL Configuration:
+  # - Certificate type: Java KeyStore (.jks) generated via keytool
+  # - Location: /usr/local/tomcat/conf/ssl/ (bind mount dari host)
+  # - Direct access: https://10.20.0.2:8443 (for Tomcat Manager UI)
+  # - Proxied access: https://10.20.0.2/app → Apache2 reverse proxy
+  #
+  # Volumes:
+  # - ./app/webapps: Deploy .war files here, auto-deployed by Tomcat
+  # - ./https/tomcat-cert: SSL certificate storage (persistent)
+  #
+  # Build Context: ./docker-compose/tomcat (custom Dockerfile with Java + Tomcat)
+  #
   tomcat:
     container_name: l-e-a-p_tomcat
     build: ./docker-compose/tomcat
@@ -43,11 +167,11 @@ services:
     expose:
       - "8443"
     ports:
-      - "10.20.0.2:8443:8443" # Port forwarding untuk akses manager tomcat tanpa apache2
+      - "${VPN_IP}:${TOMCAT_SSL_PORT}:8443"  # Direct access to Tomcat Manager
       
     volumes:
       - ./app/webapps:/usr/local/tomcat/webapps # Save aplikasi web
-      - ./webserver/tomcat-cert:/usr/local/tomcat/conf/ssl/ # Save sertifikat ssl
+      - ./https/tomcat-cert:/usr/local/tomcat/conf/ssl/ # Save sertifikat ssl
     healthcheck:
       test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/l-e-a-p_tomcat/8443'"]
       interval: 60s
@@ -55,7 +179,44 @@ services:
       retries: 5
     networks:
       - backend # backend bertujuan untuk menghubungkan individual container karena network masing2 terisolasi
-
+      
+  # ===========================================================================
+  # APACHE2 SERVICE - Web Server & Reverse Proxy (httpd:2.4)
+  # ===========================================================================
+  # Purpose: 
+  # 1. HTTPS termination (SSL/TLS endpoint)
+  # 2. Reverse proxy ke Tomcat untuk Java applications
+  # 3. FastCGI proxy ke phpMyAdmin untuk PHP processing
+  # 4. Static file serving untuk phpMyAdmin assets
+  #
+  # Network: frontend (external access) + backend (internal communication)
+  # Port: 443 (HTTPS only, HTTP disabled)
+  #
+  # SSL Configuration:
+  # - Certificate type: Standard SSL certificate (.crt + .key)
+  # - Location: /usr/local/apache2/ssl/ (bind mount)
+  # - Handles SSL termination untuk semua incoming HTTPS requests
+  #
+  # Routing Logic:
+  # ┌─────────────────────────────────────────────────────────────┐
+  # │ https://10.20.0.2/phpmyadmin/*                              │
+  # │  ├─> *.css, *.js, *.png  → Serve dari /var/www/html/phpmyadmin │
+  # │  └─> *.php               → FastCGI proxy ke l-e-a-p_pma:9000    │
+  # │                                                               │
+  # │ https://10.20.0.2/app/*                                      │
+  # │  └─> Reverse proxy (SSL) → https://l-e-a-p_tomcat:8443      │
+  # └─────────────────────────────────────────────────────────────┘
+  #
+  # Volume Mounts:
+  # - pma: Shared volume dengan phpMyAdmin (read-only)
+  #   → Apache serve static assets, phpMyAdmin process PHP
+  #
+  # Dependencies:
+  # - tomcat: Required untuk reverse proxy functionality
+  # - phpmyadmin: Required untuk FastCGI proxy & static file serving
+  #
+  # Build Context: ./docker-compose/apache2 (custom httpd:2.4 with modules)
+  #
   apache2:
     build: ./docker-compose/apache2
     container_name: l-e-a-p_apache2
@@ -63,7 +224,7 @@ services:
     ports:
       - "443:443"
     volumes:
-      - ./webserver/apache2-cert:/usr/local/apache2/ssl
+      - ./https/apache2-cert:/usr/local/apache2/ssl
       - pma:/var/www/html/phpmyadmin:ro  # Mount phpMyAdmin files (read-only)
     depends_on:
       - tomcat
@@ -76,23 +237,72 @@ services:
     networks:
       - backend
       - frontend
-
+      - monitoring  # Reverse proxy to monitoring services (Grafana, Prometheus, cAdvisor, Node Exporter)
+      
+# =============================================================================
+# NAMED VOLUMES
+# =============================================================================
+# Docker-managed volumes (data persists even after container removal)
+#
 volumes:
-  pma: # Named volume untuk menyimpan data phpMyAdmin, bisa digunakan untuk share data antara container apache2 dan phpmyadmin
-# Browser (https://10.20.0.2/phpmyadmin/index.php)
-#     ↓
-# Apache2 Container
-#     ├── Static files (.css, .js, .png) → Serve dari /var/www/html/phpmyadmin
-#     └── *.php files → FastCGI proxy ke fcgi://l-e-a-p_pma:9000
-#                           ↓
-#                 phpMyAdmin FPM Container
-#                 (execute PHP, return HTML)
-#                           ↓
-#                      Named Volume
-#                   (shared files: pma)
-
+  pma: # phpMyAdmin files volume (shared between phpMyAdmin FPM dan Apache2)
+    # Purpose: Share phpMyAdmin PHP files & static assets between containers
+    #
+    # Architecture:
+    # ┌──────────────────┐         ┌──────────────────┐
+    # │  phpMyAdmin FPM  │         │     Apache2      │
+    # │  (read-write)    │         │   (read-only)    │
+    # └────────┬─────────┘         └────────┬─────────┘
+    #          │                            │
+    #          └────────────┬───────────────┘
+    #                       │
+    #                  Named Volume
+    #                  'pma' (Docker-managed)
+    #
+    # Flow:
+    # 1. phpMyAdmin container writes PHP files to volume
+    # 2. Apache2 reads static files (.css/.js/.png) dari volume
+    # 3. Apache2 forwards *.php requests via FastCGI to phpMyAdmin FPM
+    #
+    # Location: Managed by Docker (inspect: docker volume inspect l-e-a-p_pma)
+    #
+    #
+    
+# =============================================================================
+# NETWORKS
+# =============================================================================
+# Docker bridge networks untuk isolasi dan komunikasi antar container
+#
+# Network Strategy:
+# - frontend: External-facing network (hanya Apache2)
+# - backend: Internal services network (semua services kecuali frontend-only)
+#
+# Why Two Networks?
+# 1. Security: Database tidak perlu exposed ke frontend network
+# 2. Isolation: Clear separation antara public-facing vs internal services  
+# 3. Monitoring: Monitoring stack bisa connect ke backend untuk scrape metrics
+# 4. Scalability: Frontend bisa di-scale terpisah dari backend services
+#
 networks:
   frontend:
-    driver: bridge # bridge sebagai jembatan (apache2->tomcat) atau (apache2->pma->mysql)
-  backend:
+    name: l-e-a-p_frontend  # Explicit name untuk reference dari monitoring stack
     driver: bridge
+    # Purpose: External access layer
+    # Connected: Apache2 only
+    # Reason: Apache2 adalah entry point, tidak perlu expose services lain
+    
+  backend:
+    name: l-e-a-p_backend   # Explicit name untuk reference dari monitoring stack  
+    driver: bridge
+    # Purpose: Internal services communication
+    # Connected: MariaDB, phpMyAdmin, Tomcat, Apache2
+    # Reason: Services need to communicate internally (DB queries, reverse proxy)
+    # Note: Monitoring stack (Prometheus/cAdvisor) juga connect kesini
+    
+  monitoring:
+    name: l-e-a-p_monitoring  # Explicit name untuk reference dari monitoring stack
+    driver: bridge
+    # Purpose: Monitoring services network + Apache reverse proxy access
+    # Connected: Apache2 (reverse proxy), Monitoring stack services (external reference)
+    # Reason: Apache perlu akses ke monitoring services untuk reverse proxy
+    # Note: Monitoring stack (docker-compose.monitoring.yml) reference network ini sebagai external
