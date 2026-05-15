@@ -1,0 +1,359 @@
+# =============================================================================
+# L-E-A-P Monitoring Stack - Prometheus + Grafana + Exporters
+# =============================================================================
+# Optional monitoring stack untuk observability L-E-A-P infrastructure
+#
+# DIRECTORY STRUCTURE:
+# l-e-a-p/
+# ├── docker-compose.yml              # Main application stack
+# ├── docker-compose.monitoring.yml   # This file - monitoring stack
+# └── monitoring/
+#     ├── prometheus/
+#     │   └── prometheus.yml         # Scrape configs & targets
+#     └── grafana/
+#         └── provisioning/
+#             └── datasources/
+#                 └── datasource.yml # Auto-configure Prometheus datasource
+#
+# NETWORK ARCHITECTURE:
+# ┌─────────────────────────────────────────────────────────────────┐
+# │                      monitoring Network                         │
+# │                   (internal monitoring layer)                   │
+# │                                                                 │
+# │  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐     │
+# │  │ Prometheus   │◄───┤    Grafana   │    │    Redis     │     │
+# │  │   :9090      │    │    :3000     │    │   :6379      │     │
+# │  └──────┬───────┘    └──────────────┘    └──────┬───────┘     │
+# │         │                                        │             │
+# │         │ (scrapes)                             │             │
+# │         │                                        │             │
+# │  ┌──────▼────────┐                      ┌───────▼────────┐    │
+# │  │ Node Exporter │                      │   cAdvisor     │    │
+# │  │   :9100       │                      │   :8080        │    │
+# │  │ (host metrics)│                      │(container stats)│   │
+# │  └───────────────┘                      └────────┬───────┘    │
+# └─────────────────────────────────────────────────┼─────────────┘
+#                                                    │
+#                           (bridge to l-e-a-p_backend)
+#                                                    │
+# ┌──────────────────────────────────────────────────▼─────────────┐
+# │                    l-e-a-p_backend Network                      │
+# │              (main application services layer)                  │
+# │                                                                 │
+# │     cAdvisor & Prometheus can scrape L-E-A-P containers:       │
+# │     - l-e-a-p_mysql     (MariaDB container)                    │
+# │     - l-e-a-p_pma       (phpMyAdmin FPM)                       │
+# │     - l-e-a-p_tomcat    (Java app server)                      │
+# │     - l-e-a-p_apache2   (web server)                           │
+# └─────────────────────────────────────────────────────────────────┘
+#
+# DEPLOYMENT:
+# Single command to deploy both stacks:
+#   docker compose -f docker-compose.yml -f docker-compose.monitoring.yml up -d
+#
+# Or deploy monitoring after main stack already running:
+#   docker compose -f docker-compose.monitoring.yml up -d
+#
+# METRICS COLLECTION FLOW:
+# 1. Node Exporter → Prometheus (host CPU, RAM, disk, network)
+# 2. cAdvisor → Prometheus (Docker container resources)
+# 3. Prometheus → Grafana (visualization & dashboards)
+#
+# ACCESS POINTS:
+# - Grafana:    http://localhost:3000  (admin/admin, change on first login)
+# - Prometheus: http://localhost:9090  (query & metrics browser)
+# - cAdvisor:   http://localhost:8081  (container stats UI)
+#
+# Usage: docker compose -f docker-compose.yml -f docker-compose.monitoring.yml up -d
+
+services:
+  # ===========================================================================
+  # NODE EXPORTER - Host System Metrics Collector
+  # ===========================================================================
+  # Purpose: Expose hardware & OS level metrics dari host machine
+  # Port: 9100 (metrics endpoint untuk Prometheus scraping)
+  # Network: monitoring only (tidak perlu akses ke backend)
+  #
+  # Metrics Collected:
+  # - CPU usage & load average
+  # - Memory (RAM) usage & swap
+  # - Disk I/O & filesystem usage
+  # - Network interface statistics
+  # - System uptime & boot time
+  #
+  # Volume Mounts (read-only):
+  # - /proc → Host process info
+  # - /sys → Host system info  
+  # - / → Root filesystem untuk disk metrics
+  #
+  # Command Flags:
+  # - path.procfs/sysfs: Mount points untuk host metrics collection
+  # - collector.filesystem.mount-points-exclude: Ignore virtual filesystems
+  #
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: l-e-a-p_node-exporter
+    restart: unless-stopped
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    # ports:
+    #   - "${VPN_IP}:${NODE_EXPORTER_PORT}:9100"  # Direct access (uncomment if needed)
+    # Primary access: https://${VPN_IP}/node-exporter/metrics (via Apache reverse proxy)
+    networks:
+      - monitoring
+      
+  # ===========================================================================
+  # PROMETHEUS - Metrics Collection & Time Series Database
+  # ===========================================================================
+  # Purpose: Scrape metrics dari exporters, store di TSDB, provide query engine
+  # Port: 9090 (web UI + PromQL query API)
+  # Networks: monitoring (scrape exporters) + backend (scrape L-E-A-P containers)
+  #
+  # Architecture:
+  # 1. Scrape metrics dari configured targets (prometheus.yml)
+  # 2. Store di time-series database (/prometheus volume)
+  # 3. Serve PromQL query API untuk Grafana
+  #
+  # Scrape Targets (configured in prometheus.yml):
+  # - node-exporter:9100 → host metrics
+  # - cadvisor:8080 → Docker container metrics
+  # - prometheus:9090 → self-monitoring
+  #
+  # User Permission:
+  # - Runs as UID 1001 (non-root for security)
+  # - Volume ownership must match: chown -R 1001:1001 ./monitoring/prometheus/
+  #
+  # Storage:
+  # - TSDB path: /prometheus (named volume 'prometheus_data')
+  # - Config: ./monitoring/prometheus/prometheus.yml (bind mount)
+  # - Retention: Default 15 days (configurable via --storage.tsdb.retention.time)
+  #
+  # Web Features:
+  # - /graph → Query builder & visualization
+  # - /targets → Scrape targets health check
+  # - /config → Current prometheus.yml view
+  #
+  prometheus:
+    image: prom/prometheus:latest
+    user: "1001"
+    environment:
+      - PUID=1001
+      - PGID=1001
+    container_name: l-e-a-p_prometheus
+    restart: unless-stopped
+    # ports:
+    #   - "${VPN_IP}:${PROMETHEUS_PORT}:9090"  # Direct access (uncomment if needed)
+    # Primary access: https://${VPN_IP}/prometheus (via Apache reverse proxy)
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./monitoring/prometheus/data:/prometheus  # Persistent data (bind mount)
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+      # - '--web.external-url=https://${VPN_IP}/prometheus'
+    networks:
+      - monitoring
+      - backend  # Bridge ke L-E-A-P backend untuk monitor containers
+      
+  # ===========================================================================
+  # GRAFANA - Metrics Visualization & Dashboard Platform
+  # ===========================================================================
+  # Purpose: Visualize Prometheus metrics via dashboards & graphs
+  # Port: 3000 (web UI)
+  # Network: monitoring only (queries Prometheus internally)
+  #
+  # Default Credentials:
+  # - Username: admin
+  # - Password: admin (change on first login!)
+  #
+  # Auto-Provisioning:
+  # - Datasource: Prometheus connection auto-configured via datasource.yml
+  # - Location: /etc/grafana/provisioning/datasources/datasource.yml
+  # - Benefit: No manual datasource setup needed, ready to use
+  #
+  # User Permission:
+  # - Runs as UID 1001 (non-root)
+  # - Volume: grafana_data (Docker-managed, auto-created with correct permissions)
+  #
+  # Data Storage:
+  # - Dashboards: /var/lib/grafana/dashboards (persisted in named volume)
+  # - Configuration: /var/lib/grafana/grafana.db (SQLite DB in named volume)
+  # - Plugins: /var/lib/grafana/plugins
+  #
+  # Recommended Dashboards (import via ID):
+  # - 1860: Node Exporter Full (comprehensive host metrics)
+  # - 10619: Docker Container & Host Metrics (cAdvisor)
+  # - 3662: Prometheus 2.0 Stats (Prometheus internal metrics)
+  #
+  # Dashboard Import:
+  # 1. Login → Dashboard menu → Import
+  # 2. Enter dashboard ID
+  # 3. Select "Prometheus" datasource
+  # 4. Click Import
+  #
+  grafana:
+    image: grafana/grafana:latest
+    user: "1001"
+    container_name: l-e-a-p_grafana
+    # ports:
+    #   - "${VPN_IP}:${GRAFANA_PORT}:3000"  # Direct access (uncomment if needed)
+    # Primary access: https://${VPN_IP}/grafana (via Apache reverse proxy)
+    restart: unless-stopped
+    environment:
+      - GF_SERVER_ROOT_URL=https://${VPN_IP}/grafana
+      # - GF_SERVER_SERVE_FROM_SUB_PATH=true
+    volumes:
+      - ./monitoring/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+      - ./monitoring/grafana/data:/var/lib/grafana  # Persistent data (bind mount)
+    networks:
+      - monitoring
+      
+  # ===========================================================================
+  # CADVISOR - Container Advisor (Docker Metrics Collector)
+  # ===========================================================================
+  # Purpose: Collect resource usage & performance metrics dari Docker containers
+  # Port: 8081 (web UI + metrics endpoint) - internal port 8080
+  # Networks: monitoring (export to Prometheus) + backend (access L-E-A-P containers)
+  #
+  # Metrics Collected Per Container:
+  # - CPU usage (user, system, total)
+  # - Memory usage (working set, RSS, cache)
+  # - Network I/O (bytes sent/received, packets, errors)
+  # - Disk I/O (read/write bytes & operations)
+  # - Filesystem usage
+  #
+  # Monitored Containers (via l-e-a-p_backend network):
+  # - l-e-a-p_mysql (database CPU/RAM/I/O)
+  # - l-e-a-p_pma (phpMyAdmin resource usage)
+  # - l-e-a-p_tomcat (Java app server performance)
+  # - l-e-a-p_apache2 (web server load)
+  #
+  # Volume Mounts (read-only kecuali /var/run):
+  # - /:/rootfs → Root filesystem access untuk container discovery
+  # - /var/run:/var/run → Docker socket access (read container info)
+  # - /sys:/sys → System info (cgroups data)
+  # - /var/lib/docker → Docker storage driver data
+  #
+  # Privileged Mode:
+  # - Required: Yes (privileged: true)
+  # - Reason: Access kernel metrics via /dev/kmsg device
+  # - Security Note: Only untuk monitoring environment, review for production
+  #
+  # Redis Dependency:
+  # - cAdvisor uses Redis untuk cache container info
+  # - Improves performance untuk large number of containers
+  #
+  # Web UI Access:
+  # - http://localhost:8081
+  # - Features: Real-time graphs, historical data, container drill-down
+  #
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: l-e-a-p_cadvisor
+    # ports:
+    #   - "${VPN_IP}:${CADVISOR_PORT}:8080"  # Direct access (uncomment if needed)
+    # Primary access: https://${VPN_IP}/cadvisor (via Apache reverse proxy)
+    networks:
+      - monitoring
+      - backend  # Bridge untuk monitor L-E-A-P containers
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    depends_on:
+      - redis
+    privileged: true  # Required untuk cAdvisor
+    devices:
+      - /dev/kmsg:/dev/kmsg
+      
+  # ===========================================================================
+  # REDIS - In-Memory Cache untuk cAdvisor
+  # ===========================================================================
+  # Purpose: Storage backend untuk cAdvisor container metrics caching
+  # Port: 6379 (Redis protocol)
+  # Network: monitoring only (internal communication dengan cAdvisor)
+  #
+  # Usage:
+  # - cAdvisor writes container metrics ke Redis
+  # - Improves query performance untuk historical data
+  # - Reduces memory overhead di cAdvisor
+  #
+  # Data Persistence:
+  # - Mode: In-memory only (no RDB/AOF configured)
+  # - Data loss: OK (cAdvisor will repopulate cache)
+  # - Reason: Monitoring data, not critical to persist
+  #
+  # Note: If Redis crashes, cAdvisor akan continue collecting metrics
+  #       tapi performance mungkin degraded sampai Redis back online
+  #
+  redis:
+    image: redis:latest
+    container_name: l-e-a-p_redis
+    restart: unless-stopped
+    # No port binding - internal use only (cAdvisor backend)
+    # Accessible only via monitoring network
+    networks:
+      - monitoring
+
+# =============================================================================
+# NETWORKS
+# =============================================================================
+# Monitoring stack menggunakan 2 networks:
+# 1. monitoring (external) - Created by main compose, joined by Apache for reverse proxy
+# 2. backend (external) - bridge ke main L-E-A-P stack untuk scraping
+#
+networks:
+  # Monitoring network (created by main docker-compose.yml)
+  # Connected: All monitoring services + Apache2 (for reverse proxy)
+  # Purpose: Apache can reverse proxy to monitoring services
+  monitoring:
+    external: true  # Network created by main compose
+    name: l-e-a-p_monitoring
+    # Why external?
+    # - Main stack creates this network
+    # - Monitoring stack joins existing network
+    # - Allows Apache to reverse proxy to monitoring services
+    
+  # External reference ke main L-E-A-P backend network  
+  # Connected: prometheus, cadvisor
+  # Purpose: Allow monitoring services to scrape metrics dari application containers
+  backend:
+    external: true  # Network already exists dari main compose
+    name: l-e-a-p_backend  # Must match network name di docker-compose.yml
+    # Why external?
+    # - Main stack creates this network
+    # - Monitoring stack joins existing network
+    # - Allows prometheus & cadvisor to discover L-E-A-P containers via DNS
+
+# =============================================================================
+# VOLUMES
+# =============================================================================
+# Monitoring data menggunakan bind mounts (not named volumes)
+# Location: ./monitoring/{prometheus,grafana}/data/
+#
+# IMPORTANT - Permission Requirements:
+# Prometheus & Grafana run as UID 1001, perlu fix ownership sebelum deploy:
+#
+#   sudo chown -R 1001:1001 ./monitoring/prometheus/data
+#   sudo chown -R 1001:1001 ./monitoring/grafana/data
+#
+# Or create dengan correct ownership:
+#   sudo mkdir -p ./monitoring/{prometheus,grafana}/data
+#   sudo chown -R 1001:1001 ./monitoring/
+#
+# Benefit bind mounts vs named volumes:
+# - Easy backup: Just copy ./monitoring/ folder
+# - Portable: Can move data between servers
+# - Transparent: See files directly in host filesystem
+# =============================================================================
