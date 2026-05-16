@@ -222,6 +222,7 @@ services:
     container_name: l-e-a-p_apache2
     restart: always
     ports:
+      - "80:80"   # HTTP port (optional, redirect to HTTPS)
       - "443:443"
     volumes:
       - ./https/apache2-cert:/usr/local/apache2/ssl
