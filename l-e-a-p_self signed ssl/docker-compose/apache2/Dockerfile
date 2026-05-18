@@ -1,5 +1,4 @@
-FROM httpd:2.4
-
+FROM httpd:latest
 # Install openssl
 RUN apt-get update && \
     apt-get install -y openssl && \
