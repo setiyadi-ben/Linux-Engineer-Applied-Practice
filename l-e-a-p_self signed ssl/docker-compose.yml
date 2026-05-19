@@ -91,9 +91,10 @@ services:
     image: mariadb:lts
     restart: always
     environment:
+      MYSQL_ROOT_USER: ${MYSQL_ROOT_USER}  # Loaded from .env file
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}  # Loaded from .env file
     healthcheck:
-      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/l-e-a-p_mysql/3306'"]
+      test: ["CMD","mariadb-admin","ping","-h","localhost","-uroot","-p${MYSQL_ROOT_PASSWORD}"]
       interval: 60s
       timeout: 5s
       retries: 5
