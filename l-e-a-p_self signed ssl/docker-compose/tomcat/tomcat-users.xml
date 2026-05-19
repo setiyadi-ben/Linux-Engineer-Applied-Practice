@@ -54,18 +54,27 @@
   <user username="role1" password="<must-be-changed>" roles="role1"/>
 -->
 
- <!-- Define roles | to be used later -->
+<!-- ========================================================================= -->
+<!-- ACTIVE USER CONFIGURATION (Development/Testing)                          -->
+<!-- ========================================================================= -->
+<!-- Default admin user for Tomcat Manager access                             -->
+<!-- Production: Change password and restrict roles as needed                 -->
+<role rolename="manager-gui"/>
+<user username="admin" password="admin" roles="manager-gui"/>
+
+<!-- ========================================================================= -->
+<!-- PREVIOUS USER CONFIGURATION (Commented for reference)                    -->
+<!-- ========================================================================= -->
+<!-- Uncomment below if you need additional users with specific roles         -->
+<!--
 <role rolename="manager-script"/>
 <role rolename="manager-jmx"/>
 <role rolename="manager-status"/>
-<!-- Standard roles-->
-<role rolename="manager-gui" />
+<role rolename="admin-gui"/>
 
 <user username="manager" password="manager_password" roles="manager-gui" />
 <user username="staff1-engineer" password="password" roles="manager-gui,admin-gui,manager-script,manager-jmx,manager-status" />
-
-<role rolename="admin-gui" />
 <user username="admin" password="admin_password" roles="manager-gui,admin-gui" />
-<user username=""/>
+-->
 
 </tomcat-users>
