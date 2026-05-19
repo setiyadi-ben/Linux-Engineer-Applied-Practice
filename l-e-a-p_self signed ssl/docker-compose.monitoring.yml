@@ -106,6 +106,11 @@ services:
     # ports:
     #   - "${VPN_IP}:${NODE_EXPORTER_PORT}:9100"  # Direct access (uncomment if needed)
     # Primary access: https://${VPN_IP}/node-exporter/metrics (via Apache reverse proxy)
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/l-e-a-p_node-exporter/9100'"]
+      interval: 60s
+      timeout: 5s
+      retries: 5
     networks:
       - monitoring
       
@@ -160,6 +165,11 @@ services:
       - '--web.console.libraries=/etc/prometheus/console_libraries'
       - '--web.console.templates=/etc/prometheus/consoles'
       - '--web.enable-lifecycle'
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/l-e-a-p_prometheus/9090'"]  # Prometheus listen di port 9090
+      interval: 60s
+      timeout: 5s
+      retries: 5
     networks:
       - monitoring
       - backend  # Bridge ke L-E-A-P backend untuk monitor containers
@@ -214,6 +224,11 @@ services:
     volumes:
       - ./monitoring/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
       - ./monitoring/grafana/data:/var/lib/grafana  # Persistent data (bind mount)
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/l-e-a-p_grafana/3000'"]  # Grafana listen di port 3000
+      interval: 60s
+      timeout: 5s
+      retries: 5
     networks:
       - monitoring
       
@@ -275,7 +290,12 @@ services:
     privileged: true  # Required untuk cAdvisor
     devices:
       - /dev/kmsg:/dev/kmsg
-      
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/l-e-a-p_cadvisor/8080'"]  # cAdvisor listen di port 8080
+      interval: 60s
+      timeout: 5s
+      retries: 5
+
   # ===========================================================================
   # REDIS - In-Memory Cache untuk cAdvisor
   # ===========================================================================
