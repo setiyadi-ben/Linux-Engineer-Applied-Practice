@@ -44,7 +44,7 @@
 # │                                                                 │
 # │  ┌─────────────┐      ┌──────────────┐      ┌──────────────┐  │
 # │  │   MariaDB   │◄─────┤  phpMyAdmin  │      │   Tomcat     │  │
-# │  │   :3306     │      │  :9000 (FPM) │      │   :8443 SSL  │  │
+# │  │   :3306     │      │  :9000 (FPM) │      │   :8080 HTTP │  │
 # │  └─────────────┘      └──────────────┘      └──────────────┘  │
 # │                              ▲                       ▲          │
 # │                              │                       │          │
@@ -65,7 +65,7 @@
 #
 # 2. Browser → https://10.20.0.2/app
 #    └─> Apache2 :443 (HTTPS, frontend network)
-#        └─> Reverse proxy → Tomcat :8443 (backend)
+#        └─> Reverse proxy → Tomcat :8080 (backend)
 #
 # Tips: When using docker desktop (windows use LF bottom right corner VsCode)
 # Linux uses CRLF
@@ -141,22 +141,22 @@ services:
     networks:
       - backend
       
-  # ===========================================================================
+# ===========================================================================
   # TOMCAT SERVICE - Java Application Server
   # ===========================================================================
   # Purpose: Deploy dan run Java web applications (.war files)
-  # Network: backend (internal), port 8443 also exposed to VPN IP 10.20.0.2
-  # Port: 8443 (HTTPS via self-signed SSL certificate in JKS keystore)
+  # Network: backend (internal), port 8080 also exposed to VPN IP 10.20.0.2
+  # Port: 8080 (HTTP, SSL termination handled by Apache reverse proxy)
   #
   # SSL Configuration:
-  # - Certificate type: Java KeyStore (.jks) generated via keytool
-  # - Location: /usr/local/tomcat/conf/ssl/ (bind mount dari host)
-  # - Direct access: https://10.20.0.2:8443 (for Tomcat Manager UI)
+  # - SSL/TLS termination handled by Apache at frontend layer (port 443)
+  # - Tomcat only runs HTTP on port 8080 for internal backend traffic
+  # - Direct access: http://10.20.0.2:8080 (for Tomcat Manager UI)
   # - Proxied access: https://10.20.0.2/app → Apache2 reverse proxy
   #
   # Volumes:
   # - ./app/webapps: Deploy .war files here, auto-deployed by Tomcat
-  # - ./https/tomcat-cert: SSL certificate storage (persistent)
+  # - ./https/tomcat-cert: SSL certificate storage (not used, kept for reference)
   #
   # Build Context: ./docker-compose/tomcat (custom Dockerfile with Java + Tomcat)
   #
@@ -165,15 +165,15 @@ services:
     build: ./docker-compose/tomcat
     restart: always
     expose:
-      - "8443"
-    ports:
-      - "${VPN_IP}:${TOMCAT_SSL_PORT}:8443"  # Direct access to Tomcat Manager
+      - "8080"
+    # ports:
+    #   - "${VPN_IP}:${TOMCAT_HTTP_PORT}:8080"  # Direct access to Tomcat Manager
       
     volumes:
       - ./app/webapps:/usr/local/tomcat/webapps # Save aplikasi web
       - ./https/tomcat-cert:/usr/local/tomcat/conf/ssl/ # Save sertifikat ssl
     healthcheck:
-      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/l-e-a-p_tomcat/8443'"]
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/l-e-a-p_tomcat/8080'"]
       interval: 60s
       timeout: 5s
       retries: 5
