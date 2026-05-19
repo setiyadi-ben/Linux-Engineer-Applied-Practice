@@ -12,9 +12,10 @@ WORKDIR /usr/local/tomcat
 COPY tomcat-users.xml /usr/local/tomcat/conf/tomcat-users.xml
 COPY server.xml       /usr/local/tomcat/conf/server.xml
 
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-
-ENTRYPOINT ["/entrypoint.sh"]
-CMD ["/usr/local/tomcat/bin/catalina.sh", "run"]
+# Entrypoint not needed - using default Tomcat startup from base image
+# SSL configuration previously handled by entrypoint.sh is now managed by Apache reverse proxy
+# COPY entrypoint.sh /entrypoint.sh
+# RUN chmod +x /entrypoint.sh
+# ENTRYPOINT ["/entrypoint.sh"]
+# CMD ["/usr/local/tomcat/bin/catalina.sh", "run"]
 
