@@ -5,6 +5,12 @@
 # - Bruteforce flush removes all accounts, NICs, routes and config files
 # - Import uses basename of .vpn file (no absolute path)
 # - Wait for NIC to appear before assigning IP
+#
+# CHANGES:
+# [FIX] import_account: pre-check existing account by exact name
+#       to prevent duplicate "(2)" entries on re-import
+# [NEW] bind_nic_and_connect: AccountStartupSet added after NicSet
+#       so vpnclient daemon auto-connects this account on service start
 # ==========================================================
 
 VPNCMD="/usr/local/vpnclient/vpncmd"
@@ -13,7 +19,7 @@ VPNDIR="/usr/local/vpnclient"
 
 # Default network params (customize if needed)
 VPN_NIC_NAME="vpn"
-VPN_STATIC_IP="10.20.0.2"
+VPN_STATIC_IP="10.20.15.252"
 VPN_NETMASK="255.255.240.0"
 VPN_GATEWAY="10.20.0.1"
 VPN_SUBNET="10.20.0.0/20"
@@ -126,21 +132,47 @@ create_nic_if_needed() {
     fi
 }
 
+# [FIX] Check if account with exact same name already exists before importing.
+#       Previously, re-running import would create a duplicate "name (2)" entry
+#       because SoftEther auto-renames on conflict. Now we skip import entirely
+#       if the account name derived from the .vpn filename already exists.
 import_account() {
+    log "Checking if account '$VPN_ACCOUNT_NAME' already exists..."
+    existing=$($VPNCMD localhost /CLIENT /CMD AccountList 2>/dev/null \
+        | awk -F'|' '/VPN Connection Setting Name/ {print $2}' \
+        | sed 's/^[ \t]*//;s/[ \t]*$//')
+
+    # grep -qx = exact whole-line match; prevents "name" matching "name (2)"
+    if echo "$existing" | grep -qx "$VPN_ACCOUNT_NAME"; then
+        log "Account '$VPN_ACCOUNT_NAME' already exists, skipping import."
+        return 0
+    fi
+
     log "Importing VPN account from: $CONFIG_FILE"
     cd "$CONFIG_DIR" || { log "Cannot cd to $CONFIG_DIR"; exit 1; }
     $VPNCMD localhost /CLIENT /CMD AccountImport "$CONFIG_BASENAME" >/dev/null 2>&1 || true
     sleep 2
-    imported=$($VPNCMD localhost /CLIENT /CMD AccountList 2>/dev/null | awk -F'|' '/VPN Connection Setting Name/ {print $2}' | sed 's/^[ \t]*//;s/[ \t]*$//' | tail -n1)
+
+    imported=$($VPNCMD localhost /CLIENT /CMD AccountList 2>/dev/null \
+        | awk -F'|' '/VPN Connection Setting Name/ {print $2}' \
+        | sed 's/^[ \t]*//;s/[ \t]*$//' | tail -n1)
     [ -z "$imported" ] && { log "[ERROR] Account import failed."; return 1; }
     VPN_ACCOUNT_NAME="$imported"
     log "Imported account: '$VPN_ACCOUNT_NAME'"
 }
 
+# [NEW] AccountStartupSet: marks this account as a startup account so the
+#       vpnclient daemon will auto-connect it whenever the service starts.
+#       Called after NicSet, before AccountConnect.
 bind_nic_and_connect() {
     log "Binding NIC '$VPN_NIC_NAME' to account '$VPN_ACCOUNT_NAME'..."
     $VPNCMD localhost /CLIENT /CMD AccountNicSet "$VPN_ACCOUNT_NAME" /NICNAME:$VPN_NIC_NAME >/dev/null 2>&1 || true
     sleep 1
+
+    # [NEW] Register account as startup so daemon auto-connects on service start
+    log "Setting account '$VPN_ACCOUNT_NAME' as startup (auto-connect on service start)..."
+    $VPNCMD localhost /CLIENT /CMD AccountStartupSet "$VPN_ACCOUNT_NAME" >/dev/null 2>&1 || true
+
     log "Connecting account '$VPN_ACCOUNT_NAME'..."
     $VPNCMD localhost /CLIENT /CMD AccountConnect "$VPN_ACCOUNT_NAME" >/dev/null 2>&1 || true
     sleep 2
