@@ -11,6 +11,19 @@
 #       to prevent duplicate "(2)" entries on re-import
 # [NEW] bind_nic_and_connect: AccountStartupSet added after NicSet
 #       so vpnclient daemon auto-connects this account on service start
+# [FIX] install_route_service: replaced ip monitor (race condition at boot)
+#       with existence-check loop modeled after VPN server tap bind script.
+#       Loop polls ip link show until interface exists, then checks idempotency
+#       before applying IP and routes. No timing assumption, no missed events.
+# [FIX] vpn-route-apply.sh: ACTUAL_IFACE now resolved inside loop, not before.
+#       Previously resolved at script start before interface existed, causing
+#       loop to poll wrong interface name (vpn instead of vpn_vpn) indefinitely.
+# [FIX] flush_all: also disables and removes route persistence service
+#       and saved route file on full reset
+# [FIX] vpn-route-apply.service: changed from Type=simple + Restart=always
+#       to Type=oneshot + RemainAfterExit=yes. IP and route persist on the
+#       interface even after VPN disconnect (Linux assigns to NIC, not tunnel),
+#       so one-shot apply at boot is sufficient. No restart loop needed.
 # ==========================================================
 
 VPNCMD="/usr/local/vpnclient/vpncmd"
@@ -27,7 +40,6 @@ VPN_SUBNET="10.20.0.0/20"
 log() { echo -e "[`date +%H:%M:%S`] $*"; }
 require_root() { [ "$(id -u)" -eq 0 ] || { echo "Run as root (sudo $0)"; exit 1; }; }
 
-# ---------------------------
 trim() { echo "$1" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//'; }
 
 # ==========================================================
@@ -83,6 +95,13 @@ flush_all() {
         ip route flush dev "$iface" >/dev/null 2>&1 || true
     done
 
+    log "Removing route persistence service if exists..."
+    systemctl disable vpn-route-apply.service >/dev/null 2>&1 || true
+    systemctl stop vpn-route-apply.service >/dev/null 2>&1 || true
+    rm -f /etc/systemd/system/vpn-route-apply.service
+    rm -f "$VPNDIR/vpn-route-apply.sh"
+    systemctl daemon-reload >/dev/null 2>&1 || true
+
     log "Starting vpnclient service fresh..."
     $VPNCLIENT start >/dev/null 2>&1 || true
     sleep 1
@@ -132,17 +151,12 @@ create_nic_if_needed() {
     fi
 }
 
-# [FIX] Check if account with exact same name already exists before importing.
-#       Previously, re-running import would create a duplicate "name (2)" entry
-#       because SoftEther auto-renames on conflict. Now we skip import entirely
-#       if the account name derived from the .vpn filename already exists.
 import_account() {
     log "Checking if account '$VPN_ACCOUNT_NAME' already exists..."
     existing=$($VPNCMD localhost /CLIENT /CMD AccountList 2>/dev/null \
         | awk -F'|' '/VPN Connection Setting Name/ {print $2}' \
         | sed 's/^[ \t]*//;s/[ \t]*$//')
 
-    # grep -qx = exact whole-line match; prevents "name" matching "name (2)"
     if echo "$existing" | grep -qx "$VPN_ACCOUNT_NAME"; then
         log "Account '$VPN_ACCOUNT_NAME' already exists, skipping import."
         return 0
@@ -161,15 +175,11 @@ import_account() {
     log "Imported account: '$VPN_ACCOUNT_NAME'"
 }
 
-# [NEW] AccountStartupSet: marks this account as a startup account so the
-#       vpnclient daemon will auto-connect it whenever the service starts.
-#       Called after NicSet, before AccountConnect.
 bind_nic_and_connect() {
     log "Binding NIC '$VPN_NIC_NAME' to account '$VPN_ACCOUNT_NAME'..."
     $VPNCMD localhost /CLIENT /CMD AccountNicSet "$VPN_ACCOUNT_NAME" /NICNAME:$VPN_NIC_NAME >/dev/null 2>&1 || true
     sleep 1
 
-    # [NEW] Register account as startup so daemon auto-connects on service start
     log "Setting account '$VPN_ACCOUNT_NAME' as startup (auto-connect on service start)..."
     $VPNCMD localhost /CLIENT /CMD AccountStartupSet "$VPN_ACCOUNT_NAME" >/dev/null 2>&1 || true
 
@@ -208,6 +218,87 @@ apply_static_ip_and_route() {
     ip route show | grep -E "default|$VPN_SUBNET|$VPN_GATEWAY" || true
 }
 
+# ==========================================================
+# ROUTE PERSISTENCE SERVICE
+# [FIX] Type=oneshot + RemainAfterExit=yes, tanpa Restart=always.
+#       IP dan route tetap nempel di interface meskipun VPN disconnect
+#       (Linux assign ke NIC, bukan ke tunnel). One-shot apply saat boot
+#       sudah cukup — tidak perlu restart loop setiap 5 detik.
+# ==========================================================
+install_route_service() {
+    local service_file="/etc/systemd/system/vpn-route-apply.service"
+    local script_copy="$VPNDIR/vpn-route-apply.sh"
+
+    log "Installing VPN route persistence service..."
+
+    cat > "$script_copy" << EOF
+#!/bin/bash
+VPN_NIC_NAME="$VPN_NIC_NAME"
+VPN_STATIC_IP="$VPN_STATIC_IP"
+VPN_GATEWAY="$VPN_GATEWAY"
+VPN_SUBNET="$VPN_SUBNET"
+
+# Resolve actual iface name inside loop, not before.
+# At script start, neither vpn nor vpn_vpn may exist yet.
+# Loop checks both candidate names each iteration;
+# exits as soon as either appears.
+ACTUAL_IFACE=""
+until [ -n "\$ACTUAL_IFACE" ]; do
+    if ip link show "\${VPN_NIC_NAME}_vpn" >/dev/null 2>&1; then
+        ACTUAL_IFACE="\${VPN_NIC_NAME}_vpn"
+    elif ip link show "\${VPN_NIC_NAME}" >/dev/null 2>&1; then
+        ACTUAL_IFACE="\${VPN_NIC_NAME}"
+    fi
+    [ -z "\$ACTUAL_IFACE" ] && sleep 1
+done
+
+# Idempotency: skip IP assign if already configured
+if ! ip addr show "\$ACTUAL_IFACE" | grep -q "\$VPN_STATIC_IP"; then
+    ip addr flush dev "\$ACTUAL_IFACE" 2>/dev/null
+    ip addr add "\${VPN_STATIC_IP}/20" dev "\$ACTUAL_IFACE" 2>/dev/null
+    echo "[vpn-route] IP \$VPN_STATIC_IP assigned to \$ACTUAL_IFACE"
+else
+    echo "[vpn-route] IP \$VPN_STATIC_IP already present on \$ACTUAL_IFACE, skipping"
+fi
+
+# Idempotency: skip gateway route if already present
+if ! ip route | grep -q "\$VPN_GATEWAY"; then
+    ip route replace "\${VPN_GATEWAY}/32" dev "\$ACTUAL_IFACE" 2>/dev/null
+    echo "[vpn-route] Gateway route \$VPN_GATEWAY added"
+fi
+
+# Idempotency: skip subnet route if already present
+if ! ip route | grep -q "\$VPN_SUBNET"; then
+    ip route replace "\$VPN_SUBNET" dev "\$ACTUAL_IFACE" 2>/dev/null
+    echo "[vpn-route] Subnet route \$VPN_SUBNET added"
+fi
+
+echo "[vpn-route] Done on \$ACTUAL_IFACE"
+EOF
+
+    chmod +x "$script_copy"
+
+    cat > "$service_file" << EOF
+[Unit]
+Description=Restore VPN static IP and routes after SoftEther auto-connect
+# No After= network dependency — waits for interface internally via loop.
+# vpnclient daemon (AccountStartupSet) brings up interface when ready.
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=$script_copy
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+    systemctl daemon-reload
+    systemctl enable vpn-route-apply.service >/dev/null 2>&1
+    systemctl restart vpn-route-apply.service >/dev/null 2>&1
+    log "✅ vpn-route-apply.service installed, enabled, and started."
+}
+
 show_summary() {
     echo "=========================================================="
     echo "[SUCCESS] VPN Client connected/configured (summary):"
@@ -217,6 +308,7 @@ show_summary() {
     printf "%-18s : %s\n" "VPN Gateway" "$VPN_GATEWAY"
     printf "%-18s : %s\n" "VPN Subnet" "$VPN_SUBNET"
     printf "%-18s : %s\n" "Local gateway" "$(ip route | awk '/default/ {print $3; exit}')"
+    printf "%-18s : %s\n" "Route service" "$(systemctl is-active vpn-route-apply.service 2>/dev/null || echo 'not installed')"
     echo "=========================================================="
 }
 
@@ -242,6 +334,7 @@ case "$main_choice" in
         import_account
         bind_nic_and_connect
         apply_static_ip_and_route
+        install_route_service
         show_summary
         ;;
     2)
