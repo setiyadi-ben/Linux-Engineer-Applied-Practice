@@ -1,0 +1,137 @@
+# =============================================================================
+# PROMETHEUS SCRAPE CONFIGURATION
+# =============================================================================
+# Purpose: Define metrics collection targets & intervals
+# Reference: https://prometheus.io/docs/prometheus/latest/configuration/configuration/
+#
+# Key Concepts:
+# - scrape_interval: How often to collect metrics dari target
+# - evaluation_interval: How often to evaluate alerting rules (jika ada)
+# - job_name: Logical grouping of targets dengan similar purpose
+# - static_configs: Hardcoded target list (vs dynamic service discovery)
+#
+# Metric Storage:
+# - Location: /prometheus (Docker volume 'prometheus_data')
+# - Retention: Default 15 days
+# - Format: Time-series database (TSDB)
+#
+# =============================================================================
+
+global:
+  scrape_interval: 1m        # Default interval untuk semua jobs (jika tidak override)
+  evaluation_interval: 1m    # Evaluate recording/alerting rules setiap 1 menit
+  # scrape_timeout: 10s      # Default timeout per scrape (max 10s)
+  # external_labels:         # Labels ditambahkan ke semua metrics (untuk federation)
+  #   cluster: 'l-e-a-p'
+  #   environment: 'dev'
+
+# =============================================================================
+# SCRAPE TARGETS
+# =============================================================================
+# Define list of endpoints untuk scrape metrics
+# Format: job_name → targets (host:port)
+#
+scrape_configs:
+  # ---------------------------------------------------------------------------
+  # PROMETHEUS SELF-MONITORING
+  # ---------------------------------------------------------------------------
+  # Metrics: Prometheus internal stats (TSDB, scrape performance, queries)
+  # Endpoint: http://localhost:9090/metrics
+  # Use Case: Monitor Prometheus health, query performance, storage usage
+  #
+  - job_name: "prometheus"
+    scrape_interval: 1m      # Check Prometheus health every minute
+    static_configs:
+      - targets: ["localhost:9090"]
+        # labels:            # Optional: add custom labels ke semua metrics dari job ini
+        #   env: "production"
+  
+  # ---------------------------------------------------------------------------
+  # HOST SYSTEM METRICS (Node Exporter)
+  # ---------------------------------------------------------------------------
+  # Metrics: CPU, RAM, disk, network, filesystem usage
+  # Endpoint: http://node-exporter:9100/metrics
+  # Use Case: Monitor VPS/server health, capacity planning, resource alerts
+  #
+  # Example Queries (PromQL):
+  # - CPU usage: 100 - (avg(rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)
+  # - Memory usage: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100
+  # - Disk usage: (node_filesystem_size_bytes - node_filesystem_free_bytes) / node_filesystem_size_bytes * 100
+  #
+  - job_name: "node-exporter"
+    scrape_interval: 1m      # Host metrics don't change rapidly, 1min is enough
+    static_configs:
+      - targets: ["node-exporter:9100"]
+        labels:
+          instance: "vps-main"    # Custom label untuk identify server (jika multiple hosts)
+  
+  # ---------------------------------------------------------------------------
+  # DOCKER CONTAINER METRICS (cAdvisor)
+  # ---------------------------------------------------------------------------
+  # Metrics: Per-container CPU, RAM, network, disk I/O
+  # Endpoint: http://cadvisor:8080/metrics
+  # Use Case: Monitor container resource usage, detect resource bottlenecks
+  #
+  # Collected Metrics per Container:
+  # - container_cpu_usage_seconds_total: CPU time consumed
+  # - container_memory_working_set_bytes: Current memory usage
+  # - container_network_receive_bytes_total: Network RX
+  # - container_fs_reads_bytes_total: Disk reads
+  #
+  # Example Queries (PromQL):
+  # - Container CPU: rate(container_cpu_usage_seconds_total{name="l-e-a-p_mysql"}[5m]) * 100
+  # - Container RAM: container_memory_working_set_bytes{name="l-e-a-p_mysql"} / 1024 / 1024 (MB)
+  #
+  - job_name: "cadvisor"
+    scrape_interval: 15s     # Container metrics change frequently, scrape setiap 15s
+    static_configs:
+      - targets: ["cadvisor:8080"]
+        labels:
+          instance: "l-e-a-p-stack"
+  
+  # ---------------------------------------------------------------------------
+  # MYSQL/MARIADB METRICS (Optional - Requires mysqld_exporter)
+  # ---------------------------------------------------------------------------
+  # Uncomment jika sudah deploy mysqld_exporter container
+  # Metrics: Queries/sec, connections, slow queries, InnoDB metrics
+  # Endpoint: http://mysql-exporter:9104/metrics
+  #
+  # Deployment:
+  # docker run -d --name mysql-exporter --network l-e-a-p_backend \
+  #   -e DATA_SOURCE_NAME="exporter:password@(l-e-a-p_mysql:3306)/" \
+  #   prom/mysqld-exporter:latest
+  #
+  # - job_name: "mysql"
+  #   scrape_interval: 30s
+  #   static_configs:
+  #     - targets: ["mysql-exporter:9104"]
+  
+  # ---------------------------------------------------------------------------
+  # TOMCAT JMX METRICS (Optional - Requires JMX exporter)
+  # ---------------------------------------------------------------------------
+  # Uncomment jika sudah enable JMX exporter di Tomcat
+  # Metrics: JVM heap, GC, thread pool, request rate, session count
+  # Endpoint: http://l-e-a-p_tomcat:9404/metrics
+  #
+  # Setup:
+  # 1. Download jmx_prometheus_javaagent.jar
+  # 2. Add to Tomcat CATALINA_OPTS:
+  #    -javaagent:/path/to/jmx_prometheus_javaagent.jar=9404:/path/to/config.yml
+  # 3. Restart Tomcat
+  #
+  # - job_name: "tomcat"
+  #   scrape_interval: 30s
+  #   static_configs:
+  #     - targets: ["l-e-a-p_tomcat:9404"]
+
+# =============================================================================
+# NEXT STEPS
+# =============================================================================
+# 1. Add alerting rules (create /etc/prometheus/alerts.yml)
+# 2. Configure Alertmanager untuk notifications (email, Slack, PagerDuty)
+# 3. Add recording rules untuk pre-compute expensive queries
+# 4. Setup federation untuk multi-cluster monitoring
+#
+# Reload Config (tanpa restart):
+# curl -X POST http://localhost:9090/-/reload
+# (requires --web.enable-lifecycle flag, already set di compose)
