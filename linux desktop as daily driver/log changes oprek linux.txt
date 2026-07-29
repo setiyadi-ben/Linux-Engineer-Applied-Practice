@@ -1,0 +1,56 @@
+14.
+
+*sebelum 28 jul 2026
+reason: ya biar ada catatan ringkas sudah ngapain aja selama install linux di desktop
+real time usage saya tidak tahu mulai kapan, tidak ingat dan tidak ada kewajiban untuk ingat.
+Hanya saja, ini yang saya pegang: "tidak harus sempurna untuk menulis, namun ketika pengalaman
+sudah membentuk suatu momentum yang bisa dilihat sebagai pola ide dasar, itu layak ditulis. Percayalah
+ada batasan untuk manusia bisa mencerna suatu pemahaman, dan saya berusaha melindungi itu."
+
+13. clone l-e-a-p & sts & apply scripts to connect vpn (softether autostart) 
+12. install git & vscode via .deb (sudo apt install ./codeblabla)
+11. research rdp alternatives:
+xfreerdp3 /v:192.168.122.247 /u:vm /p:222000 /sound +clipboard /f
+- xfreerdp3 -> cli, clear graphics, audio redirection, full keyboard grabber means win(super) key doesn't interfere with linux host binding
+- remmina -> gui, compressed graphics, audio redirection, clipboard
+- connections (gnome bundled) -> gui, clear graphics, no audio redirecion, no clipboard
+reason: vmware & qemu kvm tidak support clipboard, jadi dilewatkan rdp
+10. post install win 11 | install softether vpn server & client + rdp (if missing) +disable windows reserved space
+dism /Online /Set-ReservedStorageState /State:Disabled  | then restart vm
+9. configure qemu | install win 11, insert win11.iso, insert autoattend.iso
+8. install qemu | untuk manajemen gui vpn + rdp dan japanese typing (ime)
+sudo apt install qemu-kvm libvirt-daemon-system libvirt-clients && sudo adduser $USER kvm && sudo apt install virt-manager
+7. install firefox via cli | restore sync dgn login firefox >> sync todo
+6. install helium via cli
+5. install brave via store
+4. uninstall firefox-esr
+3. install flatpak sebagai tambahan listing gnome store
+2. show percentage battery
+1. mendisable suspend dari afk saat ac charging
+partisi: 
+| EFI |-------- /home --------|---------- / ----------|---- swap ----|
+       p2                      p4                      p3
+meskipun urut buat dari efi, /home, /, swap paritipn tidak urut makannya tertulis p4 baru p3, tapi tak apa tidak ngaruh.
+
+#reinstall ke-2 | reason: delete swap malah buat stuck lama di booting, di restore mapping ulang juga tidak berubah  
+
+13
+jangan install lewat flatpak: firefox karena tidak bisa set default browser, vscode karena cmd dia sandboxed bukan /bin/bash jadi tidak bisa eksesuksi root access
+freenet peer: 5N3iyVwRK43bPbqYoMArVB82V3Riv5R77gJ1TjhjtcyP
+12. install qemu
+sudo apt install qemu-kvm libvirt-daemon-system libvirt-clients && sudo adduser $USER kvm && sudo apt install virt-manager
+
+11. resize partition / to 78 | 15gb from swap + 32gb from /home using gparted live iso
+10. buat shortcut task manager ctrl+shift+esc
+9. install softether vpn client, import config and connect and also test rdp
+8. instal kdenlive, buzz, subtitleedit
+7. clone l-e-a-p && sts
+6. install git
+5. install vscode, firefox (purge firefox-esr), opera, brave via flatpak
+4. aplikasi bawaan bisa diuninstall 1-1 lewat gnome store
+3. install flatpak sebagai tambahan listing gnome store
+2. show percentage battery
+1. mendisable suspend dari afk saat ac charging
+
+
+==============LINUX DEBIAN 13 TRIXIE=========================
