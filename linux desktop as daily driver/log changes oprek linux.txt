@@ -1,3 +1,14 @@
+
+s-1. backup softether config, backup catatan, deploy proxmox template.
+# Lihat semua yang ter-install, filter GUI/desktop apps
+dpkg -l | grep "^ii" | awk '{print $2}' | sort > /tmp/installed.txt
+cat /tmp/installed.txt | less
+
+# Task manager docker
+docker stats
+
+==== Reinstall debian contabo server=====
+*12 agt 2026
 18. Set ram ke 12gb buat vm windows cek htop ternyata ram 14gb penyebab crash karena sebagian sudah dimakan proxmox. Dengan ini gpu passthrough memang bisa dari awal cuman tidak ngeh saja ke memory
 *9 agt 2026
 
