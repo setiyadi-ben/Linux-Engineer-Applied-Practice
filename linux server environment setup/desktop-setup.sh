@@ -268,7 +268,7 @@ run_xrdp_installer() {
 
     echo -e "${CYN}  Running xrdp-installer as '${rdp_user}'...${RST}"
     curl -fsSL \
-        https://raw.githubusercontent.com/setiyadi-ben/Linux-Engineer-Applied-Practice/refs/heads/main/l-e-a-p/deployment-workflow/scripts/configs/xrdp-installer-1.5.5.sh \
+        https://raw.githubusercontent.com/setiyadi-ben/Linux-Engineer-Applied-Practice/refs/heads/main/linux%20server%20environment%20setup/xrdp-installer-1.5.5.sh \
         | su - "$rdp_user" -c "bash -s -- --unsupported"
 
     rm -f /etc/sudoers.d/xrdp-install-tmp
