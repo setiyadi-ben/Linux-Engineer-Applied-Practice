@@ -24,6 +24,15 @@
 #       to Type=oneshot + RemainAfterExit=yes. IP and route persist on the
 #       interface even after VPN disconnect (Linux assigns to NIC, not tunnel),
 #       so one-shot apply at boot is sufficient. No restart loop needed.
+# [NEW] Menu renumbered: 1) Import & Connect VPN, 2) Import & Connect VPN
+#       for Proxmox (new), 3) Full Reset, 4) Exit.
+# [NEW] configure_proxmox_interfaces: for the Proxmox flow, skips static IP
+#       assignment on the VPN NIC (no apply_static_ip_and_route call) and
+#       instead appends a vmbr1 bridge stanza to /etc/network/interfaces,
+#       bound to the detected VPN interface (vpn or vpn_vpn). Proxmox IP is
+#       asked interactively. A timestamped backup of interfaces file is made
+#       before any write, and the function refuses to duplicate an existing
+#       vmbr1 stanza.
 # ==========================================================
 
 VPNCMD="/usr/local/vpnclient/vpncmd"
@@ -313,6 +322,80 @@ show_summary() {
 }
 
 # ==========================================================
+# PROXMOX BRIDGE (vmbr1) — no static IP on the VPN NIC itself,
+# the VPN interface is bridged and Proxmox host IP lives on vmbr1.
+# ==========================================================
+resolve_actual_iface() {
+    local iface="$VPN_NIC_NAME"
+    if ip link show "${iface}_vpn" >/dev/null 2>&1; then
+        actual_iface="${iface}_vpn"
+    elif ip link show "$iface" >/dev/null 2>&1; then
+        actual_iface="$iface"
+    else
+        wait_for_nic || true
+        if ip link show "${iface}_vpn" >/dev/null 2>&1; then
+            actual_iface="${iface}_vpn"
+        else
+            actual_iface="$iface"
+        fi
+    fi
+}
+
+configure_proxmox_interfaces() {
+    local iface_file="/etc/network/interfaces"
+    local backup_file="${iface_file}.bak.$(date +%Y%m%d%H%M%S)"
+
+    resolve_actual_iface
+    log "Detected VPN interface for bridge-ports: $actual_iface"
+
+    read -rp "Masukkan IP address Proxmox untuk vmbr1 (contoh: 10.20.0.3/20): " PROXMOX_IP
+    if [ -z "$PROXMOX_IP" ]; then
+        log "[ERROR] IP address tidak boleh kosong. Konfigurasi vmbr1 dibatalkan."
+        return 1
+    fi
+
+    if [ -f "$iface_file" ]; then
+        log "Backing up $iface_file to $backup_file..."
+        cp "$iface_file" "$backup_file" 2>/dev/null || log "[WARN] Gagal membuat backup $iface_file."
+    else
+        log "[WARN] $iface_file tidak ditemukan, akan dibuat baru."
+        touch "$iface_file"
+    fi
+
+    if grep -q "^iface vmbr1" "$iface_file" 2>/dev/null; then
+        log "[WARN] Konfigurasi vmbr1 sudah ada di $iface_file, dilewati agar tidak duplikat."
+        log "Silakan edit $iface_file secara manual jika perlu memperbarui."
+        return 1
+    fi
+
+    log "Menambahkan konfigurasi bridge vmbr1 ke $iface_file..."
+    cat >> "$iface_file" << EOF
+
+auto vmbr1
+iface vmbr1 inet static
+        address $PROXMOX_IP
+        bridge-ports $actual_iface
+        bridge-stp off
+        bridge-fd 0
+EOF
+
+    log "✅ vmbr1 ditambahkan ke $iface_file (backup: $backup_file)."
+    log "Jalankan 'systemctl restart networking' atau reboot untuk menerapkan."
+}
+
+show_summary_proxmox() {
+    echo "=========================================================="
+    echo "[SUCCESS] VPN Client for Proxmox connected/configured (summary):"
+    printf "%-18s : %s\n" "Account" "$VPN_ACCOUNT_NAME"
+    printf "%-18s : %s\n" "NIC (softether)" "$VPN_NIC_NAME"
+    printf "%-18s : %s\n" "Actual interface" "$actual_iface"
+    printf "%-18s : %s\n" "Bridge" "vmbr1"
+    printf "%-18s : %s\n" "Proxmox IP" "$PROXMOX_IP"
+    echo "Note: run 'systemctl restart networking' or reboot to apply /etc/network/interfaces changes."
+    echo "=========================================================="
+}
+
+# ==========================================================
 # MAIN
 # ==========================================================
 require_root
@@ -321,9 +404,10 @@ echo "=========================================================="
 echo " SoftEther VPN Client Modular Manager (final)"
 echo "=========================================================="
 echo "1) Import & Connect VPN"
-echo "2) Full Reset (Flush all configs and accounts)"
-echo "3) Exit"
-read -rp "Select an option (1-3): " main_choice
+echo "2) Import & Connect VPN for Proxmox"
+echo "3) Full Reset (Flush all configs and accounts)"
+echo "4) Exit"
+read -rp "Select an option (1-4): " main_choice
 echo "=========================================================="
 
 case "$main_choice" in
@@ -338,10 +422,19 @@ case "$main_choice" in
         show_summary
         ;;
     2)
+        detect_vpn_file
+        start_vpnclient
+        create_nic_if_needed
+        import_account
+        bind_nic_and_connect
+        configure_proxmox_interfaces
+        show_summary_proxmox
+        ;;
+    3)
         flush_all
         read -rp "Flush completed. Continue import new VPN config now? (y/n): " cont
         [[ "$cont" =~ ^[Yy]$ ]] && exec "$0"
         ;;
-    3) echo "Goodbye."; exit 0 ;;
+    4) echo "Goodbye."; exit 0 ;;
     *) echo "Invalid option."; exit 1 ;;
 esac
