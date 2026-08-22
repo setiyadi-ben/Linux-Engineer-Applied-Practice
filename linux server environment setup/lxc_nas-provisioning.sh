@@ -1,0 +1,23 @@
+# ---------------- STEP 9: TURNKEY INIT ----------------
+echo ""
+echo "[*] Step 9: jalankan turnkey-init..."
+sudo lxc-attach -n "$CONTAINER_NAME" -- turnkey-init
+
+echo ""
+echo "================================"
+echo " Akses Akhir"
+echo "================================"
+echo "WAN (publik)  : http://$PUB_IP:8080  (WebGUI/WebDAV)"
+echo "VPN/lokal saja: https://$CONTAINER_IP:443, Samba \\\\$CONTAINER_IP\\, Webmin https://$CONTAINER_IP:12321"
+echo "================================"
+echo ""
+echo "[!] TROUBLESHOOTING: Lupa Password & Terkena Banned Webmin"
+echo "TurnKey File Server dilengkapi dengan perlindungan Fail2Ban."
+echo "Jika Anda gagal login Webmin sebanyak 3x, IP VPN Anda akan diblokir."
+echo ""
+echo "Jika itu terjadi, jalankan perintah ini di terminal Host VPS:"
+echo "  1. Masuk ke container : sudo lxc-attach -n $CONTAINER_NAME"
+echo "  2. Reset password     : passwd root"
+echo "  3. Hapus ban IP Anda  : fail2ban-client set webmin-auth unbanip <IP_VPN_ANDA>"
+echo "                          (Ganti <IP_VPN_ANDA> dengan IP klien Anda, misal 10.20.0.10)"
+echo "================================"
