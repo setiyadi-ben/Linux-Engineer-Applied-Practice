@@ -1,4 +1,6 @@
 # Ignoring generated https ssl certificates
+/apache2-cert/*
+/tomcat-cert/*
 *.crt
 *.key
 *.jks
