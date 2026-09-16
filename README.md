@@ -27,23 +27,30 @@ The earlier version documents broader experimentation before the scope was refin
 ## 2. System Overview
 
 ```
-                Internet
-                   │
-                   ▼
-           Reverse Proxy (HTTPS)
-                   │
-                   ▼
-              Docker Network
-          ┌────────┴─────────┐
-          │                  │
-      Java Web App       Database
-          │
-          ▼
-      Monitoring
-
-Admin Access
-   ├─ SSH
-   └─ VPN
+                  PUBLIC INTERNET
+                  ┌───────┴───────┐
+                  │               │
+      (Public Users)             (Administrator)
+             │                           │
+  HTTPS (80/443) / 8080          VPN Tunnel (1194)
+             │                           │
+             ▼                           ▼
+    Apache Reverse Proxy          SoftEther VPN Gateway
+             │                    (10.20.0.0/20 Subnet)
+             │                           │
+  ┌──────────┴──────────┐       ┌────────┴────────┐
+  │ DOCKER BACKEND NET  │       │ ADMIN SERVICES  │
+  │                     │       │                 │
+  │  Java App (Tomcat)  │       │  SSH / RDP      │
+  │       │             │       │  phpMyAdmin     │
+  │       ▼             │       │  Zabbix Server  │
+  │  MariaDB (3306)     │       │  NAS NFS        │
+  └───────┬─────────────┘       └────────┬────────┘
+          │                              │
+          └──────────────┬───────────────┘
+                         ▼
+             Internal Service Metrics
+           (Zabbix Agent 2 / Turnkey LXC)
 ```
 
 Live Application Endpoint:
