@@ -26,7 +26,7 @@ Reverse Proxy (Apache)                  SoftEther VPN Gateway
 │ Subnet 10.20.1.0/24 ││                │  • Zabbix Engine  │
 │ [Docker Macvlan]    ││                │  • NAS NFS        │
 │ • Java App Tomcat   ││                └─────────┬─────────┘
-│ • MariaDB / MySQL   ││                          │
+│ • MySQL             ││                          │
 │ • phpMyAdmin FPM    ││ (Proxy via VPN)     VPN Tunnel
 └─────────────────────┘│                          │
                        └────────────┐             ▼
@@ -59,10 +59,10 @@ Berikut adalah skenario penerapan *real-application* Reverse Proxy Apache yang f
     ProxyPreserveHost On
 
     # Forwarding menggunakan Local DNS Name menembus VPN Tunnel
-    ProxyPass        / [http://staging-tomcat-1.sgp.local:8080/](http://staging-tomcat-1.sgp.local:8080/)
-    ProxyPassReverse / [http://staging-tomcat-1.sgp.local:8080/](http://staging-tomcat-1.sgp.local:8080/)
+    ProxyPass        / http://staging-tomcat-1.sgp.local:8080/
+    ProxyPassReverse / http://staging-tomcat-1.sgp.local:8080/
 
-    <Location/>
+    <Location />
         Require ip 10.20.0.0/20
     </Location>
 </VirtualHost>
@@ -81,10 +81,10 @@ Berikut adalah skenario penerapan *real-application* Reverse Proxy Apache yang f
     ProxyPreserveHost On
 
     # Forwarding langsung ke IP statis Home Lab Proxmox
-    ProxyPass        / [http://10.20.2.2:8080/](http://10.20.2.2:8080/)
-    ProxyPassReverse / [http://10.20.2.2:8080/](http://10.20.2.2:8080/)
+    ProxyPass        / http://10.20.2.2:8080/
+    ProxyPassReverse / http://10.20.2.2:8080/
 
-    <Location/>
+    <Location />
         Require ip 10.20.0.0/20
     </Location>
 </VirtualHost>
@@ -97,13 +97,14 @@ Berikut adalah skenario penerapan *real-application* Reverse Proxy Apache yang f
 
 ### A. Public Traffic Layer (WAN Direct)
 
-* **Pintu Masuk Terbuka**: Port `80` / `443` (Apache Reverse Proxy), `1194` (SoftEther VPN), `3128` (Squid Proxy), dan `8080` (Public Mirror).
+* **Pintu Masuk Terbuka**: Port `80` / `443` (Apache Reverse Proxy), `1194` (SoftEther VPN), dan `8080` (Public Mirror). Squid Proxy bersifat opsional (lihat bagian 3.B).
 * **Alur Trafik Web**: User Publik $\rightarrow$ Port `80`/`443` $\rightarrow$ Reverse Proxy (`prod-apache-1.sgp.local` / `10.20.1.1`) $\rightarrow$ Diteruskan ke Production App lokal via Docker Macvlan (`10.20.1.x`) atau ke Staging/Dev di Home Lab Proxmox (`10.20.2.x` / `10.20.3.x`) melalui VPN Tunnel.
 * **Proteksi Exposure**: Port `22` (SSH), `3389` (RDP), dan port internal database ditutup total dari IP publik WAN.
 
 ### B. Management Plane Layer (Private VPN)
 
 * **Pintu Masuk**: Port `1194` (SoftEther VPN — *cert-only auth*, *virtual hub isolation*).
+* **Fallback (Opsional)**: Jika port `1194` diblokir ISP, koneksi dapat melalui Squid Proxy (contoh port `3128`, port dapat diatur lewat script dan layanan tidak wajib aktif). Jalur ini dipakai untuk akses SSH awal sebelum seluruh trafik dialihkan lewat VPN.
 * **Alur Trafik Admin**: Administrator $\rightarrow$ Encrypted SoftEther Tunnel $\rightarrow$ Subnet Internal (`10.20.0.0/20`).
 * **Scope Akses**: Memberikan akses penuh ke SSH VPS Host, Console/GUI Proxmox Home Lab, Zabbix Dashboard (`core-zabbix-1.sgp.local`), phpMyAdmin FPM (`prod-pma-1.sgp.local`), dan MySQL (`prod-mysql-1.sgp.local`).
 
@@ -117,14 +118,15 @@ Berikut adalah skenario penerapan *real-application* Reverse Proxy Apache yang f
 
 ## 4. Security Surface & Fail-Safe Rules
 
-1. **Firewall Ingress (`iptables`)**:
+### A. Firewall Ingress (`iptables`)
+
 * *Policy Default*: `ACCEPT` untuk trafik umum di `eth0`.
 * *Explicit Drop*: Port `22` (SSH) dan `3389` (RDP) diblokir khusus pada interface `eth0` (WAN).
 
+### B. Automated Protection
 
-2. **Automated Protection**:
 * Fail2ban aktif memantau log autentikasi SoftEther (`1194`) di Linux Host OS dan mengeksekusi *auto-ban* jika terdeteksi indikasi *brute-force*.
 
+### C. Internal Database Isolation
 
-3. **Internal Database Isolation**:
-* Database MariaDB (`prod-mysql-1.sgp.local`) tidak memiliki *port-binding* ke IP publik dan hanya dapat diakses melalui jaringan internal/VPN.
+* Database MySQL (`prod-mysql-1.sgp.local`) tidak memiliki *port-binding* ke IP publik dan hanya dapat diakses melalui jaringan internal/VPN.
