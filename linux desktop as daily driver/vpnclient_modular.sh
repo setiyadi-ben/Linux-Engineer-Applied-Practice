@@ -24,6 +24,36 @@
 #       to Type=oneshot + RemainAfterExit=yes. IP and route persist on the
 #       interface even after VPN disconnect (Linux assigns to NIC, not tunnel),
 #       so one-shot apply at boot is sufficient. No restart loop needed.
+# [NEW] Menu renumbered: 1) Import & Connect VPN, 2) Import & Connect VPN
+#       for Proxmox (new), 3) Full Reset, 4) Exit.
+# [NEW] configure_proxmox_interfaces: for the Proxmox flow, skips static IP
+#       assignment on the VPN NIC (no apply_static_ip_and_route call) and
+#       instead appends a vmbr1 bridge stanza to /etc/network/interfaces,
+#       bound to the detected VPN interface (vpn or vpn_vpn). Proxmox IP is
+#       asked interactively. A timestamped backup of interfaces file is made
+#       before any write, and the function refuses to duplicate an existing
+#       vmbr1 stanza.
+# [FIX] import_account: the old pre-check compared the existing-account list
+#       against a name derived from the .vpn FILENAME, but AccountImport
+#       names the resulting account from the "VPN Connection Setting Name"
+#       embedded inside the file at export time — the two names are usually
+#       different, so the check never matched and a re-import could silently
+#       collide with / be shadowed by a stale same-named account, leaving the
+#       OLD config connected while the script believed it imported the new
+#       one. Now: unconditionally clear whatever account(s) exist first, then
+#       read back whichever single account resulted from AccountImport — no
+#       filename-based guessing.
+# [NEW] stop_and_delete_account: AccountDelete silently no-ops on an account
+#       that is Connecting/Online (e.g. one left auto-starting via a prior
+#       AccountStartupSet — the vpnclient daemon reconnects it the instant
+#       `vpnclient start` runs, often before the delete loop even gets to
+#       it). Now runs AccountStartupRemove + AccountDisconnect before every
+#       AccountDelete, with up to 3 retries and a hard verification that the
+#       account list is actually empty before importing.
+# [FIX] main(): import_account's failure/error return was not checked, so a
+#       failed import (see above) still fell through to bind_nic_and_connect
+#       using a stale VPN_ACCOUNT_NAME. Both menu options 1) and 2) now abort
+#       with [FATAL] if import_account fails, instead of connecting stale.
 # ==========================================================
 
 VPNCMD="/usr/local/vpnclient/vpncmd"
@@ -151,15 +181,56 @@ create_nic_if_needed() {
     fi
 }
 
+stop_and_delete_account() {
+    local acc="$1"
+    log "Stopping and removing existing account: $acc"
+    # An account previously marked as Startup (AccountStartupSet, done by
+    # bind_nic_and_connect) gets auto-reconnected by the vpnclient daemon the
+    # instant the service (re)starts — often *before* this function even runs.
+    # AccountDelete silently no-ops on an account that is Connecting/Online,
+    # so it must be un-flagged and disconnected first, or the delete below
+    # does nothing and the stale account survives to shadow the next import.
+    $VPNCMD localhost /CLIENT /CMD AccountStartupRemove "$acc" >/dev/null 2>&1 || true
+    $VPNCMD localhost /CLIENT /CMD AccountDisconnect "$acc" >/dev/null 2>&1 || true
+    sleep 1
+    $VPNCMD localhost /CLIENT /CMD AccountDelete "$acc" >/dev/null 2>&1 || true
+}
+
 import_account() {
-    log "Checking if account '$VPN_ACCOUNT_NAME' already exists..."
-    existing=$($VPNCMD localhost /CLIENT /CMD AccountList 2>/dev/null \
+    # NOTE: AccountImport names the resulting account from the "VPN Connection
+    # Setting Name" embedded inside the .vpn file at export time — NOT from the
+    # .vpn filename. So VPN_ACCOUNT_NAME (derived from the filename here) can
+    # never be trusted to match what SoftEther will actually call the account,
+    # and checking existence against it is a no-op that lets a stale account
+    # with the *real* embedded name silently block/shadow a fresh import.
+    # Fix: always clear whatever account(s) currently exist before importing,
+    # so there is nothing left to collide with, then read back whichever single
+    # account resulted — that is unambiguously the one we just imported.
+    log "Clearing existing VPN account(s) before import (avoids stale/duplicate re-import)..."
+
+    for attempt in 1 2 3; do
+        existing=$($VPNCMD localhost /CLIENT /CMD AccountList 2>/dev/null \
+            | awk -F'|' '/VPN Connection Setting Name/ {print $2}' \
+            | sed 's/^[ \t]*//;s/[ \t]*$//')
+        [ -z "$existing" ] && break
+
+        while IFS= read -r acc; do
+            [ -z "$acc" ] && continue
+            stop_and_delete_account "$acc"
+        done <<< "$existing"
+        sleep 1
+    done
+
+    remaining=$($VPNCMD localhost /CLIENT /CMD AccountList 2>/dev/null \
         | awk -F'|' '/VPN Connection Setting Name/ {print $2}' \
         | sed 's/^[ \t]*//;s/[ \t]*$//')
-
-    if echo "$existing" | grep -qx "$VPN_ACCOUNT_NAME"; then
-        log "Account '$VPN_ACCOUNT_NAME' already exists, skipping import."
-        return 0
+    if [ -n "$remaining" ]; then
+        log "[ERROR] Could not remove existing account(s) after 3 attempts, still present: $remaining"
+        log "[ERROR] They may still be reconnecting via auto-startup. Manually run:"
+        log "[ERROR]   $VPNCMD localhost /CLIENT /CMD AccountStartupRemove <name>"
+        log "[ERROR]   $VPNCMD localhost /CLIENT /CMD AccountDisconnect <name>"
+        log "[ERROR]   $VPNCMD localhost /CLIENT /CMD AccountDelete <name>"
+        return 1
     fi
 
     log "Importing VPN account from: $CONFIG_FILE"
@@ -167,11 +238,17 @@ import_account() {
     $VPNCMD localhost /CLIENT /CMD AccountImport "$CONFIG_BASENAME" >/dev/null 2>&1 || true
     sleep 2
 
-    imported=$($VPNCMD localhost /CLIENT /CMD AccountList 2>/dev/null \
+    imported_list=$($VPNCMD localhost /CLIENT /CMD AccountList 2>/dev/null \
         | awk -F'|' '/VPN Connection Setting Name/ {print $2}' \
-        | sed 's/^[ \t]*//;s/[ \t]*$//' | tail -n1)
-    [ -z "$imported" ] && { log "[ERROR] Account import failed."; return 1; }
-    VPN_ACCOUNT_NAME="$imported"
+        | sed 's/^[ \t]*//;s/[ \t]*$//')
+    imported_count=$(echo "$imported_list" | grep -c .)
+
+    if [ "$imported_count" -ne 1 ]; then
+        log "[ERROR] Expected exactly 1 account after import, found $imported_count: $imported_list"
+        return 1
+    fi
+
+    VPN_ACCOUNT_NAME="$imported_list"
     log "Imported account: '$VPN_ACCOUNT_NAME'"
 }
 
@@ -313,6 +390,80 @@ show_summary() {
 }
 
 # ==========================================================
+# PROXMOX BRIDGE (vmbr1) — no static IP on the VPN NIC itself,
+# the VPN interface is bridged and Proxmox host IP lives on vmbr1.
+# ==========================================================
+resolve_actual_iface() {
+    local iface="$VPN_NIC_NAME"
+    if ip link show "${iface}_vpn" >/dev/null 2>&1; then
+        actual_iface="${iface}_vpn"
+    elif ip link show "$iface" >/dev/null 2>&1; then
+        actual_iface="$iface"
+    else
+        wait_for_nic || true
+        if ip link show "${iface}_vpn" >/dev/null 2>&1; then
+            actual_iface="${iface}_vpn"
+        else
+            actual_iface="$iface"
+        fi
+    fi
+}
+
+configure_proxmox_interfaces() {
+    local iface_file="/etc/network/interfaces"
+    local backup_file="${iface_file}.bak.$(date +%Y%m%d%H%M%S)"
+
+    resolve_actual_iface
+    log "Detected VPN interface for bridge-ports: $actual_iface"
+
+    read -rp "Masukkan IP address Proxmox untuk vmbr1 (contoh: 10.20.0.3/20): " PROXMOX_IP
+    if [ -z "$PROXMOX_IP" ]; then
+        log "[ERROR] IP address tidak boleh kosong. Konfigurasi vmbr1 dibatalkan."
+        return 1
+    fi
+
+    if [ -f "$iface_file" ]; then
+        log "Backing up $iface_file to $backup_file..."
+        cp "$iface_file" "$backup_file" 2>/dev/null || log "[WARN] Gagal membuat backup $iface_file."
+    else
+        log "[WARN] $iface_file tidak ditemukan, akan dibuat baru."
+        touch "$iface_file"
+    fi
+
+    if grep -q "^iface vmbr1" "$iface_file" 2>/dev/null; then
+        log "[WARN] Konfigurasi vmbr1 sudah ada di $iface_file, dilewati agar tidak duplikat."
+        log "Silakan edit $iface_file secara manual jika perlu memperbarui."
+        return 1
+    fi
+
+    log "Menambahkan konfigurasi bridge vmbr1 ke $iface_file..."
+    cat >> "$iface_file" << EOF
+
+auto vmbr1
+iface vmbr1 inet static
+        address $PROXMOX_IP
+        bridge-ports $actual_iface
+        bridge-stp off
+        bridge-fd 0
+EOF
+
+    log "✅ vmbr1 ditambahkan ke $iface_file (backup: $backup_file)."
+    log "Jalankan 'systemctl restart networking' atau reboot untuk menerapkan."
+}
+
+show_summary_proxmox() {
+    echo "=========================================================="
+    echo "[SUCCESS] VPN Client for Proxmox connected/configured (summary):"
+    printf "%-18s : %s\n" "Account" "$VPN_ACCOUNT_NAME"
+    printf "%-18s : %s\n" "NIC (softether)" "$VPN_NIC_NAME"
+    printf "%-18s : %s\n" "Actual interface" "$actual_iface"
+    printf "%-18s : %s\n" "Bridge" "vmbr1"
+    printf "%-18s : %s\n" "Proxmox IP" "$PROXMOX_IP"
+    echo "Note: run 'systemctl restart networking' or reboot to apply /etc/network/interfaces changes."
+    echo "=========================================================="
+}
+
+# ==========================================================
 # MAIN
 # ==========================================================
 require_root
@@ -321,9 +472,10 @@ echo "=========================================================="
 echo " SoftEther VPN Client Modular Manager (final)"
 echo "=========================================================="
 echo "1) Import & Connect VPN"
-echo "2) Full Reset (Flush all configs and accounts)"
-echo "3) Exit"
-read -rp "Select an option (1-3): " main_choice
+echo "2) Import & Connect VPN for Proxmox"
+echo "3) Full Reset (Flush all configs and accounts)"
+echo "4) Exit"
+read -rp "Select an option (1-4): " main_choice
 echo "=========================================================="
 
 case "$main_choice" in
@@ -331,17 +483,26 @@ case "$main_choice" in
         detect_vpn_file
         start_vpnclient
         create_nic_if_needed
-        import_account
+        import_account || { log "[FATAL] Import failed — aborting instead of connecting with a stale/wrong account."; exit 1; }
         bind_nic_and_connect
         apply_static_ip_and_route
         install_route_service
         show_summary
         ;;
     2)
+        detect_vpn_file
+        start_vpnclient
+        create_nic_if_needed
+        import_account || { log "[FATAL] Import failed — aborting instead of connecting with a stale/wrong account."; exit 1; }
+        bind_nic_and_connect
+        configure_proxmox_interfaces
+        show_summary_proxmox
+        ;;
+    3)
         flush_all
         read -rp "Flush completed. Continue import new VPN config now? (y/n): " cont
         [[ "$cont" =~ ^[Yy]$ ]] && exec "$0"
         ;;
-    3) echo "Goodbye."; exit 0 ;;
+    4) echo "Goodbye."; exit 0 ;;
     *) echo "Invalid option."; exit 1 ;;
 esac
