@@ -75,6 +75,29 @@
 #       or the reload itself fails; show_summary_proxmox's closing note
 #       now reflects the actual outcome (NETWORK_APPLY_MSG) instead of a
 #       fixed "please restart manually" line.
+# [FIX] configure_proxmox_interfaces: ifreload -a applies the change at the
+#       OS/ifupdown2 level correctly (confirmed via `pvesh get
+#       /nodes/<node>/network` and `ip a`), but on Proxmox, pvedaemon /
+#       pveproxy keep their own long-lived in-memory parse of
+#       /etc/network/interfaces (PVE::INotify) for the API/GUI. Editing
+#       the file directly, however it's written, never tells that cache
+#       to refresh — so a freshly-added bridge could be fully working yet
+#       stay invisible (empty list, 200 OK) in the web GUI until the PVE
+#       daemons themselves restarted. Now restarts pvedaemon + pveproxy
+#       right after ifreload -a (skipped harmlessly on non-Proxmox hosts).
+# [FIX] configure_proxmox_interfaces: the vmbr1-stanza-strip step used
+#       `mktemp` (default mode 600, root-only) + `mv` onto
+#       /etc/network/interfaces — `mv` carries the SOURCE file's
+#       permissions onto the destination, so the file silently dropped
+#       from 644 to 600 every time this path ran (i.e. every run AFTER
+#       the first, once vmbr1 already existed). pveproxy's worker runs as
+#       unprivileged www-data, so it could no longer read the file at
+#       all — API still returned 200 but with an empty interface list,
+#       while root-run commands (pvesh, this script) kept working fine.
+#       This exactly explains "works from fresh, breaks on repeated
+#       runs". Now chmod's the tmp file to 644 before the mv, and
+#       unconditionally re-asserts root:root / 644 on the real file
+#       afterward regardless of which code path wrote it.
 # ==========================================================
 
 VPNCMD="/usr/local/vpnclient/vpncmd"
@@ -463,6 +486,16 @@ configure_proxmox_interfaces() {
         log "Konfigurasi vmbr1 sudah ada di $iface_file, menghapus stanza lama sebelum menulis yang baru..."
         local tmp_file
         tmp_file=$(mktemp)
+        # mktemp defaults to mode 600 (root-only), and `mv` carries the
+        # SOURCE file's permissions onto the destination — so without this,
+        # /etc/network/interfaces silently drops from 644 to 600 the moment
+        # this block runs (i.e. every run AFTER the first, once vmbr1
+        # already exists). pveproxy's worker runs as the unprivileged
+        # www-data user, so it can no longer read the file at all: the API
+        # request still returns 200, just with an empty interface list,
+        # while `pvesh`/root-run commands keep working normally — exactly
+        # the "works fresh, breaks on repeated runs" split observed.
+        chmod 644 "$tmp_file"
         awk '
             {
                 if (skip) {
@@ -475,6 +508,11 @@ configure_proxmox_interfaces() {
             }
         ' "$iface_file" > "$tmp_file" && mv "$tmp_file" "$iface_file"
     fi
+
+    # Belt-and-suspenders: enforce the correct owner/mode regardless of which
+    # code path wrote the file, so this can never silently regress again.
+    chown root:root "$iface_file" 2>/dev/null || true
+    chmod 644 "$iface_file" 2>/dev/null || true
 
     log "Menulis konfigurasi bridge vmbr1 (address $PROXMOX_IP) ke $iface_file..."
     cat >> "$iface_file" << EOF
@@ -502,6 +540,34 @@ EOF
         log "[WARN] 'ifreload' tidak ditemukan (paket ifupdown2 belum terpasang)."
         log "Jalankan 'systemctl restart networking' atau reboot untuk menerapkan."
         NETWORK_APPLY_MSG="'ifreload' not found — run 'systemctl restart networking' or reboot manually."
+    fi
+
+    # ifreload -a (above) applies the change at the OS/ifupdown2 level and is
+    # sufficient for the interface to actually work — but on a Proxmox host,
+    # pvedaemon/pveproxy keep their own long-lived in-memory parse of this
+    # file (PVE::INotify) for the API/GUI, and editing the file directly
+    # never tells that cache to refresh. Symptom: `pvesh get
+    # /nodes/<node>/network` and `ip a` both show the bridge correctly and
+    # working, but the web GUI's Network tab stays empty until the PVE
+    # daemons themselves are restarted. Only relevant on a Proxmox host, so
+    # this is skipped harmlessly if pvedaemon isn't present.
+    if command -v systemctl >/dev/null 2>&1 && systemctl cat pvedaemon >/dev/null 2>&1; then
+        log "Merestart pvedaemon & pveproxy agar GUI Proxmox membaca ulang interface (cache PVE::INotify)..."
+        # Clear any systemd start-limit lockout first: repeated runs of this
+        # script in a short window (testing, retries) can restart these
+        # daemons enough times to trip systemd's default StartLimitBurst,
+        # which then silently refuses further restarts ("Start request
+        # repeated too quickly" / unit stuck in "failed") — exactly matching
+        # "works from a fresh state, breaks again after repeated runs".
+        # reset-failed is a safe no-op if the unit isn't actually rate-limited.
+        systemctl reset-failed pvedaemon pveproxy >/dev/null 2>&1 || true
+        if systemctl restart pvedaemon pveproxy >/dev/null 2>&1; then
+            log "✅ pvedaemon & pveproxy direstart — Network tab seharusnya langsung menampilkan vmbr1."
+        else
+            log "[WARN] Gagal restart pvedaemon/pveproxy. Jalankan manual:"
+            log "[WARN]   systemctl reset-failed pvedaemon pveproxy && systemctl restart pvedaemon pveproxy"
+            NETWORK_APPLY_MSG="$NETWORK_APPLY_MSG GUI cache may be stale — run: systemctl reset-failed pvedaemon pveproxy && systemctl restart pvedaemon pveproxy"
+        fi
     fi
 }
 
