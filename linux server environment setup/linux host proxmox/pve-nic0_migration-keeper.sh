@@ -13,12 +13,14 @@
 # Pemakaian:
 #   pve-nic0_migration-keeper.sh enable    pasang unit systemd, aktif mulai boot berikutnya (reboot untuk apply)
 #   pve-nic0_migration-keeper.sh disable   matikan unit; konfigurasi hasil terakhir TIDAK dihapus
-#   pve-nic0_migration-keeper.sh status    tampilkan mode, hasil run terakhir, dan keadaan jaringan
+#   pve-nic0_migration-keeper.sh status    ringkasan 3 baris; masalah otomatis ditandai "!" lengkap dengan log
+#   pve-nic0_migration-keeper.sh status -v tampilan lengkap + 20 baris log terakhir
+#   pve-nic0_migration-keeper.sh dns       setel /etc/resolv.conf sekarang juga + jinakkan NetworkManager (tahan reboot)
 #   (pre / post dipanggil oleh systemd, bukan manual)
 #
 # Log: journalctl -b -u pve-nic0-migration-keeper-pre -u pve-nic0-migration-keeper-post
 
-set -uo pipefail
+set -o pipefail
 
 SELF=/usr/local/sbin/pve-nic0_migration-keeper.sh
 STATE_DIR=/var/lib/pve-nic0-migration-keeper
@@ -35,13 +37,18 @@ WANT_NIC=nic0
 RESOLV=/etc/resolv.conf
 DNS_SERVERS=(10.20.0.3 1.1.1.1 8.8.8.8 9.9.9.9)
 RESOLV_OPTIONS="options timeout:2 attempts:2"   # kosongkan untuk tidak menambah baris options
-CARRIER_WAIT=10        # detik menunggu link NIC naik
+CARRIER_WAIT=8         # detik menunggu link NIC naik
 KEEP_BACKUPS=10
 UNIT_PRE=pve-nic0-migration-keeper-pre.service
 UNIT_POST=pve-nic0-migration-keeper-post.service
 
-log()  { echo "pve-nic0-keeper: $*"; }
-warn() { echo "pve-nic0-keeper: WARN: $*" >&2; }
+LOGFILE=$STATE_DIR/keeper.log      # log persisten (tampil di 'status'), terpisah dari journal
+
+_lw() { { printf '%s %-4s %s\n' "$(date '+%F %T')" "$1" "$2" >> "$LOGFILE"; } 2>/dev/null; }
+log()  { _lw INFO "$*"; }                                     # detail langkah: hanya ke file
+say()  { echo "pve-nic0-keeper: $*"; _lw INFO "$*"; }         # ringkasan/perubahan: terminal atau journal + file
+warn() { echo "pve-nic0-keeper: WARN: $*" >&2; _lw WARN "$*"; }
+err()  { echo "pve-nic0-keeper: ERR: $*" >&2; _lw ERR "$*"; }
 die()  { echo "pve-nic0-keeper: ERROR: $*" >&2; exit 1; }
 need_root() { [ "$(id -u)" -eq 0 ] || die "harus dijalankan sebagai root"; }
 
@@ -220,16 +227,28 @@ save_state() {
 }
 
 # ---------------------------------------------------------------- jaringan
-# Minta lease DHCP lewat dhclient bawaan (opsi default, supaya lolos AppArmor).
+# Minta lease DHCP lewat dhclient bawaan, di mount-namespace privat:
+# /etc/resolv.conf dan file lease asli "disamarkan" dengan file kosong sementara, jadi dhclient-script
+# TIDAK BISA mengubah resolv.conf asli, dan tidak ada lease lama yang dipakai (jalur TIMEOUT di
+# dhclient-script memasang IP + DNS dari lease lama, itu yang membuat run ke-2 dst. berbeda dari run pertama).
 # Hasil: D_IP D_PFX D_GW. Lease TETAP terpasang di iface sampai dhcp_down dipanggil.
 dhcp_up() { # iface
-    local iface=$1 a
+    local iface=$1 a lease_real=/var/lib/dhcp/dhclient.leases t0=$SECONDS
     D_IP=""; D_PFX=""; D_GW=""
     command -v dhclient >/dev/null || { warn "dhclient tidak ada (apt install isc-dhcp-client)"; return 1; }
-    cp -p "$RESOLV" "$RUN_DIR/resolv.before" 2>/dev/null || rm -f "$RUN_DIR/resolv.before"
+    command -v unshare >/dev/null || { warn "unshare tidak ada (paket util-linux)"; return 1; }
+    mkdir -p "$(dirname "$lease_real")"
+    [ -e "$lease_real" ] || : > "$lease_real"
+    [ -e "$RESOLV" ] || : > "$RESOLV"
+    : > "$RUN_DIR/dhclient.leases"; : > "$RUN_DIR/resolv.scratch"
     ip link set dev "$iface" up 2>/dev/null
-    # dhclient 4.4.x tidak punya opsi -timeout; batas waktu lewat `timeout`. Output disimpan untuk diagnosa.
-    timeout 20 dhclient -1 -v "$iface" > "$RUN_DIR/dhclient.log" 2>&1
+    timeout 20 unshare --mount sh -c '
+        mount --bind "$1" "$2" && mount --bind "$3" "$4" || exit 97
+        exec dhclient -1 -v "$5"
+    ' keeper "$RUN_DIR/resolv.scratch" "$RESOLV" "$RUN_DIR/dhclient.leases" "$lease_real" "$iface" \
+        > "$RUN_DIR/dhclient.log" 2>&1
+    unleak
+    log "dhclient di $iface selesai dalam $((SECONDS - t0))s"
     a=$(ip -4 -o addr show dev "$iface" scope global 2>/dev/null | awk '{print $4; exit}')
     D_IP=${a%/*}; D_PFX=${a#*/}
     D_GW=$(ip -4 route show default dev "$iface" 2>/dev/null | awk '{print $3; exit}')
@@ -241,16 +260,27 @@ dhcp_up() { # iface
     return 0
 }
 
-# Lepas lease, bersihkan IP/route sementara, kembalikan resolv.conf yang sempat ditimpa dhclient-script
+# Hentikan dhclient dan bersihkan IP/route sementara di iface (resolv.conf tidak pernah tersentuh)
 dhcp_down() { # iface
-    local iface=$1
-    dhclient -r -q "$iface" >/dev/null 2>&1
+    local iface=$1 i
     pkill -f "dhclient -1 -v $iface" 2>/dev/null
+    for i in 1 2 3; do pgrep -f "dhclient -1 -v $iface" >/dev/null 2>&1 || break; sleep 1; done
+    pkill -9 -f "dhclient -1 -v $iface" 2>/dev/null
     ip -4 addr flush dev "$iface" 2>/dev/null
     ip -4 route flush dev "$iface" 2>/dev/null
-    [ -f "$RUN_DIR/resolv.before" ] && cat "$RUN_DIR/resolv.before" > "$RESOLV"
-    rm -f "$RUN_DIR/resolv.before"
+    unleak
     return 0
+}
+
+# Jaring pengaman: bind mount sementara dhclient tidak boleh pernah terlihat di namespace utama
+unleak() {
+    local m
+    for m in "$RESOLV" /var/lib/dhcp/dhclient.leases; do
+        if findmnt -rn -M "$m" >/dev/null 2>&1; then
+            warn "$m ternyata mountpoint (bind mount bocor); dilepas"
+            umount -l "$m" 2>/dev/null
+        fi
+    done
 }
 
 # ping dari iface (yang sedang memegang IP lease): 0 = ada yang menjawab = IP terpakai
@@ -328,14 +358,14 @@ pin_nic0() { # mac
             elif [ "$lf" != "$LINK_OURS" ]; then
                 ensure_bk
                 mv -f "$lf" "$BK/links/"
-                log "pinning lama (MAC berbeda) dipindah ke backup: $lf"
+                say "pinning lama (MAC berbeda) dipindah ke backup: $lf"
                 CHANGED=1
             fi
         done
     done
     if [ $found -eq 0 ]; then
         printf '[Match]\nMACAddress=%s\n\n[Link]\nName=%s\n' "$mac" "$WANT_NIC" > "$LINK_OURS"
-        log "pinning baru: $mac -> $WANT_NIC ($LINK_OURS)"
+        say "pinning baru: $mac -> $WANT_NIC ($LINK_OURS)"
         CHANGED=1
     fi
 }
@@ -351,7 +381,7 @@ runtime_rename() { # cur
     fi
     ip link set dev "$cur" down 2>/dev/null
     if ip link set dev "$cur" name "$WANT_NIC" 2>/dev/null; then
-        log "rename langsung: $cur -> $WANT_NIC"
+        say "rename langsung: $cur -> $WANT_NIC"
         CHANGED=1
     else
         warn "rename $cur -> $WANT_NIC gagal"
@@ -386,21 +416,84 @@ resolv_render() {
     return 0
 }
 
+# ---------------------------------------------------------------- NetworkManager
+# "Wired connection 1" = profil otomatis NetworkManager. NM menjalankan DHCP-nya sendiri di nic0 (anggota
+# vmbr0), menimpa /etc/resolv.conf dengan DNS gateway, lalu koneksi macet. Jadi NM dijinakkan: tidak boleh
+# membuat profil otomatis, tidak boleh menyentuh resolv.conf, dan tidak boleh mengelola nic*/vmbr*.
+NM_CONF=/etc/NetworkManager/conf.d/90-pve-nic0-keeper.conf
+NM_CONF_BODY='# dipasang oleh pve-nic0_migration-keeper.sh
+[main]
+no-auto-default=*
+dns=none
+rc-manager=unmanaged
+
+[keyfile]
+unmanaged-devices=interface-name:nic*;interface-name:vmbr*;interface-name:fwbr*;interface-name:fwpr*;interface-name:fwln*;interface-name:tap*;interface-name:veth*
+'
+
+nm_present() { [ -d /etc/NetworkManager ] || command -v nmcli >/dev/null 2>&1; }
+nm_guard_ok() { printf '%s' "$NM_CONF_BODY" | cmp -s - "$NM_CONF" 2>/dev/null; }
+
+# nm_guard 0 = hanya file konfigurasi (aman saat boot, NM belum jalan); 1 = sekalian terapkan ke NM yang sedang jalan
+nm_guard() {
+    local runtime=${1:-0} changed=0 uuid name
+    nm_present || return 0
+    if ! nm_guard_ok; then
+        mkdir -p "$(dirname "$NM_CONF")"
+        printf '%s' "$NM_CONF_BODY" > "$NM_CONF" && { say "NetworkManager dijinakkan: $NM_CONF"; changed=1; }
+    fi
+    if [ "$runtime" = 1 ] && command -v nmcli >/dev/null 2>&1 && systemctl is-active --quiet NetworkManager 2>/dev/null; then
+        [ $changed -eq 1 ] && timeout 15 nmcli general reload >/dev/null 2>&1
+        [ -e "/sys/class/net/$WANT_NIC" ] && timeout 10 nmcli device set "$WANT_NIC" managed no >/dev/null 2>&1
+        while IFS=: read -r uuid name; do
+            case "$name" in
+                "Wired connection "[0-9]*)
+                    timeout 15 nmcli connection delete uuid "$uuid" >/dev/null 2>&1 && say "profil otomatis NetworkManager dihapus: $name" ;;
+            esac
+        done < <(nmcli -t -f UUID,NAME connection show 2>/dev/null)
+    fi
+    return 0
+}
+
+# Daftar nameserver di resolv.conf persis sama dengan DNS_SERVERS?
+resolv_ok() {
+    [ "$(awk '/^nameserver[[:space:]]/{print $2}' "$RESOLV" 2>/dev/null | paste -sd' ' -)" = "${DNS_SERVERS[*]}" ]
+}
+
+# Idempotent: tidak melakukan apa-apa kalau sudah sesuai; dipanggil di awal, akhir, dan lewat trap EXIT.
+# DNS harus tetap di segala kondisi, jadi tidak ada jalur yang diam-diam melewatinya.
 apply_resolv() {
-    local target tmp
+    local target content tmp
+    unleak
+    if [ -L "$RESOLV" ]; then
+        target=$(readlink -f "$RESOLV" 2>/dev/null)
+        case "$target" in
+            /run/*|/var/run/*|"")
+                ensure_bk
+                readlink "$RESOLV" > "$BK/resolv.symlink" 2>/dev/null
+                warn "$RESOLV adalah symlink ke ${target:-?}; diganti file biasa supaya DNS tetap"
+                rm -f "$RESOLV"; : > "$RESOLV"
+                ;;
+        esac
+    fi
     target=$(readlink -f "$RESOLV" 2>/dev/null || echo "$RESOLV")
-    case "$target" in
-        /run/*|/var/run/*) warn "$RESOLV dikelola layanan lain ($target); DNS tidak diubah"; return 0 ;;
-    esac
-    tmp=$(mktemp "$(dirname "$target")/resolv.nic0keeper.XXXXXX")
-    resolv_render > "$tmp"
-    if [ -s "$tmp" ] && ! cmp -s "$tmp" "$target"; then
-        ensure_bk
-        chmod 644 "$tmp"; mv -f "$tmp" "$target"
-        log "DNS diperbarui: ${DNS_SERVERS[*]}"
+    resolv_ok && return 0
+    content=$(resolv_render)
+    [ -n "$content" ] || return 1
+    ensure_bk
+    tmp=$(mktemp "$(dirname "$target")/resolv.nic0keeper.XXXXXX" 2>/dev/null)
+    if [ -n "$tmp" ] && printf '%s\n' "$content" > "$tmp" && chmod 644 "$tmp" && mv -f "$tmp" "$target" 2>/dev/null; then
+        :
+    else
+        [ -n "$tmp" ] && rm -f "$tmp"
+        printf '%s\n' "$content" > "$target"      # tulis langsung; tetap bisa walau mv ditolak
+    fi
+    if resolv_ok; then
+        say "DNS diperbarui: ${DNS_SERVERS[*]}"
         CHANGED=1
     else
-        rm -f "$tmp"
+        err "DNS GAGAL diperbarui di $target ($(ls -l "$target" 2>&1 | awk '{$1=$1; print}'))"
+        return 1
     fi
 }
 
@@ -409,9 +502,17 @@ cmd_pre() {
     need_root
     mkdir -p "$STATE_DIR" "$BACKUP_ROOT" "$RUN_DIR"
     rm -f "$HANDOFF"
+    if [ "$(wc -l < "$LOGFILE" 2>/dev/null || echo 0)" -gt 400 ]; then
+        tail -n 200 "$LOGFILE" > "$LOGFILE.tmp" && mv -f "$LOGFILE.tmp" "$LOGFILE"
+    fi
+    log "=== pre mulai (uptime $(cut -d' ' -f1 /proc/uptime)s) ==="
     CHANGED=0; IF_CHANGED=0; BK=""; NEWIP=""; NEW_GW=""; NEW_PFX=""; NET_STATE="dhcp"
     D_IP=""; D_PFX=""; D_GW=""
     load_state
+    # DNS dijamin di segala kondisi: disetel di awal, dan dicek lagi apa pun yang terjadi (error, return, dll.)
+    nm_guard 0
+    apply_resolv
+    trap 'apply_resolv' EXIT
 
     [ -r "$IFACES" ] || { warn "$IFACES tidak terbaca, dilewati"; return 0; }
     [ -f "$IFACES.new" ] && warn "$IFACES.new (perubahan pending dari GUI) ada; tidak disentuh"
@@ -421,7 +522,7 @@ cmd_pre() {
     [ -f /etc/corosync/corosync.conf ] && CLUSTER=1
 
     if ! select_nic; then
-        log "tidak ada NIC fisik dengan link; jaringan tidak diubah"
+        say "tidak ada NIC fisik dengan link; jaringan tidak diubah"
         apply_resolv
         return 0
     fi
@@ -432,7 +533,7 @@ cmd_pre() {
 
     if [ "$CLUSTER" -eq 1 ]; then
         NET_STATE="cluster"
-        log "node cluster terdeteksi; DHCP/IP//etc/hosts dilewati (hanya nic0, bridge-ports, DNS)"
+        say "node cluster terdeteksi; DHCP/IP//etc/hosts dilewati (hanya nic0, bridge-ports, DNS)"
         NEWIP=$CFG_ADDR; NEW_PFX=$CFG_PREFIX; NEW_GW=$CFG_GW
     else
         # 1. minta lease DHCP -> tahu subnet dan gateway jaringan ini
@@ -475,7 +576,7 @@ cmd_pre() {
             if ! cmp -s "$tmp" "$IFACES"; then
                 ensure_bk
                 chmod 644 "$tmp"; mv -f "$tmp" "$IFACES"
-                log "interfaces diperbarui: vmbr0 $NEWIP/$NEW_PFX gw $NEW_GW, bridge-ports $WANT_NIC"
+                say "interfaces diperbarui: vmbr0 $NEWIP/$NEW_PFX gw $NEW_GW, bridge-ports $WANT_NIC"
                 CHANGED=1; IF_CHANGED=1
             else
                 rm -f "$tmp"
@@ -491,7 +592,7 @@ cmd_pre() {
             if [ -s "$tmp" ] && ! cmp -s "$tmp" "$HOSTS"; then
                 ensure_bk
                 chmod 644 "$tmp"; mv -f "$tmp" "$HOSTS"
-                log "/etc/hosts diperbarui: $NEWIP"
+                say "/etc/hosts diperbarui: $NEWIP"
                 CHANGED=1; IF_CHANGED=1
             else
                 rm -f "$tmp"
@@ -508,7 +609,7 @@ cmd_pre() {
         printf 'IF_CHANGED=%q\n' "$IF_CHANGED"
         printf 'BK=%q\n' "$BK"
     } > "$HANDOFF"
-    log "selesai (changed=$CHANGED, status=$NET_STATE, ip=${NEWIP:-tetap})"
+    say "pre selesai dalam ${SECONDS}s (changed=$CHANGED, status=$NET_STATE, ip=${NEWIP:-tetap})"
     return 0
 }
 
@@ -520,11 +621,16 @@ cmd_post() {
     # shellcheck disable=SC1090
     [ -f "$HANDOFF" ] && . "$HANDOFF"
     load_state
+    log "=== post mulai (uptime $(cut -d' ' -f1 /proc/uptime)s) ==="
+    # setelah networking.service selesai: pastikan tidak ada yang menimpa DNS selama boot
+    nm_guard 1
+    apply_resolv
+    trap 'apply_resolv' EXIT
     eval "$(ifpy get "$IFACES")"
 
     local ok=0 i
     if [ -n "$CFG_GW" ]; then
-        for i in 1 2 3 4 5; do
+        for i in 1 2 3 4; do
             gw_ok "$CFG_GW" && { ok=1; break; }
             sleep 2
         done
@@ -535,7 +641,7 @@ cmd_post() {
         S_NIC_MAC=$(cat "/sys/class/net/$WANT_NIC/address" 2>/dev/null || echo "")
         LAST_RESULT=OK
         # banner console "https://IP:8006" mengikuti /etc/hosts
-        systemctl cat pvebanner.service >/dev/null 2>&1 && systemctl restart pvebanner.service
+        systemctl cat pvebanner.service >/dev/null 2>&1 && systemctl restart --no-block pvebanner.service
         log "OK: vmbr0 $CFG_ADDR, gateway $CFG_GW terjangkau"
     else
         warn "gateway ${CFG_GW:-?} tidak terjangkau dari vmbr0"
@@ -548,14 +654,15 @@ cmd_post() {
         if [ "$IF_CHANGED" = 1 ] && [ -n "$BK" ] && [ -f "$BK/interfaces" ]; then
             cp -p "$BK/interfaces" "$IFACES"
             [ -f "$BK/hosts" ] && cp -p "$BK/hosts" "$HOSTS"
-            ifreload -a >/dev/null 2>&1 || warn "ifreload gagal saat rollback"
+            timeout 30 ifreload -a >/dev/null 2>&1 || warn "ifreload gagal/lewat batas waktu saat rollback"
             LAST_RESULT=ROLLED_BACK
-            warn "interfaces/hosts di-rollback dari $BK (DNS tetap)"
+            err "interfaces/hosts di-rollback dari $BK (DNS tetap)"
         else
             LAST_RESULT=NO_GATEWAY
         fi
     fi
     save_state
+    say "post selesai dalam ${SECONDS}s (hasil=$LAST_RESULT)"
     return 0
 }
 
@@ -573,7 +680,8 @@ Conflicts=shutdown.target
 Type=oneshot
 RemainAfterExit=yes
 ExecStart=$SELF pre
-TimeoutStartSec=150
+TimeoutStartSec=75
+TimeoutStopSec=15
 
 [Install]
 WantedBy=multi-user.target
@@ -587,7 +695,8 @@ After=networking.service $UNIT_PRE
 Type=oneshot
 RemainAfterExit=yes
 ExecStart=$SELF post
-TimeoutStartSec=90
+TimeoutStartSec=45
+TimeoutStopSec=15
 
 [Install]
 WantedBy=multi-user.target
@@ -600,6 +709,7 @@ cmd_enable() {
     command -v python3 >/dev/null || missing+=(python3)
     command -v dhclient >/dev/null || missing+=(isc-dhcp-client)
     command -v ping >/dev/null || missing+=(iputils-ping)
+    command -v unshare >/dev/null || missing+=(util-linux)
     [ ${#missing[@]} -eq 0 ] || die "paket belum ada: apt install ${missing[*]}"
 
     mkdir -p "$STATE_DIR"
@@ -610,60 +720,124 @@ cmd_enable() {
     systemctl daemon-reload
     systemctl enable "$UNIT_PRE" "$UNIT_POST" >/dev/null 2>&1 || die "systemctl enable gagal"
     date +%s > "$MODE_STAMP"
-    log "ENABLED. Berlaku mulai boot berikutnya; reboot untuk menerapkan."
-    log "Cek hasil setelah boot: pve-nic0_migration-keeper.sh status"
+    nm_guard 1
+    apply_resolv
+    say "ENABLED. Jaringan baru berlaku mulai boot berikutnya; reboot untuk menerapkan (DNS sudah disetel sekarang)."
+    say "Cek hasil setelah boot: pve-nic0_migration-keeper.sh status"
 }
 
 cmd_disable() {
     need_root
     systemctl disable "$UNIT_PRE" "$UNIT_POST" >/dev/null 2>&1
     date +%s > "$MODE_STAMP"
-    log "DISABLED. Tidak jalan lagi mulai boot berikutnya; konfigurasi terakhir tidak diubah."
+    nm_guard 1
+    apply_resolv
+    say "DISABLED. Tidak jalan lagi mulai boot berikutnya; konfigurasi jaringan tidak diubah, DNS tetap disetel."
 }
 
 cmd_status() {
+    local verbose=0 en mc boot mode pend res dur pre_s post_s nicst="$WANT_NIC TIDAK ADA" live file gwst="?"
+    local nmact="" nmtxt="tidak terpasang" nmprof="-" nmguard=ok dnsst resolvlist p mp
+    local prob=()
+    [ "${1:-}" = "-v" ] && verbose=1
     load_state
-    local en mc nic0="tidak ada" cfgline
     en=$(systemctl is-enabled "$UNIT_PRE" 2>/dev/null || true)
     mc=$(cat "$MODE_STAMP" 2>/dev/null || echo 0)
-    if [ "$en" = enabled ]; then
-        echo "Mode         : ENABLED (jalan di setiap boot)"
-    else
-        echo "Mode         : DISABLED"
-    fi
+    boot=$(( $(date +%s) - $(cut -d. -f1 /proc/uptime) ))
+    [ "$en" = enabled ] && mode=ENABLED || mode=DISABLED
+    if [ "$mc" -gt "$boot" ]; then pend="ya (reboot)"; else pend="tidak"; fi
+
+    # hasil run terakhir + durasi (dari log)
     if [ "${LAST_RUN:-0}" -gt 0 ]; then
-        echo "Run terakhir : $(date -d "@$LAST_RUN" '+%F %T')  hasil: $LAST_RESULT"
+        res="$LAST_RESULT $(date -d "@$LAST_RUN" '+%m-%d %H:%M')"
+        [ "$LAST_RESULT" = OK ] || prob+=("hasil run terakhir: $LAST_RESULT")
     else
-        echo "Run terakhir : belum pernah"
+        res="belum pernah"
     fi
-    if [ -d /sys/class/net/$WANT_NIC/device ]; then
-        nic0="ada, MAC $(cat /sys/class/net/$WANT_NIC/address), link $(cat /sys/class/net/$WANT_NIC/operstate 2>/dev/null)"
+    pre_s=$(grep 'pre selesai dalam' "$LOGFILE" 2>/dev/null | tail -1 | sed -n 's/.*dalam \([0-9]*\)s.*/\1/p')
+    post_s=$(grep 'post selesai dalam' "$LOGFILE" 2>/dev/null | tail -1 | sed -n 's/.*dalam \([0-9]*\)s.*/\1/p')
+    dur="pre ${pre_s:--}s, post ${post_s:--}s"
+    if [ "${pre_s:-0}" -gt 45 ] || [ "${post_s:-0}" -gt 45 ]; then prob+=("boot lambat: $dur (batas 45s)"); fi
+    if [ "$mode" = ENABLED ] && [ "${LAST_RUN:-0}" -lt "$boot" ]; then
+        prob+=("belum ada run yang selesai di boot ini")
     fi
-    echo "nic0         : $nic0"
-    cfgline=$(ip -4 -o addr show dev vmbr0 2>/dev/null | awk '{print $4}' | paste -sd, -)
-    echo "vmbr0 (live) : ${cfgline:-tidak ada IP}"
-    if [ -r "$IFACES" ]; then
-        eval "$(ifpy get "$IFACES")"
-        echo "vmbr0 (file) : ${CFG_ADDR:-?}/${CFG_PREFIX:-?} gw ${CFG_GW:-?} ports ${CFG_PORTS:-?}"
-    fi
-    echo "Gateway      : ${S_GW:--}"
-    echo "DNS          : $(awk '/^nameserver/{print $2}' "$RESOLV" 2>/dev/null | paste -sd' ' -)"
-    if [ "$mc" -gt "${LAST_RUN:-0}" ]; then
-        echo "Pending      : ya, mode diubah setelah run terakhir; reboot untuk menerapkan"
+
+    # nic0, vmbr0, gateway
+    if [ -d "/sys/class/net/$WANT_NIC/device" ]; then
+        nicst="$WANT_NIC $(cat "/sys/class/net/$WANT_NIC/operstate" 2>/dev/null) $(cat "/sys/class/net/$WANT_NIC/address")"
+        [ "$(cat "/sys/class/net/$WANT_NIC/operstate" 2>/dev/null)" = up ] || prob+=("link $WANT_NIC tidak up")
     else
-        echo "Pending      : tidak"
+        prob+=("$WANT_NIC tidak ditemukan")
     fi
+    live=$(ip -4 -o addr show dev vmbr0 2>/dev/null | awk '{print $4}' | paste -sd, -)
+    CFG_ADDR=""; CFG_PREFIX=""; CFG_GW=""; CFG_PORTS=""
+    [ -r "$IFACES" ] && eval "$(ifpy get "$IFACES")"
+    file="${CFG_ADDR:-?}/${CFG_PREFIX:-?}"
+    case ",$live," in *",$file,"*) ;; *) prob+=("vmbr0 live (${live:-kosong}) beda dengan file ($file)") ;; esac
+    if [ -n "$CFG_GW" ]; then
+        if ping -n -q -c 1 -W 1 -I vmbr0 "$CFG_GW" >/dev/null 2>&1; then gwst=ok
+        else gwst="TIDAK terjangkau"; prob+=("gateway $CFG_GW tidak terjangkau"); fi
+    fi
+
+    # DNS dan NetworkManager
+    resolvlist=$(awk '/^nameserver/{print $2}' "$RESOLV" 2>/dev/null | paste -sd' ' -)
+    if resolv_ok; then dnsst="ok"; else
+        dnsst="TIDAK sesuai"
+        prob+=("DNS tidak sesuai (isi: ${resolvlist:-kosong}); jalankan: $0 dns")
+    fi
+    if nm_present; then
+        nmact=$(systemctl is-active NetworkManager 2>/dev/null || true)
+        if command -v nmcli >/dev/null 2>&1 && [ "$nmact" = active ]; then
+            nmprof=$(nmcli -t -f NAME connection show 2>/dev/null | grep -c '^Wired connection [0-9]')
+        fi
+        nm_guard_ok || { nmguard="BELUM"; prob+=("penjaga NetworkManager belum terpasang; jalankan: $0 dns"); }
+        [ "$nmprof" != "-" ] && [ "$nmprof" != 0 ] && prob+=("ada $nmprof profil 'Wired connection'; jalankan: $0 dns")
+        nmtxt="${nmact:-mati}, penjaga $nmguard, profil liar $nmprof"
+    fi
+
+    if [ $verbose -eq 1 ]; then
+        echo "Mode         : $mode (pending: $pend)"
+        echo "Run terakhir : $res ($dur)"
+        echo "nic0         : $nicst"
+        echo "vmbr0 live   : ${live:-kosong}"
+        echo "vmbr0 file   : $file gw ${CFG_GW:-?} ports ${CFG_PORTS:-?} (gateway $gwst)"
+        echo "DNS          : ${resolvlist:-kosong} ($dnsst)"
+        echo "NetworkManager: $nmtxt"
+        if [ -s "$LOGFILE" ]; then echo "Log (20 terakhir):"; tail -n 20 "$LOGFILE" | sed 's/^/  /'; fi
+    else
+        echo "$mode | run terakhir: $res ($dur) | pending: $pend"
+        echo "$nicst | vmbr0 $file gw ${CFG_GW:-?} ($gwst)"
+        echo "DNS $dnsst | NM: $nmtxt"
+    fi
+
+    if [ ${#prob[@]} -gt 0 ]; then
+        for p in "${prob[@]}"; do echo "! $p"; done
+        if ! resolv_ok; then
+            mp=$(findmnt -rn -M "$RESOLV" 2>/dev/null | head -1 | cut -c1-60)
+            echo "  dns: $(ls -l "$RESOLV" 2>&1 | awk '{$1=$1; print}') | mountpoint: ${mp:-tidak} | isi: $(grep -v '^#' "$RESOLV" 2>/dev/null | head -4 | tr '\n' ';')"
+        fi
+        if [ $verbose -eq 0 ] && [ -s "$LOGFILE" ]; then echo "log:"; tail -n 5 "$LOGFILE" | sed 's/^/  /'; fi
+    fi
+    return 0
+}
+
+cmd_dns() {
+    need_root
+    mkdir -p "$STATE_DIR"
+    nm_guard 1
+    if resolv_ok; then say "DNS sudah sesuai: ${DNS_SERVERS[*]}"; else apply_resolv; fi
 }
 
 usage() {
-    echo "Pemakaian: pve-nic0_migration-keeper.sh {enable|disable|status}"
+    echo "Pemakaian: pve-nic0_migration-keeper.sh {enable|disable|status [-v]|dns}"
     exit 1
 }
 
 case "${1:-}" in
     enable)  cmd_enable ;;
     disable) cmd_disable ;;
-    status)  cmd_status ;;
+    status)  cmd_status "${2:-}" ;;
+    dns)     cmd_dns ;;
     pre)     cmd_pre ;;
     post)    cmd_post ;;
     *)       usage ;;
