@@ -24,97 +24,115 @@
 #       to Type=oneshot + RemainAfterExit=yes. IP and route persist on the
 #       interface even after VPN disconnect (Linux assigns to NIC, not tunnel),
 #       so one-shot apply at boot is sufficient. No restart loop needed.
-# [NEW] Menu renumbered: 1) Import & Connect VPN, 2) Import & Connect VPN
-#       for Proxmox (new), 3) Full Reset, 4) Exit.
-# [NEW] configure_proxmox_interfaces: for the Proxmox flow, skips static IP
-#       assignment on the VPN NIC (no apply_static_ip_and_route call) and
-#       instead appends a vmbr1 bridge stanza to /etc/network/interfaces,
-#       bound to the detected VPN interface (vpn or vpn_vpn). Proxmox IP is
-#       asked interactively. A timestamped backup of interfaces file is made
-#       before any write, and the function refuses to duplicate an existing
-#       vmbr1 stanza.
-# [FIX] import_account: the old pre-check compared the existing-account list
-#       against a name derived from the .vpn FILENAME, but AccountImport
-#       names the resulting account from the "VPN Connection Setting Name"
-#       embedded inside the file at export time — the two names are usually
-#       different, so the check never matched and a re-import could silently
-#       collide with / be shadowed by a stale same-named account, leaving the
-#       OLD config connected while the script believed it imported the new
-#       one. Now: unconditionally clear whatever account(s) exist first, then
-#       read back whichever single account resulted from AccountImport — no
-#       filename-based guessing.
+# [FIX] import_account: AccountImport names the resulting account from the
+#       "VPN Connection Setting Name" embedded inside the .vpn file, not from
+#       the filename. Now unconditionally clears whatever account(s) exist
+#       first, then reads back the single account that resulted from
+#       AccountImport — no filename-based guessing.
 # [NEW] stop_and_delete_account: AccountDelete silently no-ops on an account
 #       that is Connecting/Online (e.g. one left auto-starting via a prior
-#       AccountStartupSet — the vpnclient daemon reconnects it the instant
-#       `vpnclient start` runs, often before the delete loop even gets to
-#       it). Now runs AccountStartupRemove + AccountDisconnect before every
-#       AccountDelete, with up to 3 retries and a hard verification that the
-#       account list is actually empty before importing.
-# [FIX] main(): import_account's failure/error return was not checked, so a
-#       failed import (see above) still fell through to bind_nic_and_connect
-#       using a stale VPN_ACCOUNT_NAME. Both menu options 1) and 2) now abort
-#       with [FATAL] if import_account fails, instead of connecting stale.
-# [NEW] apply_static_ip_and_route (option 1): VPN client static IP was a
-#       hardcoded default (10.20.15.252) applied silently. Now prompts
-#       interactively (example range 10.20.15.1 - 10.20.15.254), matching
-#       the Proxmox flow's style; falls back to the default if left blank.
-# [NEW] configure_proxmox_interfaces (option 2): example IP in the prompt
-#       updated from 10.20.0.3/20 to 10.20.0.100/20.
-# [FIX] configure_proxmox_interfaces: previously, if a vmbr1 stanza already
-#       existed in /etc/network/interfaces, the function just logged a
-#       warning and returned — meaning the OLD address (e.g. 10.20.0.3/20
-#       from an earlier run) stayed in the file forever no matter what IP
-#       was typed on subsequent runs. Now strips any existing vmbr1 stanza
-#       (auto vmbr1 + its iface block) with awk before appending a fresh
-#       one built from the freshly typed PROXMOX_IP, so re-running actually
-#       updates the address instead of silently keeping the stale one.
-# [NEW] configure_proxmox_interfaces: after writing vmbr1, runs
-#       'ifreload -a' directly (ifupdown2, standard on Proxmox) instead of
-#       just printing a note to restart networking/reboot manually. Falls
-#       back to that manual instruction only if ifreload isn't installed
-#       or the reload itself fails; show_summary_proxmox's closing note
-#       now reflects the actual outcome (NETWORK_APPLY_MSG) instead of a
-#       fixed "please restart manually" line.
-# [FIX] configure_proxmox_interfaces: ifreload -a applies the change at the
-#       OS/ifupdown2 level correctly (confirmed via `pvesh get
-#       /nodes/<node>/network` and `ip a`), but on Proxmox, pvedaemon /
-#       pveproxy keep their own long-lived in-memory parse of
-#       /etc/network/interfaces (PVE::INotify) for the API/GUI. Editing
-#       the file directly, however it's written, never tells that cache
-#       to refresh — so a freshly-added bridge could be fully working yet
-#       stay invisible (empty list, 200 OK) in the web GUI until the PVE
-#       daemons themselves restarted. Now restarts pvedaemon + pveproxy
-#       right after ifreload -a (skipped harmlessly on non-Proxmox hosts).
-# [FIX] configure_proxmox_interfaces: the vmbr1-stanza-strip step used
-#       `mktemp` (default mode 600, root-only) + `mv` onto
-#       /etc/network/interfaces — `mv` carries the SOURCE file's
-#       permissions onto the destination, so the file silently dropped
-#       from 644 to 600 every time this path ran (i.e. every run AFTER
-#       the first, once vmbr1 already existed). pveproxy's worker runs as
-#       unprivileged www-data, so it could no longer read the file at
-#       all — API still returned 200 but with an empty interface list,
-#       while root-run commands (pvesh, this script) kept working fine.
-#       This exactly explains "works from fresh, breaks on repeated
-#       runs". Now chmod's the tmp file to 644 before the mv, and
-#       unconditionally re-asserts root:root / 644 on the real file
-#       afterward regardless of which code path wrote it.
+#       AccountStartupSet). Now runs AccountStartupRemove + AccountDisconnect
+#       before every AccountDelete, with up to 3 retries and a hard
+#       verification that the account list is actually empty before importing.
+# [FIX] main(): import_account's failure/error return is now checked, so a
+#       failed import aborts with [FATAL] instead of connecting a stale
+#       account.
+# [NEW] apply_static_ip_and_route: prompts for "IP/prefix" (validated IPv4,
+#       prefix 8-30, not the network/broadcast address); netmask, subnet and
+#       gateway (first host of the subnet) are DERIVED from what was typed.
+# [FIX] vpn-route-apply.sh: idempotency check matches "IP/prefix" (not just
+#       the IP), so re-running with a different prefix is re-applied.
+# [FIX] ip addr add (+ vpn-route-apply.sh): added "brd +" so the broadcast
+#       address is set; the idempotency check also requires "brd".
+# [CHANGE] Section 0 (default network params) removed: there are NO default
+#       IP / prefix / netmask / gateway / subnet anymore. The user MUST type
+#       "IP/prefix" manually (example: 10.20.0.100/24). Blank input or input
+#       without "/prefix" is rejected and asked again — no silent fallback.
+# [CHANGE] VPN_NIC_NAME is now "softether". SoftEther names the Linux tap
+#       device "vpn_<NICNAME>" (-> vpn_softether), so every interface lookup
+#       now uses vpn_${VPN_NIC_NAME} instead of the old ${VPN_NIC_NAME}_vpn
+#       pattern (which only worked by coincidence when the NIC was "vpn").
+# [NEW] detect_vpn_file: .vpn files are now also detected in /home/<user>
+#       (one level deep, e.g. /home/benny/xxx.vpn), besides /usr/local/vpnclient and /opt.
+# [REMOVE] Proxmox option removed (configure_proxmox_interfaces,
+#       resolve_actual_iface, show_summary_proxmox). Menu renumbered:
+#       1) Import & Connect VPN, 2) Full Reset, 3) Exit.
 # ==========================================================
 
 VPNCMD="/usr/local/vpnclient/vpncmd"
 VPNCLIENT="/usr/local/vpnclient/vpnclient"
 VPNDIR="/usr/local/vpnclient"
 
-# Default network params (customize if needed)
-VPN_NIC_NAME="vpn"
-VPN_STATIC_IP="10.20.15.252"
-VPN_NETMASK="255.255.240.0"
-VPN_GATEWAY="10.20.0.1"
-VPN_SUBNET="10.20.0.0/20"
+# Only the NIC name is fixed (SoftEther names the Linux tap device "vpn_<NICNAME>"). IP, prefix, netmask, gateway and subnet have NO
+# default: they are filled in by parse_vpn_cidr from what the user types.
+VPN_NIC_NAME="softether"   # Linux iface becomes vpn_<name> -> vpn_softether (13 chars, limit 15)
+VPN_STATIC_IP=""
+VPN_PREFIX=""
+VPN_NETMASK=""
+VPN_GATEWAY=""
+VPN_SUBNET=""
 
 log() { echo -e "[`date +%H:%M:%S`] $*"; }
 require_root() { [ "$(id -u)" -eq 0 ] || { echo "Run as root (sudo $0)"; exit 1; }; }
 
 trim() { echo "$1" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//'; }
+
+# ==========================================================
+# CIDR HELPERS (pure bash, no extra packages)
+# ==========================================================
+valid_ipv4() {
+    local ip="$1" o
+    [[ "$ip" =~ ^([0-9]{1,3})\.([0-9]{1,3})\.([0-9]{1,3})\.([0-9]{1,3})$ ]] || return 1
+    for o in "${BASH_REMATCH[@]:1}"; do
+        (( 10#$o <= 255 )) || return 1
+    done
+    return 0
+}
+
+ip_to_int() {
+    local a b c d
+    IFS=. read -r a b c d <<< "$1"
+    echo $(( (10#$a << 24) | (10#$b << 16) | (10#$c << 8) | 10#$d ))
+}
+
+int_to_ip() {
+    local n="$1"
+    echo "$(( (n >> 24) & 255 )).$(( (n >> 16) & 255 )).$(( (n >> 8) & 255 )).$(( n & 255 ))"
+}
+
+# Validate "A.B.C.D/N" and, only if valid, set the globals:
+#   VPN_STATIC_IP, VPN_PREFIX, VPN_NETMASK, VPN_SUBNET, VPN_GATEWAY
+# On failure returns 1 and puts the reason in CIDR_ERR (globals untouched).
+# Gateway = first host of the subnet (10.20.0.100/24 -> 10.20.0.1).
+parse_vpn_cidr() {
+    local cidr="$1" ip prefix ip_int mask_int net_int bcast_int
+    ip="${cidr%/*}"
+    prefix="${cidr#*/}"
+
+    valid_ipv4 "$ip" || { CIDR_ERR="format IP tidak valid: '$ip'"; return 1; }
+    if ! [[ "$prefix" =~ ^[0-9]{1,2}$ ]] || (( 10#$prefix < 8 || 10#$prefix > 30 )); then
+        CIDR_ERR="prefix harus angka 8-30 (contoh /24 atau /20), dapat: '/$prefix'"
+        return 1
+    fi
+    prefix=$((10#$prefix))
+
+    ip_int=$(ip_to_int "$ip")
+    mask_int=$(( (0xFFFFFFFF << (32 - prefix)) & 0xFFFFFFFF ))
+    net_int=$(( ip_int & mask_int ))
+    bcast_int=$(( net_int | (~mask_int & 0xFFFFFFFF) ))
+
+    if [ "$ip_int" -eq "$net_int" ] || [ "$ip_int" -eq "$bcast_int" ]; then
+        CIDR_ERR="$ip adalah alamat network/broadcast dari $(int_to_ip "$net_int")/$prefix, pilih IP host"
+        return 1
+    fi
+
+    VPN_STATIC_IP=$(int_to_ip "$ip_int")   # normalised (strips leading zeros like 015)
+    VPN_PREFIX="$prefix"
+    VPN_NETMASK=$(int_to_ip "$mask_int")
+    VPN_SUBNET="$(int_to_ip "$net_int")/$prefix"
+    VPN_GATEWAY=$(int_to_ip $(( net_int + 1 )))
+    return 0
+}
 
 # ==========================================================
 # FLUSH: brute-force deletion of all accounts & NICs
@@ -144,7 +162,7 @@ flush_all() {
             log "Deleting NIC: $nic"
             $VPNCMD localhost /CLIENT /CMD NicDelete "$nic" >/dev/null 2>&1 || true
             ip link delete "$nic" >/dev/null 2>&1 || true
-            ip link delete "${nic}_vpn" >/dev/null 2>&1 || true
+            ip link delete "vpn_${nic}" >/dev/null 2>&1 || true
         done <<< "$nic_list"
     else
         log "No NICs found to delete."
@@ -187,9 +205,14 @@ flush_all() {
 # IMPORT & CONNECT
 # ==========================================================
 detect_vpn_file() {
-    log "Searching for .vpn files in /usr/local/vpnclient and /opt..."
-    mapfile -t vpn_files < <(find /usr/local/vpnclient /opt -maxdepth 1 -type f -name "*.vpn" 2>/dev/null)
-    (( ${#vpn_files[@]} )) || { echo "[ERROR] No .vpn files found in /opt or /usr/local/vpnclient"; exit 1; }
+    log "Searching for .vpn files in /usr/local/vpnclient, /opt and /home/<user>..."
+    mapfile -t vpn_files < <(
+        {
+            find /usr/local/vpnclient /opt -maxdepth 1 -type f -name "*.vpn"
+            find /home -mindepth 2 -maxdepth 2 -type f -name "*.vpn"
+        } 2>/dev/null
+    )
+    (( ${#vpn_files[@]} )) || { echo "[ERROR] No .vpn files found in /usr/local/vpnclient, /opt or /home/<user>"; exit 1; }
     if [ ${#vpn_files[@]} -eq 1 ]; then
         CONFIG_FILE="${vpn_files[0]}"
         echo "[INFO] Found single config: $(basename "$CONFIG_FILE")"
@@ -208,7 +231,7 @@ wait_for_nic() {
     local attempts=15
     log "Waiting for interface name to appear..."
     for i in $(seq 1 $attempts); do
-        if ip link show "$VPN_NIC_NAME" >/dev/null 2>&1 || ip link show "${VPN_NIC_NAME}_vpn" >/dev/null 2>&1; then
+        if ip link show "$VPN_NIC_NAME" >/dev/null 2>&1 || ip link show "vpn_${VPN_NIC_NAME}" >/dev/null 2>&1; then
             log "Detected interface (try $i)."; return 0
         fi
         sleep 1
@@ -316,24 +339,38 @@ apply_static_ip_and_route() {
     iface="$VPN_NIC_NAME"
     if ip link show "$iface" >/dev/null 2>&1; then
         actual_iface="$iface"
-    elif ip link show "${iface}_vpn" >/dev/null 2>&1; then
-        actual_iface="${iface}_vpn"
+    elif ip link show "vpn_${iface}" >/dev/null 2>&1; then
+        actual_iface="vpn_${iface}"
     else
         actual_iface="$iface"
     fi
 
     wait_for_nic || true
 
-    read -rp "Masukkan IP static untuk VPN client (contoh range: 10.20.15.1 s/d 10.20.15.254): " input_ip
-    if [ -z "$input_ip" ]; then
-        log "[ERROR] IP address tidak boleh kosong. Menggunakan default: $VPN_STATIC_IP"
-    else
-        VPN_STATIC_IP="$input_ip"
-    fi
+    # No default: the user must type IP/prefix by hand. Blank input and input
+    # without "/prefix" are rejected and asked again.
+    local input_cidr
+    while true; do
+        read -rp "Masukkan IP static + prefix untuk VPN client (wajib diisi manual, contoh: 10.20.0.100/24): " input_cidr \
+            || { log "[FATAL] Input dibatalkan."; exit 1; }
+        input_cidr=$(trim "$input_cidr")
+        if [ -z "$input_cidr" ]; then
+            log "[ERROR] Input tidak boleh kosong. Tulis manual dengan format IP/prefix, contoh: 10.20.0.100/24"
+            continue
+        elif [[ "$input_cidr" != */* ]]; then
+            log "[ERROR] Prefix wajib ditulis (format IP/prefix), contoh: 10.20.0.100/24"
+            continue
+        fi
+        if parse_vpn_cidr "$input_cidr"; then
+            break
+        fi
+        log "[ERROR] $CIDR_ERR — coba lagi."
+    done
+    log "Network diturunkan dari input: subnet $VPN_SUBNET, netmask $VPN_NETMASK, gateway $VPN_GATEWAY"
 
-    log "Assigning static IP $VPN_STATIC_IP/$VPN_NETMASK to interface $actual_iface..."
+    log "Assigning static IP $VPN_STATIC_IP/$VPN_PREFIX ($VPN_NETMASK) to interface $actual_iface..."
     ip addr flush dev "$actual_iface" >/dev/null 2>&1 || true
-    ip addr add "$VPN_STATIC_IP"/20 dev "$actual_iface" >/dev/null 2>&1 || true
+    ip addr add "$VPN_STATIC_IP/$VPN_PREFIX" brd + dev "$actual_iface" >/dev/null 2>&1 || true
 
     log "Adding route to VPN gateway $VPN_GATEWAY via $actual_iface..."
     ip route replace "$VPN_GATEWAY"/32 dev "$actual_iface" >/dev/null 2>&1 || true
@@ -363,6 +400,7 @@ install_route_service() {
 #!/bin/bash
 VPN_NIC_NAME="$VPN_NIC_NAME"
 VPN_STATIC_IP="$VPN_STATIC_IP"
+VPN_PREFIX="$VPN_PREFIX"
 VPN_GATEWAY="$VPN_GATEWAY"
 VPN_SUBNET="$VPN_SUBNET"
 
@@ -372,21 +410,22 @@ VPN_SUBNET="$VPN_SUBNET"
 # exits as soon as either appears.
 ACTUAL_IFACE=""
 until [ -n "\$ACTUAL_IFACE" ]; do
-    if ip link show "\${VPN_NIC_NAME}_vpn" >/dev/null 2>&1; then
-        ACTUAL_IFACE="\${VPN_NIC_NAME}_vpn"
+    if ip link show "vpn_\${VPN_NIC_NAME}" >/dev/null 2>&1; then
+        ACTUAL_IFACE="vpn_\${VPN_NIC_NAME}"
     elif ip link show "\${VPN_NIC_NAME}" >/dev/null 2>&1; then
         ACTUAL_IFACE="\${VPN_NIC_NAME}"
     fi
     [ -z "\$ACTUAL_IFACE" ] && sleep 1
 done
 
-# Idempotency: skip IP assign if already configured
-if ! ip addr show "\$ACTUAL_IFACE" | grep -q "\$VPN_STATIC_IP"; then
+# Idempotency: skip IP assign only if the exact IP/prefix is already configured
+# (matching the prefix too, so a /24 -> /16 change is not skipped as "present").
+if ! ip addr show "\$ACTUAL_IFACE" | grep -q "inet \${VPN_STATIC_IP}/\${VPN_PREFIX} brd "; then
     ip addr flush dev "\$ACTUAL_IFACE" 2>/dev/null
-    ip addr add "\${VPN_STATIC_IP}/20" dev "\$ACTUAL_IFACE" 2>/dev/null
-    echo "[vpn-route] IP \$VPN_STATIC_IP assigned to \$ACTUAL_IFACE"
+    ip addr add "\${VPN_STATIC_IP}/\${VPN_PREFIX}" brd + dev "\$ACTUAL_IFACE" 2>/dev/null
+    echo "[vpn-route] IP \${VPN_STATIC_IP}/\${VPN_PREFIX} assigned to \$ACTUAL_IFACE"
 else
-    echo "[vpn-route] IP \$VPN_STATIC_IP already present on \$ACTUAL_IFACE, skipping"
+    echo "[vpn-route] IP \${VPN_STATIC_IP}/\${VPN_PREFIX} already present on \$ACTUAL_IFACE, skipping"
 fi
 
 # Idempotency: skip gateway route if already present
@@ -432,154 +471,12 @@ show_summary() {
     echo "[SUCCESS] VPN Client connected/configured (summary):"
     printf "%-18s : %s\n" "Account" "$VPN_ACCOUNT_NAME"
     printf "%-18s : %s\n" "NIC (softether)" "$VPN_NIC_NAME"
-    printf "%-18s : %s\n" "Static IP" "$VPN_STATIC_IP"
+    printf "%-18s : %s\n" "Static IP" "$VPN_STATIC_IP/$VPN_PREFIX"
+    printf "%-18s : %s\n" "Netmask" "$VPN_NETMASK"
     printf "%-18s : %s\n" "VPN Gateway" "$VPN_GATEWAY"
     printf "%-18s : %s\n" "VPN Subnet" "$VPN_SUBNET"
     printf "%-18s : %s\n" "Local gateway" "$(ip route | awk '/default/ {print $3; exit}')"
     printf "%-18s : %s\n" "Route service" "$(systemctl is-active vpn-route-apply.service 2>/dev/null || echo 'not installed')"
-    echo "=========================================================="
-}
-
-# ==========================================================
-# PROXMOX BRIDGE (vmbr1) — no static IP on the VPN NIC itself,
-# the VPN interface is bridged and Proxmox host IP lives on vmbr1.
-# ==========================================================
-resolve_actual_iface() {
-    local iface="$VPN_NIC_NAME"
-    if ip link show "${iface}_vpn" >/dev/null 2>&1; then
-        actual_iface="${iface}_vpn"
-    elif ip link show "$iface" >/dev/null 2>&1; then
-        actual_iface="$iface"
-    else
-        wait_for_nic || true
-        if ip link show "${iface}_vpn" >/dev/null 2>&1; then
-            actual_iface="${iface}_vpn"
-        else
-            actual_iface="$iface"
-        fi
-    fi
-}
-
-configure_proxmox_interfaces() {
-    local iface_file="/etc/network/interfaces"
-    local backup_file="${iface_file}.bak.$(date +%Y%m%d%H%M%S)"
-    NETWORK_APPLY_MSG="vmbr1 not configured — check log above."
-
-    resolve_actual_iface
-    log "Detected VPN interface for bridge-ports: $actual_iface"
-
-    read -rp "Masukkan IP address Proxmox untuk vmbr1 (contoh: 10.20.0.100/20): " PROXMOX_IP
-    if [ -z "$PROXMOX_IP" ]; then
-        log "[ERROR] IP address tidak boleh kosong. Konfigurasi vmbr1 dibatalkan."
-        return 1
-    fi
-
-    if [ -f "$iface_file" ]; then
-        log "Backing up $iface_file to $backup_file..."
-        cp "$iface_file" "$backup_file" 2>/dev/null || log "[WARN] Gagal membuat backup $iface_file."
-    else
-        log "[WARN] $iface_file tidak ditemukan, akan dibuat baru."
-        touch "$iface_file"
-    fi
-
-    if grep -qE "^(auto vmbr1[[:space:]]*$|iface vmbr1)" "$iface_file" 2>/dev/null; then
-        log "Konfigurasi vmbr1 sudah ada di $iface_file, menghapus stanza lama sebelum menulis yang baru..."
-        local tmp_file
-        tmp_file=$(mktemp)
-        # mktemp defaults to mode 600 (root-only), and `mv` carries the
-        # SOURCE file's permissions onto the destination — so without this,
-        # /etc/network/interfaces silently drops from 644 to 600 the moment
-        # this block runs (i.e. every run AFTER the first, once vmbr1
-        # already exists). pveproxy's worker runs as the unprivileged
-        # www-data user, so it can no longer read the file at all: the API
-        # request still returns 200, just with an empty interface list,
-        # while `pvesh`/root-run commands keep working normally — exactly
-        # the "works fresh, breaks on repeated runs" split observed.
-        chmod 644 "$tmp_file"
-        awk '
-            {
-                if (skip) {
-                    if ($0 ~ /^[ \t]/ || $0 ~ /^iface vmbr1/) { next }
-                    else if ($0 ~ /^[[:space:]]*$/) { skip = 0; next }
-                    else { skip = 0; print; next }
-                }
-                if ($0 ~ /^auto vmbr1[[:space:]]*$/ || $0 ~ /^iface vmbr1/) { skip = 1; next }
-                print
-            }
-        ' "$iface_file" > "$tmp_file" && mv "$tmp_file" "$iface_file"
-    fi
-
-    # Belt-and-suspenders: enforce the correct owner/mode regardless of which
-    # code path wrote the file, so this can never silently regress again.
-    chown root:root "$iface_file" 2>/dev/null || true
-    chmod 644 "$iface_file" 2>/dev/null || true
-
-    log "Menulis konfigurasi bridge vmbr1 (address $PROXMOX_IP) ke $iface_file..."
-    cat >> "$iface_file" << EOF
-
-auto vmbr1
-iface vmbr1 inet static
-        address $PROXMOX_IP
-        bridge-ports $actual_iface
-        bridge-stp off
-        bridge-fd 0
-EOF
-
-    log "✅ vmbr1 diperbarui di $iface_file (backup: $backup_file)."
-
-    if command -v ifreload >/dev/null 2>&1; then
-        log "Menerapkan perubahan network dengan 'ifreload -a'..."
-        if ifreload -a >/dev/null 2>&1; then
-            log "✅ Network berhasil di-reload (ifreload -a) — vmbr1 sudah aktif tanpa reboot."
-            NETWORK_APPLY_MSG="Applied automatically via 'ifreload -a'."
-        else
-            log "[WARN] 'ifreload -a' gagal. Jalankan 'systemctl restart networking' atau reboot secara manual."
-            NETWORK_APPLY_MSG="'ifreload -a' failed — run 'systemctl restart networking' or reboot manually."
-        fi
-    else
-        log "[WARN] 'ifreload' tidak ditemukan (paket ifupdown2 belum terpasang)."
-        log "Jalankan 'systemctl restart networking' atau reboot untuk menerapkan."
-        NETWORK_APPLY_MSG="'ifreload' not found — run 'systemctl restart networking' or reboot manually."
-    fi
-
-    # ifreload -a (above) applies the change at the OS/ifupdown2 level and is
-    # sufficient for the interface to actually work — but on a Proxmox host,
-    # pvedaemon/pveproxy keep their own long-lived in-memory parse of this
-    # file (PVE::INotify) for the API/GUI, and editing the file directly
-    # never tells that cache to refresh. Symptom: `pvesh get
-    # /nodes/<node>/network` and `ip a` both show the bridge correctly and
-    # working, but the web GUI's Network tab stays empty until the PVE
-    # daemons themselves are restarted. Only relevant on a Proxmox host, so
-    # this is skipped harmlessly if pvedaemon isn't present.
-    if command -v systemctl >/dev/null 2>&1 && systemctl cat pvedaemon >/dev/null 2>&1; then
-        log "Merestart pvedaemon & pveproxy agar GUI Proxmox membaca ulang interface (cache PVE::INotify)..."
-        # Clear any systemd start-limit lockout first: repeated runs of this
-        # script in a short window (testing, retries) can restart these
-        # daemons enough times to trip systemd's default StartLimitBurst,
-        # which then silently refuses further restarts ("Start request
-        # repeated too quickly" / unit stuck in "failed") — exactly matching
-        # "works from a fresh state, breaks again after repeated runs".
-        # reset-failed is a safe no-op if the unit isn't actually rate-limited.
-        systemctl reset-failed pvedaemon pveproxy >/dev/null 2>&1 || true
-        if systemctl restart pvedaemon pveproxy >/dev/null 2>&1; then
-            log "✅ pvedaemon & pveproxy direstart — Network tab seharusnya langsung menampilkan vmbr1."
-        else
-            log "[WARN] Gagal restart pvedaemon/pveproxy. Jalankan manual:"
-            log "[WARN]   systemctl reset-failed pvedaemon pveproxy && systemctl restart pvedaemon pveproxy"
-            NETWORK_APPLY_MSG="$NETWORK_APPLY_MSG GUI cache may be stale — run: systemctl reset-failed pvedaemon pveproxy && systemctl restart pvedaemon pveproxy"
-        fi
-    fi
-}
-
-show_summary_proxmox() {
-    echo "=========================================================="
-    echo "[SUCCESS] VPN Client for Proxmox connected/configured (summary):"
-    printf "%-18s : %s\n" "Account" "$VPN_ACCOUNT_NAME"
-    printf "%-18s : %s\n" "NIC (softether)" "$VPN_NIC_NAME"
-    printf "%-18s : %s\n" "Actual interface" "$actual_iface"
-    printf "%-18s : %s\n" "Bridge" "vmbr1"
-    printf "%-18s : %s\n" "Proxmox IP" "$PROXMOX_IP"
-    echo "Note: $NETWORK_APPLY_MSG"
     echo "=========================================================="
 }
 
@@ -592,10 +489,9 @@ echo "=========================================================="
 echo " SoftEther VPN Client Modular Manager (final)"
 echo "=========================================================="
 echo "1) Import & Connect VPN"
-echo "2) Import & Connect VPN for Proxmox"
-echo "3) Full Reset (Flush all configs and accounts)"
-echo "4) Exit"
-read -rp "Select an option (1-4): " main_choice
+echo "2) Full Reset (Flush all configs and accounts)"
+echo "3) Exit"
+read -rp "Select an option (1-3): " main_choice
 echo "=========================================================="
 
 case "$main_choice" in
@@ -610,19 +506,10 @@ case "$main_choice" in
         show_summary
         ;;
     2)
-        detect_vpn_file
-        start_vpnclient
-        create_nic_if_needed
-        import_account || { log "[FATAL] Import failed — aborting instead of connecting with a stale/wrong account."; exit 1; }
-        bind_nic_and_connect
-        configure_proxmox_interfaces
-        show_summary_proxmox
-        ;;
-    3)
         flush_all
         read -rp "Flush completed. Continue import new VPN config now? (y/n): " cont
         [[ "$cont" =~ ^[Yy]$ ]] && exec "$0"
         ;;
-    4) echo "Goodbye."; exit 0 ;;
+    3) echo "Goodbye."; exit 0 ;;
     *) echo "Invalid option."; exit 1 ;;
 esac
