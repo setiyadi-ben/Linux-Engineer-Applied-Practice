@@ -1,0 +1,232 @@
+#!/usr/bin/env bash
+#
+# vm-local-dns.sh: hubungkan domain .local ke DNS milik adapter ethernet di dalam VM.
+#
+# Masalah: systemd-resolved TIDAK mengirim nama *.local ke DNS unicast, karena .local dicadangkan untuk mDNS.
+# Nama lain (ping.eu) lewat DNS dari DHCP, tetapi kuma.id.local atau x.sgp.local tidak, kecuali link punya
+# routing domain ~local. Skrip ini menempelkan ~local ke link ethernet (yang tampil sebagai "Link 2 (eth0)" di
+# `resolvectl status`), sehingga DNS dari DHCP dipakai untuk semua *.local di semua region.
+#
+# Yang dilakukan:
+#   - Drop-in systemd-networkd untuk file .network milik link:
+#         /etc/systemd/network/<file-network-link>.d/10-local-domain.conf
+#         [Network]
+#         Domains=~local
+#         DNSDefaultRoute=yes
+#     DNSDefaultRoute=yes WAJIB menyertai ~local: bila link punya routing domain (~xxx) dan DefaultRoute tidak
+#     disetel, systemd-resolved mematikan "default route" link itu (resolvectl: -DefaultRoute), sehingga nama
+#     publik (ifconfig.me) tidak punya DNS sama sekali. Dengan DNSDefaultRoute=yes, link tetap melayani nama
+#     publik DAN *.local.
+#     Drop-in hidup di /etc, jadi selamat dari netplan/cloud-init yang menulis ulang file utamanya di /run.
+#   - Tidak menulis IP DNS apa pun. DNS tetap dari DHCP (DNS host), tidak terkunci ke satu alamat.
+#   - Tidak menyentuh /etc/systemd/resolved.conf. Setelan lama di sana hanya diperingatkan.
+#
+# Drop-in versi lama (hanya Domains=) otomatis diperbarui saat skrip dijalankan lagi.
+# Idempotent: dijalankan berulang kali aman. Tanpa perubahan, tidak ada yang ditulis dan link tidak di-reconfigure.
+# Cocok dijalankan SEKALI di template (clone mewarisi drop-in) atau per VM.
+#
+# Pakai (sebagai root, di dalam VM):
+#   ./vm-local-dns.sh                      # link default route, domain ~local
+#   ./vm-local-dns.sh -i eth0              # pilih link
+#   ./vm-local-dns.sh -d local -d lan.test # beberapa routing domain (default: local)
+#   ./vm-local-dns.sh -t kuma.id.local     # setelah itu tes resolve sebuah nama
+#   ./vm-local-dns.sh --no-reconfigure     # tanpa networkctl reconfigure (tidak menyentuh lease DHCP/koneksi SSH)
+#   ./vm-local-dns.sh --undo               # hapus drop-in buatan skrip ini
+#
+# Kode keluar: 0 sesuai | 1 gagal menerapkan/belum persisten | 2 argumen/lingkungan salah | 3 link tidak dikelola systemd-networkd
+#              4 terapan benar, tetapi tes -t gagal (cek DNS host/NetBird, bukan skrip ini)
+
+set -uo pipefail
+
+: "${NETWORKD_DIR:=/etc/systemd/network}"   # HARDCODE: direktori konfigurasi admin systemd-networkd (systemd.network(5)). Tempat drop-in
+                                          # kita. Bisa ditimpa lewat environment (dipakai saat pengujian).
+DROPIN=10-local-domain.conf               # HARDCODE: nama bebas milik skrip ini. Awalan "10-" mengatur urutan baca drop-in; nama tetap
+                                          # supaya run ulang dan --undo menemukan file yang sama (idempotent).
+IFACE=""; DOMAINS=(); TEST_NAME=""; UNDO=0; NO_RECONF=0; PERSIST_OK=1
+
+usage() {
+  sed -n '2,/^$/p' "$0" | sed 's/^# \{0,1\}//' | sed '$d'
+  cat <<EOF
+Opsi:
+  -i, --iface IFACE   link yang dipakai (default: link default route)
+  -d, --domain DOM    routing domain tanpa tanda ~ (boleh diulang; default: local)
+  -t, --test NAMA     tes resolve NAMA setelah diterapkan
+      --no-reconfigure    jangan jalankan networkctl reconfigure: domain dipasang langsung lewat resolvectl dan
+                          drop-in baru berlaku penuh pada reconfigure/boot berikutnya (tidak ada gangguan koneksi)
+      --undo          hapus drop-in buatan skrip ini
+  -h, --help
+EOF
+}
+
+log()  { printf '[%s] %s\n'    "$(date +%H:%M:%S)" "$*"; }
+warn() { printf '[%s] !! %s\n' "$(date +%H:%M:%S)" "$*" >&2; }
+die()  { warn "$1"; exit "${2:-2}"; }
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -i|--iface)  [ $# -ge 2 ] || die "$1 butuh nilai"; IFACE=$2; shift 2 ;;
+    --iface=*)   IFACE=${1#*=}; shift ;;
+    -d|--domain) [ $# -ge 2 ] || die "$1 butuh nilai"; DOMAINS+=("$2"); shift 2 ;;
+    --domain=*)  DOMAINS+=("${1#*=}"); shift ;;
+    -t|--test)   [ $# -ge 2 ] || die "$1 butuh nilai"; TEST_NAME=$2; shift 2 ;;
+    --test=*)    TEST_NAME=${1#*=}; shift ;;
+    --undo)      UNDO=1; shift ;;
+    --no-reconfigure) NO_RECONF=1; shift ;;
+    -h|--help)   usage; exit 0 ;;
+    *)           die "Opsi tidak dikenal: $1" ;;
+  esac
+done
+
+[ "$(id -u)" -eq 0 ] || die "Jalankan sebagai root."
+[ "${#DOMAINS[@]}" -gt 0 ] || DOMAINS=(local)   # HARDCODE: TLD "local" dipakai semua region L-E-A-P (id.local, sgp.local, ...).
+                                                   # ~local mencocokkan semua nama berakhiran .local. Ganti lewat -d.
+
+# Normalisasi domain: huruf kecil, tanpa titik/tilde di depan, lalu validasi.
+ROUTE=()
+for d in "${DOMAINS[@]}"; do
+  d=${d,,}; d=${d#\~}; d=${d#.}
+  [[ $d =~ ^[a-z0-9]([a-z0-9.-]*[a-z0-9])?$ ]] || die "Domain '${d}' tidak valid."
+  ROUTE+=("~${d}")
+done
+WANT="${ROUTE[*]}"
+
+# --- lingkungan: butuh systemd-resolved (HARDCODE: nama unit systemd-resolved dan systemd-networkd adalah nama resmi systemd;
+#     dipakai untuk mengenali apakah VM ini memang memakai keduanya); kalau tidak aktif, masalah .local ini tidak ada ---
+if ! systemctl is-active --quiet systemd-resolved; then
+  log "systemd-resolved tidak aktif di VM ini: nama *.local tidak diblokir oleh resolver. Tidak ada yang perlu dilakukan."
+  exit 0
+fi
+
+# --- pilih link ---
+if [ -z "$IFACE" ]; then
+  # HARDCODE 1.1.1.1: alamat publik sembarang. Hanya untuk bertanya ke kernel "lewat link mana rute default?"; tidak ada
+  # paket yang dikirim ke alamat itu.
+  IFACE=$(ip -o route get 1.1.1.1 2>/dev/null | awk '{for (i = 1; i < NF; i++) if ($i == "dev") { print $(i + 1); exit }}')
+fi
+if [ -z "$IFACE" ]; then
+  IFACE=$(ip -o link show up 2>/dev/null | awk -F': ' '$2 != "lo" {print $2; exit}' | cut -d@ -f1)
+fi
+[ -n "$IFACE" ] || die "Link tidak terdeteksi. Pakai -i IFACE."
+ip link show "$IFACE" >/dev/null 2>&1 || die "Link '${IFACE}' tidak ada."
+
+# --- pastikan link dikelola systemd-networkd dan cari file .network-nya ---
+NETFILE=""
+if command -v networkctl >/dev/null 2>&1 && systemctl is-active --quiet systemd-networkd; then
+  # HARDCODE "Network File:": label baris pada keluaran `networkctl status`; menunjukkan file .network yang dipakai link ini
+  # (mis. /run/systemd/network/10-netplan-eth0.network buatan netplan). Nama drop-in harus mengikuti nama file itu.
+  NETFILE=$(networkctl status --no-pager "$IFACE" 2>/dev/null | sed -n 's/^ *Network File: *//p' | head -n1)
+fi
+if [ -z "$NETFILE" ]; then
+  warn "Link ${IFACE} tidak dikelola systemd-networkd (mungkin NetworkManager atau ifupdown); skrip ini hanya mendukung systemd-networkd."
+  warn "Sementara tanpa menyimpan: resolvectl domain ${IFACE} ${WANT}; resolvectl default-route ${IFACE} yes"
+  exit 3
+fi
+DIR="${NETWORKD_DIR}/$(basename "$NETFILE").d"
+FILE="${DIR}/${DROPIN}"
+
+live_domains() { resolvectl domain "$IFACE" 2>/dev/null | sed 's/^[^:]*: *//'; }
+has_all() {     # has_all "<domain terpasang>" : semua ROUTE harus ada
+  local cur=" $1 " r
+  for r in "${ROUTE[@]}"; do [[ $cur == *" $r "* ]] || return 1; done
+  return 0
+}
+reconfigure() {
+  networkctl reload >/dev/null 2>&1 || true
+  networkctl reconfigure "$IFACE" >/dev/null 2>&1 || networkctl reload >/dev/null 2>&1 || true
+}
+wait_live() {   # wait_live <cek-fungsi> : tunggu sampai maks 10 detik
+  # HARDCODE 10 detik: networkd mendorong domain ke resolved secara asinkron setelah reconfigure; 10 detik lebih dari cukup
+  # pada pengujian logika, nilai ini heuristik dan bukan batas dari systemd.
+  local i
+  for ((i = 0; i < 10; i++)); do
+    if "$1"; then return 0; fi
+    sleep 1
+  done
+  return 1
+}
+live_default_yes() { [ "$(resolvectl default-route "$IFACE" 2>/dev/null | sed 's/^[^:]*: *//')" = yes ]; }
+live_has_all()  { has_all "$(live_domains)" && live_default_yes; }
+live_has_none() {
+  local cur r; cur=" $(live_domains) "
+  for r in "${ROUTE[@]}"; do [[ $cur != *" $r "* ]] || return 1; done
+  return 0
+}
+
+# --- --undo ---
+if [ "$UNDO" = 1 ]; then
+  if [ -f "$FILE" ]; then
+    rm -f "$FILE"; rmdir "$DIR" 2>/dev/null || true
+    log "drop-in dihapus: ${FILE}"
+    if [ "$NO_RECONF" = 1 ]; then
+      log "tanpa reconfigure: domain ${WANT} hilang dari ${IFACE} setelah reconfigure/boot berikutnya"
+    else
+      reconfigure
+      wait_live live_has_none || warn "domain ${WANT} masih terlihat di ${IFACE}; cek resolvectl domain ${IFACE}"
+    fi
+  else
+    log "tidak ada drop-in buatan skrip ini (${FILE}); tidak ada yang diubah"
+  fi
+  exit 0
+fi
+
+# --- terapkan drop-in bila isinya belum sama ---
+# DNSDefaultRoute=yes: lihat catatan di kepala file (tanpa ini nama publik kehilangan DNS saat ada routing domain).
+DESIRED="# Dibuat oleh vm-local-dns.sh: kirim nama ${WANT} ke DNS link ini (DNS dari DHCP), dan tetap jadi default route nama publik."$'\n'"[Network]"$'\n'"Domains=${WANT}"$'\n'"DNSDefaultRoute=yes"$'\n'
+CHANGED=0
+if [ "$(cat "$FILE" 2>/dev/null || true)" != "${DESIRED%$'\n'}" ]; then
+  mkdir -p "$DIR" || die "Gagal membuat ${DIR}" 1
+  TMP=$(mktemp "${DIR}/.${DROPIN}.XXXXXX") || die "Gagal membuat file sementara di ${DIR}" 1
+  printf '%s' "$DESIRED" > "$TMP" && chmod 644 "$TMP" && mv -f "$TMP" "$FILE" || { rm -f "$TMP"; die "Gagal menulis ${FILE}" 1; }
+  CHANGED=1
+  log "drop-in ditulis: ${FILE} (Domains=${WANT})"
+fi
+
+# --- terapkan ke link hanya bila perlu ---
+if [ "$CHANGED" = 1 ] || ! live_has_all; then
+  if [ "$NO_RECONF" = 1 ]; then
+    log "mengatur ${WANT} langsung di ${IFACE} (resolvectl); drop-in berlaku penuh pada reconfigure/boot berikutnya"
+    resolvectl domain "$IFACE" $WANT >/dev/null 2>&1 || true
+    resolvectl default-route "$IFACE" yes >/dev/null 2>&1 || true
+    live_has_all || die "Gagal mengatur ${WANT} di ${IFACE}. Cek: resolvectl status ${IFACE}" 1
+  else
+    log "menerapkan ke link ${IFACE} (networkctl reconfigure)"
+    reconfigure
+    if ! wait_live live_has_all; then
+      warn "networkd belum menampilkan ${WANT} + default route di ${IFACE}; mengatur sementara lewat resolvectl (BELUM persisten: drop-in belum diterapkan networkd)."
+      resolvectl domain "$IFACE" $WANT >/dev/null 2>&1 || true
+      resolvectl default-route "$IFACE" yes >/dev/null 2>&1 || true
+      live_has_all || die "Gagal menerapkan ${WANT} ke ${IFACE}. Cek: networkctl status ${IFACE}; resolvectl status ${IFACE}" 1
+      PERSIST_OK=0
+    fi
+  fi
+else
+  log "sudah sesuai: ${IFACE} memakai ${WANT} (tidak ada yang diubah)"
+fi
+if [ "$PERSIST_OK" = 1 ]; then log "OK     ${IFACE}: routing domain $(live_domains), default route yes"; else warn "SEMENTARA ${IFACE}: routing domain $(live_domains), default route yes (tidak persisten)"; fi
+
+# --- peringatan setelan global lama (tidak diubah) ---
+# HARDCODE: lokasi setelan GLOBAL systemd-resolved (resolved.conf(5)). Hanya dibaca untuk memperingatkan DNS= tetap atau
+# Domains=~local lama; tidak pernah diubah.
+GLOBAL_FILES=(/etc/systemd/resolved.conf /etc/systemd/resolved.conf.d/*.conf)
+for f in "${GLOBAL_FILES[@]}"; do
+  [ -f "$f" ] || continue
+  if grep -qE '^[[:space:]]*DNS=[^[:space:]]' "$f"; then
+    warn "${f}: DNS= tertulis di setelan global. Itu mengunci alamat DNS tetap dan tidak mengikuti DNS dari DHCP; hapus barisnya bila tidak sengaja."
+  fi
+  if grep -qE '^[[:space:]]*Domains=.*~local' "$f"; then
+    warn "${f}: Domains=~local global sudah tidak diperlukan; routing domain kini dipasang per link."
+  fi
+done
+
+# --- tes opsional ---
+if [ -n "$TEST_NAME" ]; then
+  if out=$(resolvectl query --legend=no -t A "$TEST_NAME" 2>&1); then
+    log "OK     ${TEST_NAME}: $(printf '%s' "$out" | head -n1)"
+  else
+    warn "GAGAL  ${TEST_NAME}: $(printf '%s' "$out" | head -n1)"
+    warn "Konfigurasi di VM sudah benar; periksa DNS host/NetBird (dig @<DNS-dari-DHCP> ${TEST_NAME} +short)."
+    exit 4
+  fi
+fi
+[ "$PERSIST_OK" = 1 ] || exit 1
+exit 0
