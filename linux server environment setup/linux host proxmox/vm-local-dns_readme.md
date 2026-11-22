@@ -1,45 +1,51 @@
-# vm-local-dns: VM Debian cloud-init dengan `*.local` yang resolve
+# vm-local-dns: VM Debian cloud-init dengan domain global `*.local` yang resolve dan mencakup banyak apex region domain
 
-Panduan membuat template VM Debian di SDN Proxmox (L-E-A-P) yang bisa me-resolve nama `*.local` dari semua region
-(`kuma.id.local`, `x.sgp.local`, ...), punya login SSH dengan password, paket terbarui, dan QEMU guest agent. Setiap VM baru
-dibuat dengan full clone dari template itu.
+Membuat VM Debian di SDN Proxmox (L-E-A-P) me-resolve nama `*.local` dari semua region (`kuma.id.local`, `x.sgp.local`, ...)
+tanpa mematikan DNS publik. Ada dua file yang dipakai terpisah: **cloud-init** untuk template VM baru, dan **skrip shell** untuk
+VM yang sudah berjalan.
 
-## Masalah dan solusi
+## 1. Masalah dan solusi
 
 VM dengan `systemd-resolved` menerima DNS dari DHCP (DNS host, mis. NetBird `100.83.115.131`), tetapi nama `*.local` tidak
 dikirim ke DNS itu karena `.local` dicadangkan untuk mDNS. Nama publik (`ifconfig.me`) lewat DNS biasa, nama lokal tidak.
 LXC dan guest tanpa `systemd-resolved` tidak terkena.
 
-Skrip `vm-local-dns.sh` menempelkan routing domain ke link ethernet VM (yang tampil sebagai `Link 2` di `resolvectl status`)
+Kedua file menerapkan hal yang sama: routing domain pada link ethernet VM (yang tampil sebagai `Link 2` di `resolvectl status`)
 lewat drop-in systemd-networkd:
 
 ```
 /etc/systemd/network/<file .network milik link>.d/10-local-domain.conf
 
 [Network]
-Domains=~local          # semua *.local (semua region) dikirim ke DNS link ini, yaitu DNS dari DHCP
+Domains=~local          # semua *.local dikirim ke DNS link ini, yaitu DNS dari DHCP
 DNSDefaultRoute=yes     # wajib menyertai ~local; tanpa ini link berhenti jadi default route dan nama publik tidak resolve
 ```
 
-Tidak ada IP DNS yang ditulis, drop-in berada di `/etc` (tidak ditimpa netplan/cloud-init), dan skrip idempotent.
+Satu `~local` mencakup semua apex region domain (`id.local`, `sgp.local`, `jp.local`, ...), jadi region baru tidak perlu
+daftar domain tambahan. Tidak ada IP DNS yang ditulis, drop-in berada di `/etc` (tidak ditimpa netplan/cloud-init), dan skrip
+idempotent.
 
-## File
+## 2. Dua file dan kapan memakainya
 
-| File | Fungsi |
-|---|---|
-| `vm-local-dns.cloud-config.yaml` | cloud-init user-data: update paket, password root, SSH password, guest agent, dan skrip DNS tertanam. |
-| `vm-local-dns.sh` | Skrip yang sama, berdiri sendiri, untuk VM yang sudah berjalan. |
+| File | Dipakai untuk | Isi | Bagian |
+|---|---|---|---|
+| `vm-local-dns.cloud-config.yaml` | Template VM baru (lalu di-clone) | cloud-init user-data: update paket, password root, SSH password, guest agent, dan skrip DNS tertanam (isinya identik dengan `vm-local-dns.sh`). | 3 |
+| `vm-local-dns.sh` | VM yang sudah berjalan | Skrip bash oneshot, idempotent. | 4 |
 
-## Gambaran alur
+---
+
+## 3. File 1: `vm-local-dns.cloud-config.yaml` (template VM baru)
+
+Alur:
 
 ```
-A. Snippet (sekali, di node)   isi "apa yang dikerjakan VM saat boot pertama": paket, password, SSH, agent, ~local
-B. VM debian-vm-template       hardware + disk dari image Debian resmi + drive cloud-init + DHCP + cicustom; tag template-qcow2
-C. Jalankan sekali             paket terbarui dan ~local terpasang; tunggu selesai, lalu matikan
-D. Full clone                  satu clone per VM baru
+3.1 Snippet (sekali, di node)   isi "apa yang dikerjakan VM saat boot pertama": paket, password, SSH, agent, ~local
+3.2 VM debian-vm-template       hardware + disk dari image Debian resmi + drive cloud-init + DHCP + cicustom; tag template-qcow2
+3.3 Jalankan sekali             paket terbarui dan ~local terpasang; tunggu selesai, lalu matikan
+3.4 Full clone                  satu clone per VM baru
 ```
 
-## A. Siapkan snippet (sekali, di node)
+### 3.1 Siapkan snippet (sekali, di node)
 
 1. **Storage.** GUI: Datacenter, Storage, `local`, Edit, Content: centang **Snippets**, **Import**, dan **Disk image** (bila
    belum), lalu OK.
@@ -65,7 +71,7 @@ D. Full clone                  satu clone per VM baru
    `genericcloud` identik dengan `generic` tetapi kernelnya memuat lebih sedikit driver perangkat keras; pakai `generic` bila
    butuh driver lain.
 
-## B. Buat VM `debian-vm-template` (GUI, Create VM)
+### 3.2 Buat VM `debian-vm-template` (GUI, Create VM)
 
 | Tab | Isian |
 |---|---|
@@ -102,11 +108,11 @@ Hasilnya harus memuat: drive cloud-init (`vm-<vmid>-cloudinit...`), `ipconfig0: 
 Padanan CLI untuk langkah GUI di atas: `qm set <vmid> --agent enabled=1`, `--serial0 socket`, `--vga serial0`,
 `--ide2 local:cloudinit`, `--ipconfig0 ip=dhcp`.
 
-## C. Jalankan sekali, lalu matikan
+### 3.3 Jalankan sekali, lalu matikan
 
 1. Start `debian-vm-template`.
 2. Buka **Console, xterm.js** (display serial terminal 0 membuat console noVNC kosong) dan login sebagai root dengan password
-   dari langkah A3.
+   dari langkah 3.1 butir 3.
 3. Tunggu cloud-init selesai dan periksa:
    ```bash
    cloud-init status --wait          # status: done
@@ -119,15 +125,22 @@ Padanan CLI untuk langkah GUI di atas: `qm set <vmid> --agent enabled=1`, `--ser
    ```
 4. `poweroff`.
 
-## D. Full clone untuk instance baru
+### 3.4 Full clone untuk instance baru
 
 Klik kanan `debian-vm-template`, **Clone**: Mode **Full Clone**, isi Name, lalu Clone. Clone mewarisi paket yang sudah terbarui,
 guest agent, dan drop-in `~local`. Untuk memperbarui template di kemudian hari, jalankan lagi `debian-vm-template`, `apt update`
 dan `apt upgrade`, lalu matikan.
 
-## E. VM yang sudah berjalan
+---
 
-Jalankan skrip langsung di dalam VM sebagai root:
+## 4. File 2: `vm-local-dns.sh` (VM yang sudah berjalan)
+
+Untuk VM yang sudah ada dan tidak dibuat dari template di bagian 3. Skrip ini melakukan hal yang sama dengan bagian cloud-init
+(drop-in `~local` + default route), tanpa mengubah paket, password, atau SSH.
+
+### 4.1 Pakai
+
+Jalankan di dalam VM sebagai root:
 
 ```bash
 ./vm-local-dns.sh -t kuma.id.local          # terapkan, lalu tes resolve
@@ -135,14 +148,35 @@ Jalankan skrip langsung di dalam VM sebagai root:
 ./vm-local-dns.sh --undo                    # hapus drop-in buatan skrip
 ```
 
-Opsi lain: `-i IFACE`, `-d DOMAIN` (boleh diulang). Kode keluar: `0` sesuai, `1` gagal atau belum persisten, `2` argumen
-salah, `3` link bukan systemd-networkd, `4` konfigurasi benar tetapi tes `-t` gagal (cek DNS host/NetBird, bukan VM).
+Idempotent: tanpa perubahan, tidak ada yang ditulis dan link tidak di-reconfigure.
 
-## Nilai yang di-hardcode: asal dan kegunaan
+### 4.2 Opsi dan kode keluar
+
+| Opsi | Fungsi |
+|---|---|
+| `-i IFACE` | Pilih link (bawaan: link default route). |
+| `-d DOMAIN` | Routing domain tanpa tanda `~`; boleh diulang (bawaan: `local`). |
+| `-t NAMA` | Tes resolve `NAMA` setelah diterapkan. |
+| `--no-reconfigure` | Pasang domain lewat `resolvectl` tanpa `networkctl reconfigure`; drop-in berlaku penuh pada reconfigure/boot berikutnya. |
+| `--undo` | Hapus drop-in buatan skrip. |
+
+| Kode | Arti |
+|---|---|
+| `0` | Sesuai. |
+| `1` | Gagal diterapkan atau belum persisten. |
+| `2` | Argumen atau lingkungan salah. |
+| `3` | Link bukan systemd-networkd. |
+| `4` | Konfigurasi benar tetapi tes `-t` gagal (cek DNS host/NetBird, bukan VM). |
+
+---
+
+## 5. Referensi
+
+### 5.1 Nilai yang di-hardcode: asal dan kegunaan
 
 Semua nilai tetap di skrip dan YAML juga diberi komentar `HARDCODE` di tempatnya.
 
-### Di Proxmox / prosedur
+**Di Proxmox / prosedur (bagian 3)**
 
 | Nilai | Asal | Kegunaan |
 |---|---|---|
@@ -156,7 +190,7 @@ Semua nilai tetap di skrip dan YAML juga diberi komentar `HARDCODE` di tempatnya
 | `debian-vm-template`, tag `template-qcow2` | Penamaan dari pemilik repo. | Nama VM template dan tag pengelompokannya. |
 | `eth1010` | Contoh nama vnet SDN pve-1 (region `id`). | Bridge net0; ganti sesuai vnet VM. |
 
-### Di cloud-init (YAML)
+**Di cloud-init (`vm-local-dns.cloud-config.yaml`)**
 
 | Nilai | Asal | Kegunaan |
 |---|---|---|
@@ -169,13 +203,13 @@ Semua nilai tetap di skrip dan YAML juga diberi komentar `HARDCODE` di tempatnya
 | `ssh`, `qemu-guest-agent` | Nama unit dan paket resmi Debian. | Restart sshd (agar drop-in berlaku) dan pemasangan guest agent. |
 | `bash -o pipefail` | Pilihan penulis skrip. | Kode keluar skrip, bukan `tee`, yang menentukan status `runcmd`. |
 
-### Di `vm-local-dns.sh`
+**Di skrip shell (`vm-local-dns.sh`, bagian 4)**
 
 | Nilai | Asal | Kegunaan |
 |---|---|---|
 | `/etc/systemd/network` | Direktori konfigurasi admin systemd-networkd. | Tempat drop-in; tidak ditimpa netplan (yang menulis di `/run`). |
 | `10-local-domain.conf` | Nama bebas milik skrip. | `--undo` hanya menghapus file bernama ini. |
-| `local` (domain bawaan) | TLD domain lokal L-E-A-P (`id.local`, `sgp.local`, ...). | Satu `~local` mencakup semua region. |
+| `local` (domain bawaan) | TLD domain lokal L-E-A-P (`id.local`, `sgp.local`, ...). | Satu `~local` mencakup semua apex region domain. |
 | `~` pada `~local` | Sintaks systemd untuk routing domain. | Kirim `*.local` ke DNS link ini tanpa menjadikannya search domain. |
 | `DNSDefaultRoute=yes` | Opsi `systemd.network`. | Menjaga link tetap melayani nama publik setelah punya routing domain. |
 | `1.1.1.1` | Alamat publik sembarang. | Hanya untuk bertanya ke kernel "keluar lewat link mana?"; tidak ada paket dikirim. |
@@ -183,39 +217,39 @@ Semua nilai tetap di skrip dan YAML juga diberi komentar `HARDCODE` di tempatnya
 | 10 detik | Batas tunggu praktis. | Waktu bagi networkd mendorong domain ke resolved setelah reconfigure. |
 | `/etc/systemd/resolved.conf` dan `resolved.conf.d` | Lokasi setelan global systemd-resolved. | Hanya dibaca untuk memperingatkan `DNS=` tetap; tidak pernah diubah. |
 
-## Dari mana DNS dan domain datang
+### 5.2 Dari mana DNS dan domain datang
 
 | Hal | Sumber |
 |---|---|
 | Alamat DNS | **DHCP** (`dhcp-dns-server` di subnet SDN). Butuh link naik dan DHCP berjalan, jadi tanpa IP juga tidak ada DNS. |
-| `*.local` ke DNS itu | `vm-local-dns.sh` (routing domain `~local` + default route di link). |
+| `*.local` ke DNS itu | Routing domain `~local` + default route di link (bagian 3 atau 4). |
 | "DNS domain" dan "DNS servers: use host settings" di tab Cloud-Init | Diisi Proxmox dari `resolv.conf` host ke network-config. Dengan DHCP, cloud-init tidak menurunkannya ke netplan, jadi alamat DNS tetap berasal dari DHCP. |
 | Search domain (agar `ping kuma` menjadi `kuma.id.local`) | Tidak dikirim DHCP. Pakai nama lengkap (`kuma.id.local`). |
 
-## Yang perlu diketahui
+### 5.3 Yang perlu diketahui
 
-- **`cicustom user=` mengganti user-data bawaan Proxmox.** Isian `ciuser`, `cipassword`, `sshkeys`, dan hostname dari Proxmox tidak
-  dipakai. Jaringan (`ipconfig0`) tetap dari Proxmox. Hostname VM tetap `localhost`; ubah dengan `hostnamectl set-hostname` atau
-  tambahkan `hostname:` dan `preserve_hostname: false` di YAML.
+- **`cicustom user=` mengganti user-data bawaan Proxmox** (bagian 3). Isian `ciuser`, `cipassword`, `sshkeys`, dan hostname dari
+  Proxmox tidak dipakai. Jaringan (`ipconfig0`) tetap dari Proxmox. Hostname VM tetap `localhost`; ubah dengan
+  `hostnamectl set-hostname` atau tambahkan `hostname:` dan `preserve_hostname: false` di YAML.
 - **Hanya systemd-networkd.** Image Debian cloud dengan netplan memakainya. Bila link dikelola NetworkManager atau ifupdown,
   skrip keluar dengan kode 3 dan mencetak perintah sementara.
 - **Nama interface** di VM bisa `ens18` atau `eth0`; skrip mendeteksinya dari default route.
 - Setelan lama di `resolved.conf` (`DNS=` tetap, `Domains=~local` global) hanya diperingatkan. Hapus barisnya setelah drop-in
   berjalan.
 
-## Troubleshooting
+### 5.4 Troubleshooting
 
 | Gejala | Cek |
 |---|---|
 | `ip addr`: interface DOWN, tanpa IP; `apt update` gagal resolve | `qm config <vmid> \| grep ipconfig0` harus `ip=dhcp`. Bila kosong, set di Cloud-Init (IP Config net0, DHCP) lalu `qm cloudinit update <vmid>`. |
-| `cloud-init status` menyebut degraded | Baca `/var/log/vm-local-dns.log` dan kode keluarnya (bagian E). |
+| `cloud-init status` menyebut degraded | Baca `/var/log/vm-local-dns.log` dan kode keluarnya (bagian 4.2). |
 | `*.local` tidak resolve, publik resolve | `resolvectl status` harus memuat `~local`. Bila tidak: `/root/vm-local-dns.sh -t kuma.id.local`. |
 | Publik gagal, `*.local` resolve | `Default Route` harus `yes`. Cadangan seketika: `resolvectl default-route <iface> yes`, lalu jalankan ulang skrip. |
 | Skrip lolos tetapi `-t` gagal (kode 4) | DNS host/NetBird, bukan VM: `dig @<DNS-dari-DHCP> nama.id.local +short`. |
 | Login root ditolak | `sshd -T \| grep -E 'permitrootlogin\|passwordauthentication'`; pastikan `00-ssh-auth.conf` ada. |
 | Console kosong | Display serial terminal 0: pakai Console, xterm.js. |
 
-## Validasi
+### 5.5 Validasi
 
 - YAML lolos `cloud-init schema` (cloud-init 26.2), dan skrip tertanam identik dengan `vm-local-dns.sh`.
 - Skrip diuji untuk idempotensi, migrasi drop-in lama, perbaikan default route, fallback, dan `--undo`.
