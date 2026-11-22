@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 #
-# Proxmox SDN provisioning untuk VPS l-e-a-p
+# Proxmox SDN provisioning (zone tipe Simple) untuk VPS l-e-a-p
 #   SNAT (masquerade) + DHCP (dnsmasq SDN) + IPAM (pve) + DNS dinamis (PowerDNS)
+#   Profil --dhcp-only | --dhcp-public-ip | --dhcp-behind-nat: SNAT + DHCP (DNS lokal opsional via --domain,
+#   kecuali --dhcp-only). Lihat sdn-simple_provisioning.md
 #
 # Prinsip:
 #   1. TIDAK pakai `set -e` global. Setiap tahap berjalan terpisah; kegagalan
@@ -12,16 +14,34 @@
 #   3. ALUR: tampilkan RENCANA singkat -> konfirmasi y/N -> FLUSH config lama (paket TIDAK
 #      dihapus, TANPA backup) -> instalasi. Dengan --no-flush, script tetap idempotent dan
 #      aman dijalankan ulang di server yang sudah jadi.
+#      Dengan --flush, script HANYA flush (kembali bersih ke 0) lalu berhenti, tanpa instalasi.
 #   4. Jaringan diturunkan dari satu sumber: nama vnet eth1020 = 10.20.x.x, jadi subnet,
 #      gateway, rentang DHCP, dan IP DNS semuanya berawalan 10.20 (lihat bagian VARIABEL).
+#   5. Tiga profil jaringan (pilih satu):
+#        --dhcp-only        SNAT + DHCP saja. --domain diabaikan.
+#        --dhcp-public-ip   VPS ber-IP publik (default vnet eth1020).
+#        --dhcp-behind-nat  server di belakang NAT / double NAT (default vnet eth1010).
+#      Dua profil terakhir juga SNAT + DHCP; bila --domain (atau env DOMAIN) diberikan, DNS lokal
+#      PowerDNS ikut dipasang untuk domain itu, bila tidak maka berperilaku seperti --dhcp-only.
+#      Perilaku --dhcp-only:
+#      TANPA PowerDNS/recursor/DNS lokal. Hanya zone Simple + SNAT + DHCP.
+#      Guest memakai gateway sebagai DNS (dnsmasq SDN), yang meneruskan ke resolver HOST;
+#      /etc/resolv.conf host DITIMPA dengan UPSTREAMS (tanpa backup). Cocok bila antar-region
+#      sudah ditangani overlay (NetBird) dan subnet ini hanya untuk akses internet guest.
 #
 # Pakai (opsi CLI mengalahkan environment, environment mengalahkan default):
-#   ./sdn-vxlan_provisioning.sh
-#   ./sdn-vxlan_provisioning.sh --vnet eth1020 --domain sgp.local
-#   ./sdn-vxlan_provisioning.sh --vnet eth1030            # subnet 10.30.0.0/16, gw .1, dns .2, dhcp 10.30.0.101-10.30.255.254
-#   ./sdn-vxlan_provisioning.sh --subnet 10.30.0.1/16     # vnet eth1030, gw 10.30.0.1
-#   VNET=eth1020 DOMAIN=sgp.local ./sdn-vxlan_provisioning.sh
-#   WAN_IP=203.0.113.10 SUBNET=10.30.0.0/16 GW=10.30.0.1 ./sdn-vxlan_provisioning.sh
+#   ./sdn-simple_provisioning.sh
+#   ./sdn-simple_provisioning.sh --vnet eth1020 --domain sgp.local
+#   ./sdn-simple_provisioning.sh --vnet eth1030            # subnet 10.30.0.0/16, gw .1, dns .2, dhcp 10.30.0.101-10.30.255.254
+#   ./sdn-simple_provisioning.sh --subnet 10.30.0.1/16     # vnet eth1030, gw 10.30.0.1
+#   ./sdn-simple_provisioning.sh --dhcp-only --vnet eth1020  # SNAT + DHCP saja, tanpa DNS lokal
+#   ./sdn-simple_provisioning.sh --dhcp-public-ip                      # VPS IP publik, tanpa DNS lokal
+#   ./sdn-simple_provisioning.sh --dhcp-public-ip --domain sgp.local   # + DNS lokal untuk sgp.local
+#   ./sdn-simple_provisioning.sh --dhcp-behind-nat --domain home.local # server di belakang NAT (vnet eth1010)
+#   ./sdn-simple_provisioning.sh --dhcp-only --vnet eth1010 --yes   # mis. server di belakang NAT
+#   ./sdn-simple_provisioning.sh --flush                   # hanya hapus config buatan script, TANPA instalasi ulang
+#   VNET=eth1020 DOMAIN=sgp.local ./sdn-simple_provisioning.sh
+#   WAN_IP=203.0.113.10 SUBNET=10.30.0.0/16 GW=10.30.0.1 ./sdn-simple_provisioning.sh
 #
 # Log lengkap: /var/log/leap-sdn-setup.log
 # Zone saat ini bertipe Simple (satu node). Tipe zone tidak bisa diubah nanti,
@@ -31,18 +51,38 @@ set -uo pipefail
 
 usage() {
   cat <<EOF
-Pakai: $0 [-n|--vnet NAMA] [-s|--subnet CIDR] [-d|--domain DOMAIN] [-y|--yes] [--no-flush] [-h|--help]
+Pakai: $0 [-n|--vnet NAMA] [-s|--subnet CIDR] [-d|--domain DOMAIN] [-y|--yes] [--dhcp-only | --dhcp-public-ip | --dhcp-behind-nat] [--flush | --no-flush] [-h|--help]
 
-  -n, --vnet NAMA       nama VNet SDN (env: VNET, default: eth1020; diawali huruf, huruf/angka, maks 8 karakter)
+  -n, --vnet NAMA       nama VNet SDN (env: VNET, default: eth1020, atau eth1010 pada --dhcp-behind-nat; diawali huruf, huruf/angka, maks 8 karakter)
   -s, --subnet CIDR     jaringan SDN (env: SUBNET, default: diturunkan dari vnet; 10.20.0.1/16 = gw 10.20.0.1)
   -d, --domain DOMAIN   zone DNS dinamis (env: DOMAIN, default: sgp.local)
   -y, --yes             lewati pertanyaan konfirmasi (env: ASSUME_YES=1)
+      --dhcp-only       hanya SNAT + DHCP: tanpa PowerDNS/recursor/DNS lokal (env: DHCP_ONLY=1); --domain diabaikan.
+                        Guest memakai gateway sbg DNS -> resolver host; /etc/resolv.conf host DITIMPA
+                        dengan UPSTREAMS (env: UPSTREAMS, default 1.1.1.1 8.8.8.8 9.9.9.9)
+      --dhcp-public-ip  profil VPS ber-IP publik (SNAT ke IP di default route). Tanpa --domain = seperti
+                        --dhcp-only; dengan --domain = DNS lokal PowerDNS untuk domain itu ikut dipasang
+      --dhcp-behind-nat profil server di belakang NAT (double NAT; WAN dideteksi dari default route, mis.
+                        vmbr0), default vnet eth1010. Sama: --domain opsional untuk DNS lokal. Subnet guest
+                        yang bentrok dengan LAN di atasnya DITOLAK
+                        (ketiga profil tidak bisa digabung; tanpa flag profil = mode lengkap dengan PowerDNS)
+      --flush           HANYA flush: hapus semua config buatan script (kembali bersih ke 0), tanpa instalasi
+                        (env: FLUSH_ONLY=1). Paket tidak dihapus. Tidak bisa digabung dengan --no-flush
       --no-flush        jangan hapus config lama; mode idempotent (env: FLUSH=0)
 
 Vnet berakhiran 4 digit AABB (eth1020) = jaringan AA.BB.0.0/16; gateway/dhcp/dns ikut awalan itu.
 Variabel lain lewat environment: ZONE GW DHCP_START DHCP_END DNS_IP DUMMY_IF
 PDNS_ID PDNS_AUTH_PORT PDNS_API_PORT UPSTREAMS WAN_IF WAN_IP
 EOF
+}
+
+NET_PROFILE=""; DOMAIN_ATTACH=0
+set_profile() {
+  if [ -n "$NET_PROFILE" ] && [ "$NET_PROFILE" != "$1" ]; then
+    echo "--dhcp-only, --dhcp-public-ip, dan --dhcp-behind-nat tidak bisa dipakai bersamaan." >&2
+    exit 2
+  fi
+  NET_PROFILE=$1
 }
 
 while [ $# -gt 0 ]; do
@@ -54,11 +94,17 @@ while [ $# -gt 0 ]; do
     -d|--domain)   [ $# -ge 2 ] || { echo "$1 butuh nilai" >&2; exit 2; }; DOMAIN=$2; shift 2 ;;
     --domain=*)    DOMAIN=${1#*=}; shift ;;
     -y|--yes)      ASSUME_YES=1; shift ;;
-    --no-flush)    FLUSH=0; shift ;;
+    --dhcp-only)       set_profile dhcp-only; DHCP_ONLY=1; shift ;;
+    --dhcp-public-ip)  set_profile public-ip; shift ;;
+    --dhcp-behind-nat) set_profile behind-nat; shift ;;
+    --flush)       FLUSH=1; FLUSH_ONLY=1; shift ;;
+    --no-flush)    FLUSH=0; _noflush_flag=1; shift ;;
     -h|--help)     usage; exit 0 ;;
     *)             echo "Opsi tidak dikenal: $1" >&2; usage >&2; exit 2 ;;
   esac
 done
+
+[ "${FLUSH_ONLY:-0}" = 1 ] && [ "${_noflush_flag:-0}" = 1 ] && { echo "--flush dan --no-flush tidak bisa dipakai bersamaan." >&2; exit 2; }
 
 LOG=/var/log/leap-sdn-setup.log
 
@@ -114,7 +160,12 @@ int2ip()  { echo "$(( ($1 >> 24) & 255 )).$(( ($1 >> 16) & 255 )).$(( ($1 >> 8) 
 _vnet_given=0; _subnet_given=0; _host_ip=""; _vn_a=""; _vn_b=""; NET_NOTE=""
 if [ -n "${VNET:-}" ];   then _vnet_given=1;   fi
 if [ -n "${SUBNET:-}" ]; then _subnet_given=1; fi
-if [ "$_vnet_given" = 0 ] && [ "$_subnet_given" = 0 ]; then VNET=eth1020; fi
+if [ "$_vnet_given" = 0 ] && [ "$_subnet_given" = 0 ]; then
+  case "$NET_PROFILE" in
+    behind-nat) VNET=eth1010 ;;
+    *)          VNET=eth1020 ;;
+  esac
+fi
 
 if [ -n "${VNET:-}" ] && [[ $VNET =~ ^[A-Za-z]+([0-9]{2})([0-9]{2})$ ]]; then
   _vn_a=$((10#${BASH_REMATCH[1]})); _vn_b=$((10#${BASH_REMATCH[2]}))
@@ -174,6 +225,7 @@ for _p in GW DNS_IP; do
   if [ "$_v" -ge "$_ds" ] && [ "$_v" -le "$_de" ]; then die "${_p} ${!_p} jatuh di dalam rentang DHCP ${DHCP_START}-${DHCP_END}."; fi
 done
 : "${DUMMY_IF:=dnsdummy}"
+if [ -n "${DOMAIN:-}" ]; then DOMAIN_ATTACH=1; fi   # --domain atau env DOMAIN = DNS lokal diinginkan
 : "${DOMAIN:=sgp.local}"             # zone DNS dinamis (lihat catatan penamaan di atas)
 : "${PDNS_ID:=leapdns}"              # nama entri DNS di SDN
 : "${PDNS_AUTH_PORT:=5300}"
@@ -181,6 +233,15 @@ done
 : "${UPSTREAMS:=1.1.1.1 8.8.8.8 9.9.9.9}"    # dipisah spasi; urutan = prioritas
 
 : "${FLUSH:=1}"                      # 1 = flush config lama sebelum instalasi
+: "${FLUSH_ONLY:=0}"                 # 1 = hanya flush lalu berhenti (--flush); tidak ada instalasi
+if [ "$FLUSH_ONLY" = 1 ]; then FLUSH=1; fi
+: "${DHCP_ONLY:=0}"                  # 1 = hanya SNAT + DHCP, tanpa DNS lokal (--dhcp-only)
+if [ -z "$NET_PROFILE" ] && [ "$DHCP_ONLY" = 1 ]; then NET_PROFILE=dhcp-only; fi
+case "$NET_PROFILE" in
+  public-ip|behind-nat) if [ "$DOMAIN_ATTACH" = 1 ]; then DHCP_ONLY=0; else DHCP_ONLY=1; fi ;;
+  dhcp-only)            DHCP_ONLY=1 ;;
+esac
+: "${RESOLV_CONF:=/etc/resolv.conf}" # resolver host yang ditimpa pada mode --dhcp-only
 : "${ASSUME_YES:=0}"                 # 1 = tanpa pertanyaan konfirmasi
 
 : "${WAN_IF:=}"                      # kosong = deteksi dari default route (bridge pemegang IP publik)
@@ -270,6 +331,7 @@ guests_on_bridges() {   # guests_on_bridges <bridge...> : cetak "lxc/100 (bridge
 # Validasi input dulu (murni string, tidak menyentuh sistem)
 [[ $VNET =~ ^[a-zA-Z][a-zA-Z0-9]{0,7}$ ]] \
   || { echo "VNET '${VNET}' tidak valid: mulai huruf, hanya huruf/angka, maksimal 8 karakter." >&2; exit 2; }
+if [ "$DHCP_ONLY" != 1 ]; then
 [[ $DOMAIN =~ ^[a-z0-9]([a-z0-9.-]*[a-z0-9])?$ ]] \
   || { echo "DOMAIN '${DOMAIN}' tidak valid: huruf kecil, angka, titik, dan strip saja." >&2; exit 2; }
 case "$DOMAIN" in
@@ -277,6 +339,7 @@ case "$DOMAIN" in
     log "CATATAN: .local dicadangkan untuk mDNS (RFC 6762). Guest dengan avahi/nss-mdns, systemd-resolved" \
         "(mDNS aktif), macOS, atau Windows bisa mengabaikan DNS untuk nama *.local. Alpine/Debian minimal biasanya aman." ;;
 esac
+fi
 
 [ "$(id -u)" -eq 0 ] || { echo "Jalankan sebagai root." >&2; exit 1; }
 command -v pvesh >/dev/null || { echo "pvesh tidak ditemukan: ini bukan node Proxmox." >&2; exit 1; }
@@ -290,6 +353,51 @@ if [ -z "$WAN_IP" ] && [ -n "$WAN_IF" ]; then
 fi
 [ -n "$WAN_IF" ] && [ -n "$WAN_IP" ] || { echo "WAN_IF/WAN_IP tidak terdeteksi. Set manual: WAN_IF=vmbr0 WAN_IP=x.x.x.x $0" >&2; exit 1; }
 
+# Alamat privat: RFC1918, CGNAT 100.64/10, link-local.
+is_private_ip() {
+  local n; n=$(ip2int "$1")
+  (( (n >> 24) == 10 ))        && return 0
+  (( (n >> 20) == 0xAC1 ))     && return 0
+  (( (n >> 16) == 0xC0A8 ))    && return 0
+  (( (n >> 22) == 0x191 ))     && return 0
+  (( (n >> 16) == 0xA9FE ))    && return 0
+  return 1
+}
+# cidr_overlap A/n B/m: 0 bila kedua jaringan beririsan.
+cidr_overlap() {
+  local a an b bm m mask
+  IFS=/ read -r a an <<<"$1"; IFS=/ read -r b bm <<<"$2"
+  m=$an; if (( bm < an )); then m=$bm; fi
+  mask=$(( (0xFFFFFFFF << (32 - m)) & 0xFFFFFFFF ))
+  (( ($(ip2int "$a") & mask) == ($(ip2int "$b") & mask) ))
+}
+
+if [ "$FLUSH_ONLY" != 1 ]; then
+  case "$NET_PROFILE" in
+    dhcp-only)
+      if [ "$DOMAIN_ATTACH" = 1 ]; then log "CATATAN: --dhcp-only mengabaikan --domain/DOMAIN (tanpa DNS lokal). Pakai --dhcp-public-ip atau --dhcp-behind-nat bila domain diperlukan."; fi ;;
+    public-ip)
+      if is_private_ip "$WAN_IP"; then
+        warn "--dhcp-public-ip: ${WAN_IF} memegang ${WAN_IP} yang berupa alamat privat (VPS dengan 1:1 NAT juga begini). Bila ini server di belakang NAT, pakai --dhcp-behind-nat."
+      fi ;;
+    behind-nat)
+      if ! is_private_ip "$WAN_IP"; then
+        warn "--dhcp-behind-nat: ${WAN_IF} memegang ${WAN_IP} yang tampak publik. Bila ini VPS ber-IP publik, pakai --dhcp-public-ip. Dilanjutkan."
+      fi ;;
+  esac
+  # Subnet guest tidak boleh beririsan dengan jaringan yang tersambung di WAN (rawan pada double NAT).
+  while read -r _wan_cidr; do
+    [ -n "$_wan_cidr" ] || continue
+    if cidr_overlap "$SUBNET" "$_wan_cidr"; then
+      if [ "$NET_PROFILE" = behind-nat ]; then
+        echo "Subnet guest ${SUBNET} beririsan dengan jaringan ${_wan_cidr} di ${WAN_IF}. Pilih subnet lain (mis. --vnet eth1030)." >&2
+        exit 1
+      fi
+      warn "Subnet guest ${SUBNET} beririsan dengan jaringan ${_wan_cidr} di ${WAN_IF}; routing guest bisa rusak."
+    fi
+  done < <(ip -4 -o addr show dev "$WAN_IF" | awk '{print $4}')
+fi
+
 ### ===================== RENCANA + KONFIRMASI =====================
 print_plan() {
   local vns dz extra_dz
@@ -299,9 +407,24 @@ print_plan() {
   if [ -n "$dz" ] && [ "$dz" != "$DOMAIN" ]; then extra_dz=" & ${dz}"; fi
   echo "==================== RENCANA ===================="
   echo "Node    : $(hostname) | WAN ${WAN_IF} ${WAN_IP}"
+  if [ "$FLUSH_ONLY" = 1 ]; then
+    echo "MODE    : --flush (HANYA flush, TANPA instalasi ulang)"
+  fi
   echo "SDN     : zone=${ZONE} vnet=${VNET} subnet=${SUBNET} gw=${GW} dhcp=${DHCP_START}-${DHCP_END}"
   echo "Turunan : ${NET_NOTE}"
-  echo "DNS     : domain=${DOMAIN} recursor=${DNS_IP} upstream=${UPSTREAMS}"
+  if [ "$FLUSH_ONLY" != 1 ]; then
+    case "$NET_PROFILE" in
+      dhcp-only)  echo "MODE    : --dhcp-only (SNAT + DHCP saja)" ;;
+      public-ip)  echo "MODE    : --dhcp-public-ip (VPS ber-IP publik), SNAT -> ${WAN_IP} via ${WAN_IF}" ;;
+      behind-nat) echo "MODE    : --dhcp-behind-nat (di belakang NAT, double NAT), SNAT -> ${WAN_IP} via ${WAN_IF}" ;;
+    esac
+  fi
+  if [ "$DHCP_ONLY" = 1 ] && [ "$FLUSH_ONLY" != 1 ]; then
+    echo "DNS     : tanpa DNS lokal/PowerDNS. Guest -> gateway ${GW} (dnsmasq SDN) -> resolver host: ${UPSTREAMS}"
+    echo "PERINGATAN: ${RESOLV_CONF} host DITIMPA tanpa backup."
+  else
+    echo "DNS     : domain=${DOMAIN} recursor=${DNS_IP} upstream=${UPSTREAMS}"
+  fi
   echo "Ada     : zone SDN ${ZONE}: $(cfg_has_zone && echo "ya (vnet: ${vns:-tidak ada}, zone DNS: ${dz:-tidak ada})" || echo "tidak ada")"
   if [ "$FLUSH" = 1 ]; then
     echo "FLUSH   : YA. Dihapus: zone+vnet+subnet SDN ${ZONE}, entri DNS ${PDNS_ID}, zone PowerDNS ${DOMAIN}${extra_dz},"
@@ -336,7 +459,11 @@ if [ "$FLUSH" = 1 ]; then
       echo
       echo "DIBATALKAN: guest berikut masih memakai vnet yang akan dihapus:" >&2
       printf '  - %s\n' "${_guests[@]}" >&2
-      echo "Hapus atau pindahkan dulu guest tersebut, atau jalankan dengan --no-flush. Tidak ada yang diubah." >&2
+      if [ "$FLUSH_ONLY" = 1 ]; then
+        echo "Hapus atau pindahkan dulu guest tersebut. Tidak ada yang diubah." >&2
+      else
+        echo "Hapus atau pindahkan dulu guest tersebut, atau jalankan dengan --no-flush. Tidak ada yang diubah." >&2
+      fi
       exit 1
     fi
   fi
@@ -425,7 +552,7 @@ st_flush() {
   # 4. Dummy interface, service, dan file config buatan script
   ifdown "$DUMMY_IF" >/dev/null 2>&1 || true
   ip link del "$DUMMY_IF" >/dev/null 2>&1 || true
-  systemctl stop pdns pdns-recursor >/dev/null 2>&1 || true
+  systemctl disable --now pdns pdns-recursor >/dev/null 2>&1 || true
   rm -f /etc/network/interfaces.d/leap-dns \
         /etc/powerdns/pdns.conf /etc/powerdns/recursor.conf \
         /etc/sysctl.d/99-leap-forward.conf /etc/sysctl.d/99-nonlocal-bind.conf \
@@ -448,8 +575,9 @@ st_packages() {
   # Itu tidak fatal selama indeks paket Debian tetap terunduh.
   apt-get update -qq || warn "apt-get update melaporkan error (repo enterprise tanpa subscription?), lanjut"
 
-  apt-get install -y pdns-server pdns-backend-sqlite3 pdns-recursor dnsmasq sqlite3 bind9-dnsutils \
-    || rc=1
+  local -a pkgs=(pdns-server pdns-backend-sqlite3 pdns-recursor dnsmasq sqlite3 bind9-dnsutils)
+  if [ "$DHCP_ONLY" = 1 ]; then pkgs=(dnsmasq bind9-dnsutils); fi
+  apt-get install -y "${pkgs[@]}" || rc=1
 
   rm -f /usr/sbin/policy-rc.d
 
@@ -596,14 +724,39 @@ EOF
   fi
 }
 
+### ===================== TAHAP 3b: RESOLVER HOST (hanya --dhcp-only) =====================
+# dnsmasq SDN meneruskan query guest ke resolver host. Skrip dijalankan di host, jadi
+# /etc/resolv.conf ditimpa langsung (tanpa backup) dengan UPSTREAMS. Symlink diganti file biasa.
+st_resolver() {
+  local u n=0 tmp
+  tmp=$(mktemp "${RESOLV_CONF}.XXXXXX") || { warn "tidak bisa menulis ${RESOLV_CONF}"; return 1; }
+  for u in $UPSTREAMS; do
+    printf 'nameserver %s\n' "$u" >> "$tmp"
+    n=$((n + 1))
+  done
+  if [ "$n" -eq 0 ]; then rm -f "$tmp"; warn "UPSTREAMS kosong"; return 1; fi
+  chmod 644 "$tmp"
+  if [ -L "$RESOLV_CONF" ]; then log "${RESOLV_CONF} adalah symlink: diganti file biasa"; fi
+  mv -f "$tmp" "$RESOLV_CONF"
+  log "resolver host ditimpa: ${UPSTREAMS}"
+  log "CATATAN: bila VPS memakai DHCP/cloud-init/resolvconf, file ini bisa ditimpa balik saat reboot; periksa setelahnya."
+  wait_for 10 getent hosts cloudflare.com || { warn "host belum bisa meresolve internet lewat ${UPSTREAMS}"; return 1; }
+}
+
 ### ===================== TAHAP 4: SDN (zone/vnet/subnet lewat pvesh) =====================
 # JANGAN tulis zones/vnets/subnets.cfg dengan tangan: IPAM tidak terdaftar
 # dan alokasi IP gagal ("can't find any free ip in zone").
 st_sdn() {
   local use_dns=0 KEY f cur zjson
-  local -a dnsargs=()
+  local -a dnsargs=() dhcpdns=()
+  if [ "$DHCP_ONLY" != 1 ]; then dhcpdns=(--dhcp-dns-server "$DNS_IP"); fi
 
-  if pdns_healthy; then
+  if [ "$DHCP_ONLY" = 1 ]; then
+    log "mode --dhcp-only: tanpa DNS dinamis; guest memakai ${GW} sebagai DNS (dnsmasq SDN -> resolver host)"
+    if [ -n "$(cfg_dnszone | head -n1)" ]; then
+      warn "zone ${ZONE} masih tersambung zone DNS '$(cfg_dnszone | head -n1)' dari instalasi lama; jalankan tanpa --no-flush agar bersih."
+    fi
+  elif pdns_healthy; then
     use_dns=1
   else
     warn "PowerDNS tidak sehat: zone dibuat TANPA DNS dinamis. Perbaiki PowerDNS lalu jalankan script ini lagi."
@@ -655,7 +808,7 @@ st_sdn() {
   if ! pvesh get "/cluster/sdn/vnets/${VNET}/subnets" --output-format json 2>/dev/null \
        | grep -q "\"cidr\" *: *\"${SUBNET}\""; then
     pvesh create "/cluster/sdn/vnets/${VNET}/subnets" --subnet "$SUBNET" --type subnet \
-      --gateway "$GW" --snat 1 --dhcp-dns-server "$DNS_IP" \
+      --gateway "$GW" --snat 1 ${dhcpdns[@]+"${dhcpdns[@]}"} \
       --dhcp-range "start-address=${DHCP_START},end-address=${DHCP_END}"
     sdn_apply
   fi
@@ -676,17 +829,21 @@ st_verify() {
   check "ip_forward aktif"                     bash -c '[ "$(cat /proc/sys/net/ipv4/ip_forward)" = 1 ]'       || rc=1
   check "tepat 1 rule SNAT"                    bash -c "[ \"\$(iptables -t nat -S POSTROUTING | grep -cxF -- '$(snat_rule)')\" = 1 ]" || rc=1
   check "dnsmasq SDN listen ${GW}:53"          bash -c "ss -lnu | grep -q '${GW}:53'"                          || rc=1
-  check "recursor listen ${DNS_IP}:53"         bash -c "ss -lnu | grep -q '${DNS_IP}:53'"                      || rc=1
-  check "recursor meresolve internet"          wait_for 10 bash -c "dig +short +time=3 +tries=1 @${DNS_IP} cloudflare.com | grep -q ."  || rc=1
-  if pdns_healthy; then
-    # Terbukti dua kali: tepat setelah recursor dibuat ulang, query ke zone lokal bisa gagal
-    # lebih dari 10 detik lalu normal sendiri. Beri 45 detik; bila tetap gagal, tampilkan status/EDE.
-    if ! check "recursor meresolve ns1.${DOMAIN}" wait_for 45 bash -c "[ \"\$(dig +short +time=3 +tries=1 @${DNS_IP} ns1.${DOMAIN})\" = '${GW}' ]"; then
-      rc=1
-      dig +time=3 +tries=1 "@${DNS_IP}" "ns1.${DOMAIN}" +comments 2>&1 | grep -E 'status|EDE' | sed 's/^/   dig| /' || true
-    fi
+  if [ "$DHCP_ONLY" = 1 ]; then
+    check "gateway ${GW} meresolve internet"    wait_for 10 bash -c "dig +short +time=3 +tries=1 @${GW} cloudflare.com | grep -q ."  || rc=1
   else
-    warn "SKIP   cek ns1.${DOMAIN} (PowerDNS tidak sehat)"; rc=1
+    check "recursor listen ${DNS_IP}:53"         bash -c "ss -lnu | grep -q '${DNS_IP}:53'"                      || rc=1
+    check "recursor meresolve internet"          wait_for 10 bash -c "dig +short +time=3 +tries=1 @${DNS_IP} cloudflare.com | grep -q ."  || rc=1
+    if pdns_healthy; then
+      # Terbukti dua kali: tepat setelah recursor dibuat ulang, query ke zone lokal bisa gagal
+      # lebih dari 10 detik lalu normal sendiri. Beri 45 detik; bila tetap gagal, tampilkan status/EDE.
+      if ! check "recursor meresolve ns1.${DOMAIN}" wait_for 45 bash -c "[ \"\$(dig +short +time=3 +tries=1 @${DNS_IP} ns1.${DOMAIN})\" = '${GW}' ]"; then
+        rc=1
+        dig +time=3 +tries=1 "@${DNS_IP}" "ns1.${DOMAIN}" +comments 2>&1 | grep -E 'status|EDE' | sed 's/^/   dig| /' || true
+      fi
+    else
+      warn "SKIP   cek ns1.${DOMAIN} (PowerDNS tidak sehat)"; rc=1
+    fi
   fi
   check "IPAM pve terdaftar"                   pvesh get /cluster/sdn/ipams/pve/status                         || rc=1
   return "$rc"
@@ -702,9 +859,22 @@ if [ "$FLUSH" = 1 ]; then
   fi
 fi
 
+if [ "$FLUSH_ONLY" = 1 ]; then
+  echo
+  log "----- RINGKASAN -----"
+  log "Flush selesai: config buatan script sudah dihapus. Instalasi TIDAK dijalankan (--flush)."
+  log "Tidak diubah: paket, file DB PowerDNS (/var/lib/powerdns), nilai runtime ip_forward, ${RESOLV_CONF}."
+  log "Untuk memasang ulang, jalankan script ini tanpa --flush."
+  exit 0
+fi
+
 stage "paket"                  st_packages
-stage "powerdns authoritative" st_pdns
-stage "recursor + dummy ip"    st_recursor
+if [ "$DHCP_ONLY" = 1 ]; then
+  stage "resolver host"          st_resolver
+else
+  stage "powerdns authoritative" st_pdns
+  stage "recursor + dummy ip"    st_recursor
+fi
 stage "sdn zone/vnet/subnet"   st_sdn
 stage "verifikasi"             st_verify
 
@@ -733,5 +903,8 @@ log "Semua tahap berhasil."
 #   Hostname web1 menjadi web1.${DOMAIN}. Region lain memakai domain sendiri
 #   (mis. id.local), jadi web1 di tiap region tidak bentrok.
 #
-# Cek: dig @${DNS_IP} web1.${DOMAIN} +short
+#   Mode --dhcp-only: hilangkan --nameserver/--searchdomain (DHCP sudah memberi gateway sebagai
+#   DNS) dan nama guest tidak ter-resolve; nama antar node diurus overlay (NetBird).
+#
+# Cek: dig @${DNS_IP} web1.${DOMAIN} +short   (mode penuh) | dig @${GW} cloudflare.com +short (--dhcp-only)
 # ----------------------------------------------------------------------------------
